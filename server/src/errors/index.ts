@@ -1,4 +1,3 @@
-import { ConsoleColor } from "@/utils/template.helper";
 
 export class ErrorII extends Error {
   httpCode: number;
@@ -7,6 +6,7 @@ export class ErrorII extends Error {
     super( message );
     this.name = new.target.name;
     this.httpCode = httpCode ?? 500;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -43,10 +43,3 @@ interface ErrorParam {
   cause?: string;
 }
 
-export const handleError = ( error: Error ) => {
-  let log = `${error.name}: ${error.message}`;
-  log += ( error.cause ) ? `\nCause: ${error.cause}` : '';
-  
-  console.error(`${ConsoleColor.ERROR}${log}${ConsoleColor.RESET}`);
-  // @TODO: Add logger
-}
