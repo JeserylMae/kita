@@ -19,11 +19,10 @@ export class PasswordServices {
     const user = await UserServices
       .findByEmail(email, 'password');    
 
-    if ( !await verify( user.password!, password )) {
-      throw new InvalidCredentials('Incorrect password.');
-    }
-
-    return true;
+    if ( await verify( user.password!, password ))
+      return true;
+    
+    throw new InvalidCredentials('Incorrect password.');
   }
 
   /**
@@ -40,7 +39,7 @@ export class PasswordServices {
       resetPwdTemplate(resetURL)
     );
     
-    if (!mailData) {
+    if (mailData) {
       throw new ErrorII('Failed to send email.');
     }
   }

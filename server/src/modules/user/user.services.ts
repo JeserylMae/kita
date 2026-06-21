@@ -1,8 +1,9 @@
 import { supabase } from "@/config/db";
 import { sanitizeObject } from "@/utils/data.helpers";
-import { ConflictError, RecordNotFound, handleError } from "@/errors";
+import { ConflictError, RecordNotFound } from "@/errors";
 
 
+// @TODO: Add org id and branch id
 export interface User {
   id?: string;
   auth_id?: string;
@@ -21,7 +22,7 @@ export interface User {
 
   birthdate?: Date;
 
-  role_id?: string;
+  role_id?: string; // remove this
 
   email?: string;
   password?: string;
@@ -44,11 +45,9 @@ export class UserServices {
       .eq('role', role)
       .single();
 
-    if (error) {
-      handleError(error);
-      throw new ConflictError('Invalid role.');
-    }
-    return data.id;
+    if (!error) return data.id;
+    
+    throw new ConflictError('Invalid role.');
   }
 
   /**
@@ -63,13 +62,13 @@ export class UserServices {
       .from('users')
       .insert(userData);
       
-    if (error) {
-      throw new ConflictError(error.code === '23505' ?
+    if (!error) return true;
+    
+    throw new ConflictError(
+      error.code === '23505' ?
         'Email already exists.' :
         error.message
-      );
-    }
-    return true;
+    );
   }
 
   /**
@@ -78,7 +77,10 @@ export class UserServices {
    * @param fields 
    * @returns 
    */
-  public static async findByEmail( email: string, ...fields: string[] ) {
+  public static async findByEmail( 
+    email: string, 
+    ...fields: string[] 
+  ) {
     const selectStr = fields.join(', ');
 
     const { data, error } = await supabase
@@ -87,10 +89,11 @@ export class UserServices {
       .eq('email', email)
       .single();
 
-    if ( error ) {
-      throw new RecordNotFound(`Account with email ${email} does not exist`);
-    }
-    return data as unknown as User;
+    if ( !error ) return data as unknown as User;
+
+    throw new RecordNotFound(
+      `Account with email ${email} does not exist`
+    );
   }
 
   /**
@@ -98,7 +101,10 @@ export class UserServices {
    * @param id 
    * @param user 
    */
-  public static async update( id: string, user: User ) {
+  public static async update( 
+    id: string, 
+    user: User 
+  ) {
     const userData = sanitizeObject(user);
 
     const { data, error } = await supabase
@@ -106,11 +112,29 @@ export class UserServices {
       .update(userData)
       .eq('id', id);
     
-    if (error) {
-      throw new ConflictError(error.code === '23505' ?
+    if (!error) return; 
+
+    throw new ConflictError(
+      error.code === '23505' ?
         'Email already exists.' :
         error.message
-      );
-    }
+    );
+  }
+
+  /**
+   * 
+   * @param id 
+   */
+  public static async delete( id: string ) {
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+
+    if (!error) return;
+    
+    throw new RecordNotFound(
+      `User with id ${id} is not found.`
+    );
   }
 }

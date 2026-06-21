@@ -1,17 +1,8 @@
 import { decodeJwt } from 'jose';
 import { AuthServices } from './auth.services';
 import { TokenServices } from '../token/token.services';
-import { Request, Response } from 'express';
-import { 
-  AccountNotVerified, 
-  ConflictError, 
-  ErrorII, 
-  handleError, 
-  InvalidCredentials, 
-  RecordNotFound 
-} from '@/errors';
-import { error } from 'node:console';
-import { SessionServices } from '../token/sessions.services';
+import { NextFunction, Request, Response } from 'express';
+import { InvalidCredentials } from '@/errors';
 
 
 export default class AuthController {
@@ -21,7 +12,11 @@ export default class AuthController {
    * @param res 
    * @returns 
    */
-  public static async signup( req: Request, res: Response ) {
+  public static async signup( 
+    req: Request, 
+    res: Response,
+    next: NextFunction 
+  ) {
     try {
       const { email, password, role } = req.body;
   
@@ -34,22 +29,7 @@ export default class AuthController {
       });
     }
     catch ( error: unknown ) {
-      let status = 500;
-      let message = 'Internal server error.';
-
-      if (error instanceof ErrorII) {
-        message = error.message;
-        status = ( error instanceof ConflictError ) ?
-          error.httpCode :
-          status;
-
-        handleError( error );
-      }
-
-      return res.status(status).json({
-        'success': false,
-        'message': message,
-      });
+      next(error);
     }
   }
 
@@ -58,7 +38,11 @@ export default class AuthController {
    * @param req 
    * @param res 
    */
-  public static async signin( req: Request, res: Response ) {
+  public static async signin( 
+    req: Request, 
+    res: Response,
+    next: NextFunction 
+  ) {
     try {
       const { email, password } = req.body;
 
@@ -78,25 +62,7 @@ export default class AuthController {
       });
     }
     catch ( error: unknown ) {
-      let status = 500;
-      let message = 'Internal server error.';
-
-      if ( error instanceof ErrorII ) {
-        message = error.message;
-
-        if ( error instanceof AccountNotVerified ||
-            error instanceof InvalidCredentials ||
-            error instanceof RecordNotFound
-        ) {
-          status = error.httpCode;
-        }
-        handleError(error);
-      }
-
-      res.status(status).json({
-        'success': false,
-        'message': message,
-      });
+      next(error);
     }
   }
 
@@ -107,7 +73,8 @@ export default class AuthController {
    */
   public static async requestForgotPassword( 
     req: Request, 
-    res: Response 
+    res: Response,
+    next: NextFunction
   ) {
     try {
       const { email, resetClientLink } = req.body;
@@ -120,24 +87,7 @@ export default class AuthController {
       });
     }
     catch ( error: unknown ) {
-      let status = 500;
-      let message = 'Internal server error.';
-
-      if ( error instanceof ErrorII ) {
-        message = error.message;
-
-        if ( error instanceof ConflictError ||
-            error instanceof RecordNotFound
-        ) {
-          status = error.httpCode;
-        }
-        handleError(error);
-      }
-
-      res.status(status).json({
-        'success': false,
-        'message': message,
-      });
+      next(error);
     }
   }
 
@@ -146,7 +96,11 @@ export default class AuthController {
    * @param req 
    * @param res 
    */
-  public static async resetPassword(req: Request, res: Response) {
+  public static async resetPassword(
+    req: Request, 
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { email, token, newPassword } = req.body;
 
@@ -159,29 +113,21 @@ export default class AuthController {
       })
     }
     catch ( error: unknown ) {
-      let status = 500;
-      let message = 'Internal server error.';
-
-      if ( error instanceof ErrorII ) {
-        message = error.message;
-
-        if ( error instanceof ConflictError ||
-            error instanceof InvalidCredentials ||
-            error instanceof RecordNotFound
-        ) {
-          status = error.httpCode;
-        }
-        handleError(error);
-      }
-
-      res.status(status).json({
-        'success': false,
-        'message': message,
-      });
+      next(error);
     }
   }
 
-  public static async logout( req: Request, res: Response ) {
+  /**
+   * 
+   * @param req 
+   * @param res 
+   * @param next 
+   */
+  public static async logout( 
+    req: Request, 
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const acsToken = req.cookies['ACCESS-TOKEN'];
 
@@ -203,24 +149,7 @@ export default class AuthController {
       });
     }
     catch ( error: unknown ) {
-      let status = 500;
-      let message = 'Internal server error.';
-
-      if ( error instanceof ErrorII ) {
-        message = error.message;
-
-        if ( error instanceof InvalidCredentials ||
-            error instanceof RecordNotFound
-        ) {
-          status = error.httpCode;
-        }
-        handleError(error);
-      }
-
-      res.status(status).json({
-        'success': false,
-        'message': message,
-      });
+      next(error);
     }
   }
 }
