@@ -1,35 +1,7 @@
+import { User } from "./user.types";
 import { supabase } from "@/config/db";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { ConflictError, RecordNotFound } from "@/errors";
-
-
-// @TODO: Add org id and branch id
-export interface User {
-  id?: string;
-  auth_id?: string;
-  
-  firstname?: string;
-  middlename?: string;
-  lastname?: string;
-  suffix?: string;
-
-  house_number?: string;
-  street?: string;
-  barangay?: string;
-  city?: string;
-  province?: string;
-  region?: string;
-
-  birthdate?: Date;
-
-  role_id?: string; // remove this
-
-  email?: string;
-  password?: string;
-
-  updated_at?: Date;
-  verified_at?: Date;
-}
 
 export class UserServices {
   /**

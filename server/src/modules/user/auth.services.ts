@@ -8,7 +8,6 @@ import { SessionServices } from '../token/sessions.services';
 
 
 // @TODO: add role validation via middleware
-// @TODO: Add JSdocs
 
 export class AuthServices {
   /**
@@ -30,7 +29,6 @@ export class AuthServices {
       auth_id: uuidv4(),
       email: email, 
       password: hashedPassword,
-      role_id: role_id,
       updated_at: new Date(),
     });
 
