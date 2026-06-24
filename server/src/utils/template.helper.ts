@@ -1,3 +1,4 @@
+import { InviteEmailParams } from "@/modules/organization/organization.types";
 
 export const ConsoleColor = {
   ERROR:    '\x1b[31m',
@@ -20,4 +21,50 @@ export const resetPwdTemplate = (resetURL: string) => {
       </div>
     </body>
   `);
+}
+
+export const inviteTemplate = (
+  invite: InviteEmailParams
+) => {
+  return (`
+    <body style="display: flex; justify-content: center; width: 100%; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="display: flex; flex-direction: column; justify-content: center; width: max-content;">
+
+        <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
+          <img src="https://res.cloudinary.com/dqztsogsu/image/upload/v1782315995/Kita_juwpa0.ico" alt="kita-logo" width="32px" height="32px">
+          <h1 style="padding: 0.5rem;">KITA</h1>
+        </div>
+
+        <h2 style="align-self: center;">You're Invited to Join <strong style="color: #29C474;">${invite.orgName}</strong></h2>
+
+        <p>Hello ${invite.receiverName},</p>
+        <p>${invite.senderEmail} has invited you to join <strong>${invite.orgName}</strong>.</p>
+        <p>You have been assigned the following access:</p>
+        <ul>
+          <li><strong>Branch:</strong> ${invite.branchName}</li>
+          <li><strong>Role:</strong> ${invite.roleName}</li>
+        </ul>
+
+        <p>By accepting this invitation, you'll gain access to the branch and permissions associated with the assigned role. </p>
+
+        <p>This invitation will expire on <strong>${invite.expirationDate}</strong>.</p>
+        <p>
+          <a href="${invite.acceptURL}" 
+          style="text-decoration: none; 
+            color: white; 
+            padding: 0.7rem; 
+            background-color: #29C474; 
+            border-radius: 0.2rem;">
+            <strong>Accept Invitation</strong></a>
+        </p>
+
+        <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
+
+        <p>
+          Best regards,<br>
+          <strong style="color: #29C474;">The Kita Team</strong>
+        </p>
+      </div>
+    </body>  
+  `)
 }

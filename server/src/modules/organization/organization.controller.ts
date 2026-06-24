@@ -57,6 +57,36 @@ export class OrganizationController {
         senderID!, 
         invitation
       );
+
+      res.status(201).json({
+        'success': true,
+        'message': 'Invitation sent.'
+      });
+    }
+    catch ( error: unknown ) {
+      next(error);
+    }
+  }
+
+  public static async respondToInvitation(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { receiverEmail, inviteID, status, token } = req.body;
+
+      await InvitationServices.respond( 
+        receiverEmail, 
+        inviteID, 
+        status, 
+        token 
+      );
+
+      res.status(201).json({
+        'success': true,
+        'message': 'Re-invitation sent.'
+      });
     }
     catch ( error: unknown ) {
       next(error);
