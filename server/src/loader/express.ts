@@ -2,6 +2,7 @@ import express from 'express';
 import userRouter from '@/modules/user/user.routes';
 import cookieParser from 'cookie-parser';
 import { ErrorMiddleware } from '@/middleware/error.middleware';
+import organizationRouter from '@/modules/organization/organization.routes';
 
 
 interface Params {
@@ -14,6 +15,8 @@ export const loader = ({ app }: Params) => {
   app.use(express.urlencoded({ extended: true }));
   
   app.use('/auth', userRouter);
+  app.use('/organization', organizationRouter);
+
   app.use(ErrorMiddleware.handleError);
 
   app.get('/status', (req, res) => {
