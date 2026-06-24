@@ -34,31 +34,36 @@ export class MembershipServices {
    * @param employmentDate 
    * @returns 
    */
-  public static async storeMember(
+  public static async store(
     orgID: string,
     userID: string,
     inviteID: string,
     employeeCode: string,
-    employmentDate: Date
-  ) {
-    
-    const orgs = await MembershipServices
+    employmentDate: Date,
+    ...selectFields: string[]
+  ) {   
+    const slctStr = selectFields.join(", ");
+
+    const rOrgs = await MembershipServices
       .getMembership(userID, 'id');
 
     const { data, error } = await supabase
       .from('organization_members')
-      .insert({
+      .upsert({
         'org_id': orgID,
         'user_id': userID,
         'invitation_id': inviteID,
         'status': 'invited',
         'employee_code': employeeCode,
         'employment_date': employmentDate,
-        'is_default_org': orgs.length === 0
+        'is_default_org': rOrgs.length === 0
+      }, {
+        onConflict: 'user_id,org_id',
+        ignoreDuplicates: true
       })
-      .select('id');
+      .select(slctStr);
 
-    if (!error) return data[0]?.id;
+    if (!error) return data[0];
 
     throw new InvalidCredentials('Failed to store organization membership.');
   }
