@@ -129,19 +129,9 @@ export default class AuthController {
     next: NextFunction
   ) {
     try {
-      const acsToken = req.cookies['ACCESS-TOKEN'];
+      const userID = req.user?.id;
 
-      if (!acsToken) {
-        throw new InvalidCredentials('Access token not found.');
-      }
-      
-      const claims = decodeJwt(acsToken);
-
-      if (!claims || !claims.sub) {
-        throw new InvalidCredentials('Subject ID not found.');
-      }
-
-      await AuthServices.logout(claims.sub);
+      await AuthServices.logout(userID!);
 
       res.status(200).json({
         success: true,
