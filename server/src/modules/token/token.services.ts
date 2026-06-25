@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import config from "@/config";
-import { User } from "../user/user.services";
+import { User } from "../user/user.types";
 import { supabase } from '@/config/db';
 import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
 import { importPKCS8, SignJWT } from "jose";
@@ -22,7 +22,10 @@ export class TokenServices {
    * @param authID 
    * @returns 
    */
-  public static async createAccessToken( user: User ) {
+  public static async createAccessToken( 
+    user: User,
+    sessionID: string 
+  ) {
     const alg = config.signingAlg;
     const pkcs8 = config.privateKey;
   
@@ -30,9 +33,7 @@ export class TokenServices {
   
     const payload = {
       sub:       user.id!,
-      roleID:    user.role_id!,
-      // orgIDs:    user.orgID,
-      // branchIDs: user.branchID,
+      sid:       sessionID!,
       verified:  user.verified_at ? true : false,
     };
   
@@ -72,12 +73,14 @@ export class TokenServices {
       expDuration
     )
 
-    await SessionServices.insert({
+    const session = await SessionServices.insert({
       user_id: user!.id!,
       refresh_token_hash: refreshToken,
       expires_at: expiresAt,
       created_at: createdAt
-    });
+    }, "id");
+
+    return session[0];
   }
 
   /**
@@ -157,7 +160,7 @@ export class TokenServices {
    * @param token 
    */
   public static verify( token: Token ) {
-    const isExpired = new Date(token.expires_at!) < new Date();
+    const isExpired = token.expires_at! < new Date();
 
     if (!token.isavailable) {
       throw new InvalidCredentials('Token already used.');

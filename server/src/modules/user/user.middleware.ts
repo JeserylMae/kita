@@ -17,12 +17,15 @@ export class UserMiddleware {
     
     const claims = decodeJwt(acsToken);
 
-    if (!claims || !claims.sub) {
+    if ( typeof claims.sub !== 'string' 
+      || typeof claims.sid !== 'string' 
+    ) {
       throw new InvalidCredentials('Subject ID not found.');
     }
 
     req.user = {
-      id: claims.sub
+      id: claims.sub,
+      sid: claims.sid,
     };
     next();
   }

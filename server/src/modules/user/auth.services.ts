@@ -114,9 +114,9 @@ export class AuthServices {
    * 
    * @param userID 
    */
-  public static async logout( userID: string ) {
+  public static async logout( sessionID: string ) {
     const session = await SessionServices
-      .findByUser(userID, 'id');
+      .find(sessionID);
 
     await SessionServices.delete(session.id!);
   }

@@ -45,8 +45,12 @@ export default class AuthController {
       const { email, password } = req.body;
 
       const user = await AuthServices.signin(email, password);
-      const acsToken = await TokenServices.createAccessToken(user!);
-      await TokenServices.createRefreshToken(user!, '7d');
+
+      const session = (
+        await TokenServices.createRefreshToken(user!, '7d')
+      ) as unknown as { 'id': string };
+
+      const acsToken = await TokenServices.createAccessToken(user!, session.id);
 
       res.cookie('ACCESS-TOKEN', acsToken, {
         httpOnly: true,
@@ -127,9 +131,9 @@ export default class AuthController {
     next: NextFunction
   ) {
     try {
-      const userID = req.user?.id;
+      const sessionID = req.user?.sid;
 
-      await AuthServices.logout(userID!);
+      await AuthServices.logout(sessionID!);
 
       res.status(200).json({
         success: true,
