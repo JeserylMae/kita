@@ -16,10 +16,10 @@ export default class AuthController {
     next: NextFunction 
   ) {
     try {
-      const { email, password, role } = req.body;
+      const { email, password } = req.body;
   
       const success = await AuthServices
-        .signup(email, password, role);
+        .signup(email, password);
   
       return res.status(201).json({ 
         'success': success,

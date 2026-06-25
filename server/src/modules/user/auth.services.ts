@@ -20,10 +20,8 @@ export class AuthServices {
   public static async signup(
     email: string, 
     password: string, 
-    role: string
   ): Promise<boolean> {
     const hashedPassword = await hash(password);
-    const role_id = await UserServices.getRoleID(role);
     
     const success = await UserServices.insert({
       auth_id: uuidv4(),
@@ -50,7 +48,6 @@ export class AuthServices {
         email,
         'id',
         'auth_id', 
-        'role_id',
         'verified_at'
       );
 
@@ -79,7 +76,7 @@ export class AuthServices {
     const user = await UserServices.findByEmail(email, 'id');
     const resetURL = `${resetClientLink}/reset-password?token=${token}`;
 
-    await TokenServices.store(user.id!, token, '1min');
+    await TokenServices.store(user.id!, token, '15min');
     await PasswordServices.sendResetEmail(email, resetURL);
   }
 

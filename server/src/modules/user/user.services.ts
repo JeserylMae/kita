@@ -6,24 +6,6 @@ import { ConflictError, RecordNotFound } from "@/errors";
 export class UserServices {
   /**
    * 
-   * @param role 
-   * @returns 
-   */
-  public static async getRoleID( role: string )
-  : Promise<string> {
-    const { data, error } = await supabase
-      .from('roles')
-      .select('id')
-      .eq('role', role)
-      .single();
-
-    if (!error) return data.id;
-    
-    throw new ConflictError('Invalid role.');
-  }
-
-  /**
-   * 
    * @param user 
    * @returns 
    */
