@@ -135,6 +135,7 @@ export default class AuthController {
 
       await AuthServices.logout(sessionID!);
 
+      res.clearCookie('ACCESS-TOKEN');
       res.status(200).json({
         success: true,
         message: 'Logout successful.',

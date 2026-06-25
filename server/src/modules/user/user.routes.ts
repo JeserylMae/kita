@@ -6,7 +6,11 @@ import { UserMiddleware } from './user.middleware';
 const userRouter = Router();
 
 userRouter.post('/signup', AuthController.signup);
-userRouter.post('/signin', AuthController.signin);
+userRouter.post(
+  '/signin', 
+  UserMiddleware.requireGuest,
+  AuthController.signin
+);
 
 userRouter.post(
   '/logout', 
