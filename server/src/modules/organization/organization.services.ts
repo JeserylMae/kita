@@ -1,9 +1,16 @@
 import { supabase } from "@/config/db";
-import { Brand, Founder, OrgParams, TableName } from "./organization.types";
-import { ErrorII, InvalidCredentials, RecordNotFound } from "@/errors";
+import { RecordNotFound } from "@/errors";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "../base/base.repository";
 import { NextFunction, Response } from "express";
+
+import { 
+  Brand, 
+  Founder, 
+  OrgParams, 
+  TableName 
+} from "./organization.types";
+
 
 export class OrganizationService {
   /**
@@ -75,6 +82,10 @@ export class OrganizationService {
     );
   }
 
+  /**
+   * 
+   * @param params 
+   */
   public static async save( params: OrgParams ) {
     const founders = (sanitizeObject(params.founders)) as Founder[];
     const brands = (sanitizeObject(params.brands)) as Brand[];
@@ -95,6 +106,10 @@ export class OrganizationService {
     await founderDB.upsert(fData);
   }
 
+  /**
+   * 
+   * @param orgID 
+   */
   public static async deleteOrg( orgID: string ) {
     const orgDB = new BaseRepository(TableName.org);
     const brandDB = new BaseRepository(TableName.brand);
@@ -105,6 +120,13 @@ export class OrganizationService {
     await orgDB.delete(orgID);
   }
 
+  /**
+   * 
+   * @param id 
+   * @param table 
+   * @param res 
+   * @param next 
+   */
   public static async deleteHandler(
     id: string,
     table: TableName,
