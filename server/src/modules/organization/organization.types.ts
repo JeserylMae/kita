@@ -3,6 +3,7 @@ export enum TableName {
   org = 'organizations',
   founder = 'organization_founders',
   brand = 'organization_brands_subs',
+  orgMem = 'organization_members',
   branch = 'branches',
   branchMem = 'branch_members'
 };
@@ -60,8 +61,6 @@ export interface OrgParams {
   address: string;
   website: string;
   industry: string;
-  founders: Founder[];
-  brands: Brand[];
 }
 
 export interface OrgMembershipParams {

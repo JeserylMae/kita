@@ -1,7 +1,8 @@
 import { InvalidCredentials } from "@/errors";
 import { OrganizationService } from "./organization.services";
 import { OrgParams, TableName } from "./organization.types";
-import { NextFunction, Request, Response } from "express";
+import e, { NextFunction, Request, Response } from "express";
+import { MembershipServices } from "./membership.services";
 
 
 export class OrganizationController {
@@ -21,8 +22,8 @@ export class OrganizationController {
       const withBranches = req.query.withBranches === 'true';
       const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
   
-      const data = await OrganizationService
-        .find( userID!, { 
+      const data = await MembershipServices
+        .findMembership( userID!, { 
           withBranches,
           defaultOrgOnly 
         });
@@ -38,33 +39,15 @@ export class OrganizationController {
     }
   }
 
-  /**
-   * 
-   * @param req 
-   * @param res 
-   * @param next 
-   */
-  public static async createOrganization(
-    req: Request<any, any, OrgParams>,
-    res: Response,
-    next: NextFunction
-  ) {
-    try {
-      const params = req.body;
-
-      await OrganizationService.save(params);
-
-      res.status(201).json({
-        'success': true,
-        'message': 'Organization information saved.'
-      });
-    }
-    catch (error: unknown) {
-      if (error instanceof Error) console.log(error.message);
-      next(error);
-    }
+  public static create(req: Request, res: Response, next: NextFunction) {
+    return this.save(req, res, next, 'create');
   }
 
+  public static update(req: Request, res: Response, next: NextFunction) {
+    return this.save(req, res, next, 'update');
+  }
+
+  
   /**
    * Returns delete handler
    */
@@ -86,11 +69,11 @@ export class OrganizationController {
    * @param req 
    * @param res 
    * @param next 
-   */
-  public static async deleteOrg(
-    req: Request,
-    res: Response,
-    next: NextFunction
+  */
+ public static async deleteOrg(
+   req: Request,
+   res: Response,
+   next: NextFunction
   ) {
     try {
       const id = req.params.id;
@@ -109,6 +92,50 @@ export class OrganizationController {
       });
     }
     catch (error: unknown) {
+      next(error);
+    }
+  }
+  /**
+   * 
+   * @param req 
+   * @param res 
+   * @param next 
+   * @param action 
+   * @returns 
+   */
+  private static async save(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    action: 'create' | 'update'
+  ) {
+    try {
+      let message = "";
+      const { organization, brands, founders, membership } = req.body;
+      
+      if (action === 'create') {
+        await OrganizationService.store(
+          organization,
+          brands,
+          founders,
+          membership
+        );
+        message = 'Organization created successfully.';
+      } 
+      else {
+        await OrganizationService.update(
+          organization,
+          brands,
+          founders
+        );
+        message = 'Organization updated successfully.';
+      }
+      
+      return res.status(200).json({
+        "success": true,
+        "message": message
+      });
+    } catch (error) {
       next(error);
     }
   }

@@ -11,8 +11,12 @@ organizationRouter.get('/',
 );
 
 organizationRouter.post('/',
-  OrganizationController.createOrganization
+  OrganizationController.create
 );
+
+organizationRouter.patch('/',
+  OrganizationController.update
+)
 
 organizationRouter.delete('/founder/:id',
   OrganizationController.deleteFounder

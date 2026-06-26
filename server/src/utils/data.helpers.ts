@@ -44,3 +44,11 @@ export const getDateAfterInterval = (
 
   return new Date( initDate.getTime() + ms );
 }
+
+export const injectPropertyIntoObjects = ( 
+  arr: {}[], 
+  pair: {} 
+) => {
+  let newArr = arr.map(f => ({ ...f, ...pair }));
+  return newArr;
+}
