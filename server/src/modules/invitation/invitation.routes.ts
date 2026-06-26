@@ -12,4 +12,12 @@ invitationRouter.post('/:token',
   InvitationController.respondToInvitation
 );
 
+invitationRouter.post('/:id',
+  InvitationController.reinvite
+);
+
+invitationRouter.get('/:id',
+  InvitationController.getInvitations
+);
+
 export default invitationRouter;
