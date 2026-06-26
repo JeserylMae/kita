@@ -5,9 +5,13 @@ import { OrganizationController } from "./organization.controller";
 
 const organizationRouter = Router();
 
-organizationRouter.get('/',
+organizationRouter.get('/memberships',
   UserMiddleware.attachUser,
   OrganizationController.getOrganizations
+);
+
+organizationRouter.get('/:orgID',
+  OrganizationController.getMembers
 );
 
 organizationRouter.post('/',
@@ -17,6 +21,10 @@ organizationRouter.post('/',
 organizationRouter.patch('/',
   OrganizationController.update
 )
+
+organizationRouter.patch('/member',
+  OrganizationController.updateMember
+);
 
 organizationRouter.delete('/founder/:id',
   OrganizationController.deleteFounder
@@ -28,6 +36,10 @@ organizationRouter.delete('/brand/:id',
 
 organizationRouter.delete('/:id',
   OrganizationController.deleteOrg
+);
+
+organizationRouter.delete('/member/:id',
+  OrganizationController.deleteMember
 );
 
 export default organizationRouter;
