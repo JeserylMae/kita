@@ -87,23 +87,35 @@ export class OrganizationService {
    * @param params 
    */
   public static async save( params: OrgParams ) {
-    const founders = (sanitizeObject(params.founders)) as Founder[];
-    const brands = (sanitizeObject(params.brands)) as Brand[];
+    const founders = (params.founders) as Founder[];
+    const brands = (params.brands) as Brand[];
     const org = sanitizeObject(params);
-
-    delete org.founders, org.brands;
-
-    const orgDB = new BaseRepository(TableName.org);
-    const brandDB = new BaseRepository(TableName.brand)
-    const founderDB = new BaseRepository(TableName.founder);
     
+    delete org.founders;
+    delete org.brands;
+    
+    const orgDB = new BaseRepository(TableName.org);
     const rOrg = await orgDB.upsert(org);
     
-    const bData = brands.map(b => ({ ...b, org_id: rOrg[0].id! }));
-    const fData = founders.map(f => ({ ...f, org_id: rOrg[0].id! }))
+    if (brands && brands.length > 0) {
+      const brandDB = new BaseRepository(TableName.brand);
+      
+      const bData = (brands[0]?.org_id)
+      ? brands
+      : brands.map(b => ({ ...b, org_id: rOrg[0].id! }));
+      
+      await brandDB.upsert(bData);
+    }
+    
+    if (founders && founders.length > 0) {
+      const founderDB = new BaseRepository(TableName.founder);
 
-    await brandDB.upsert(bData);
-    await founderDB.upsert(fData);
+      const fData = (founders[0]?.id)
+        ? founders
+        : founders.map(f => ({ ...f, org_id: rOrg[0].id! }));
+      
+      await founderDB.upsert(fData);
+    }
   }
 
   /**

@@ -1,3 +1,4 @@
+import { InvalidCredentials } from "@/errors";
 import { OrganizationService } from "./organization.services";
 import { OrgParams, TableName } from "./organization.types";
 import { NextFunction, Request, Response } from "express";
@@ -51,8 +52,15 @@ export class OrganizationController {
     try {
       const params = req.body;
 
+      await OrganizationService.save(params);
+
+      res.status(201).json({
+        'success': true,
+        'message': 'Organization information saved.'
+      });
     }
     catch (error: unknown) {
+      if (error instanceof Error) console.log(error.message);
       next(error);
     }
   }
@@ -85,7 +93,13 @@ export class OrganizationController {
     next: NextFunction
   ) {
     try {
-      const { id } = req.body;
+      const id = req.params.id;
+
+      if (typeof id !== 'string') {
+        throw new InvalidCredentials(
+          'Invalid ID.'
+        );
+      }
   
       await OrganizationService.deleteOrg(id);
 

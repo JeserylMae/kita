@@ -3,6 +3,8 @@ export enum TableName {
   org = 'organizations',
   founder = 'organization_founders',
   brand = 'organization_brands_subs',
+  branch = 'branches',
+  branchMem = 'branch_members'
 };
 
 export interface Invitation {
@@ -57,6 +59,19 @@ export interface OrgParams {
   headquarters: string;
   address: string;
   website: string;
+  industry: string;
   founders: Founder[];
   brands: Brand[];
+}
+
+export interface OrgMembershipParams {
+  id?: string;
+  org_id?: string;
+  user_id?: string;
+  invitation_id?: string;
+  status?: string;
+  employee_code?: string;
+  employment_date?: Date;
+  is_default_org?: boolean;
+  updated_at?: Date;
 }
