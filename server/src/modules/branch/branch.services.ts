@@ -3,13 +3,10 @@ import { ErrorII, InvalidCredentials } from "@/errors";
 import { BrcMemberParams } from "./branch.types";
 import { BaseRepository } from "../base/base.repository";
 import { TableName } from "../organization/organization.types";
+import { sanitizeObject } from "@/utils/data.helpers";
 
 
 export class BranchServices {
-  public static async store() {
-    
-  }
-
   /**
    * 
    * @param branchID 
@@ -92,19 +89,61 @@ export class BranchServices {
     throw new ErrorII(error.message);
   }
 
+  public static async findMembers( branchID: string ) {
+    const { data, error } = await supabase
+      .from(TableName.branchMem)
+      .select(`
+        id,
+        org_mem_id,
+        role,
+        status,
+        branches(
+          branch_name,
+          icon,
+          color,
+          status,
+          org_id
+        )
+      `)
+      .eq('branch_id', branchID);
+    
+    if (!error) return data;
+
+    throw new ErrorII(error.message);
+  }
+
   /**
    * 
    * @param branch 
    * @param table 
    * @returns 
    */
-  public static async update<T extends Record<string, any>>(
+  public static async save<T extends Record<string, any>>(
     branch: T,
     table: TableName
   ) {
     const brcDB = new BaseRepository(table);
-    const data = await brcDB.upsert(branch);
+    const bdata = sanitizeObject(branch);
+
+    bdata.updated_at = new Date();
+    const data = await brcDB.upsert(bdata);
     
     return data;
+  }
+
+  public static async delete(
+    branchID: any,
+    table: TableName,
+    column: 'id' | 'branch_id' = 'id'
+  ) {
+    if (typeof branchID !== 'string') {
+      throw new InvalidCredentials(
+        'ID must be a string.'
+      );
+    }
+
+    const brcDB = new BaseRepository(table);
+
+    await brcDB.delete(branchID, column);
   }
 }

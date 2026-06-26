@@ -8,5 +8,13 @@ export interface BrcMemberParams {
   status?: string;
   starred?: boolean;
   invitation_id?: string;
-  updated_at?: Date;
+}
+
+export interface BrcParams {
+  id?: string;
+  branch_name?: string;
+  icon?: string;
+  color?: string;
+  status?: string;
+  org_id?: string;
 }
