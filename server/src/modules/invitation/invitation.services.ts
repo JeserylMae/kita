@@ -169,7 +169,7 @@ export class InvitationServices {
       user_id: receiver_id
     });
 
-    await BranchServices.update({
+    await BranchServices.save({
       status: status,
       org_mem_id: org[0].id!,
       invitation_id: inviteID
