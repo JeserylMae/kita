@@ -1,31 +1,70 @@
 import { supabase } from "@/config/db";
-import { InvalidCredentials } from "@/errors";
-import { OrgMembershipParams } from "./organization.types";
 import { BaseRepository } from "../base/base.repository";
+import { OrgMembershipParams } from "./organization.types";
+import { InvalidCredentials, RecordNotFound } from "@/errors";
 
 
 export class MembershipServices {
-  /**
-   * 
-   * @param userID 
-   * @param fields 
-   * @returns 
-   */
-  public static async getMembership( 
-    userID: string,
-    ...fields: string[]  
-  ) {
-    const slctStr = fields.join(", ");
+    /**
+     * 
+     * @param userID 
+     * @param options 
+     * @returns 
+     */
+    public static async findMembership(
+      userID: string,
+      options?: {
+        withBranches?: boolean,
+        defaultOrgOnly?: boolean
+      }
+    ) {
+      // organization_members.org_id = organizations.id
+      let slctStr = (`
+        org_id,
+        is_default_org,
+        employee_code,
+        status,
+        organizations( org_name, icon, hex_color )
+      `);
+  
+      if (options?.withBranches) {
+        // organization_members.id = branch_members.org_mem_id
+        // branch_members.branch_id = branches-id
+        slctStr += (`
+          ,
+          branch_members (
+            branch_id,
+            role(role),
+            status,
+            starred,
+            branches( branch_name, icon, color )
+          )
+        `);
+      }
 
-    const { data, error } = await supabase
-      .from('organization_members')
-      .select(slctStr)
-      .eq('user_id', userID);
-
-    if (!error) return data;
-
-    throw error;
-  }
+      let buidler = supabase 
+        .from('organization_members')
+        .select(slctStr)
+        .eq('user_id', userID)
+        .eq('organizations.status', 'active')
+        .eq('status', 'active');
+    
+      buidler = options?.withBranches
+        ? buidler.eq('branches.status', 'active')
+        : buidler;
+      
+      buidler = options?.defaultOrgOnly 
+        ? buidler.eq('is_default_org', true)
+        : buidler;
+  
+      const { data, error } = await buidler;
+      
+      if (!error) return data;
+      
+      throw new RecordNotFound(
+        'Failed to fetch organization list.'
+      );
+    }
  
   /**
    * 
@@ -47,7 +86,7 @@ export class MembershipServices {
     const slctStr = selectFields.join(", ");
 
     const rOrgs = await MembershipServices
-      .getMembership(userID, 'id');
+      .findMembership(userID);
 
     const { data, error } = await supabase
       .from('organization_members')
@@ -72,6 +111,11 @@ export class MembershipServices {
     );
   }
 
+  /**
+   * 
+   * @param org 
+   * @returns 
+   */
   public static async update( 
     org: OrgMembershipParams 
   ) {
@@ -81,3 +125,40 @@ export class MembershipServices {
     return data;
   }
 }
+
+
+/**
+ * CREATE INVITATIONS
+ *  - create a record on:
+ *      - org_mem
+ *      - brc_mem
+ * CREATE ORGANIZATIONS
+ *  - create a record on:
+ *      - org_mem
+ */
+
+/**
+ * FETCH ORG EMPLOYEES
+ * - from organizations
+ * - join through org_mem(org_id)
+ * 
+ * FETCH USER'S ORGS 
+ * - from org_mem
+ * - join organizations(id)
+ * 
+ * FETCH USER'S ORGS + BRCS
+ * - from org_mem
+ * - select(
+ *  *,
+ *  organizations(
+ *    *,
+ *    branches (
+ *      *,
+ *      branch_mem(
+ *        *
+ *      )
+ *    )
+ *  )
+ * )
+ * 
+ */
