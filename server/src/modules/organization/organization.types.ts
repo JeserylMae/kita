@@ -1,4 +1,9 @@
 
+export enum TableName {
+  org = 'organizations',
+  founder = 'organization_founders',
+  brand = 'organization_brands_subs',
+};
 
 export interface Invitation {
   senderEmail: string;
@@ -26,4 +31,32 @@ export interface InviteEmailParams {
   roleName: string;
   expirationDate: Date;
   acceptURL: string;
+}
+
+export interface Founder {
+  id?: string;
+  firstname: string;
+  middlename?: string | null;
+  lastname: string;
+  suffix?: string | null;
+}
+
+export interface Brand {
+  id?: string;
+  org_id: string;
+  name: string;
+}
+
+export interface OrgParams {
+  id?: string;
+  org_name: string;
+  icon: string;
+  hex_color: string;
+  status: string;
+  founded: Date;
+  headquarters: string;
+  address: string;
+  website: string;
+  founders: Founder[];
+  brands: Brand[];
 }

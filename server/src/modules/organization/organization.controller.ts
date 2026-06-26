@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { OrganizationService } from "./organization.services";
-import { Invitation } from "./organization.types";
+import { Invitation, OrgParams, TableName } from "./organization.types";
 import { InvitationServices } from "./invitation.services";
+import { table } from "node:console";
 
 
 export class OrganizationController {
@@ -22,7 +23,7 @@ export class OrganizationController {
       const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
   
       const data = await OrganizationService
-        .getOrganizations( userID!, { 
+        .find( userID!, { 
           withBranches,
           defaultOrgOnly 
         });
@@ -34,6 +35,20 @@ export class OrganizationController {
       })
     }
     catch ( error: unknown ) {
+      next(error);
+    }
+  }
+
+  public static async createOrganization(
+    req: Request<any, any, OrgParams>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const params = req.body;
+
+    }
+    catch (error: unknown) {
       next(error);
     }
   }
@@ -91,5 +106,54 @@ export class OrganizationController {
     catch ( error: unknown ) {
       next(error);
     }
+  }
+
+  public static deleteFounder = 
+    OrganizationController.createDeleteHandler(
+      TableName.founder
+    );
+  
+  public static deleteBrand = 
+    OrganizationController.createDeleteHandler(
+      TableName.brand
+    );
+
+  public static async deleteOrg(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { id } = req.body;
+  
+      await OrganizationService.deleteOrg(id);
+
+      res.status(200).json({
+        'success': true,
+        'message': 'Deletion successful.'
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  private static createDeleteHandler(
+    table: TableName
+  ) {
+    return async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      const { id } = req.body;
+
+      await OrganizationService.deleteHandler(
+        id,
+        table,
+        res,
+        next
+      );
+    };
   }
 }
