@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { ErrorMiddleware } from '@/middleware/error.middleware';
 import organizationRouter from '@/modules/organization/organization.routes';
 import invitationRouter from '@/modules/invitation/invitation.routes';
+import branchRouter from '@/modules/branch/branch.routes';
 
 
 interface Params {
@@ -18,6 +19,7 @@ export const loader = ({ app }: Params) => {
   app.use('/auth', userRouter);
   app.use('/organization', organizationRouter);
   app.use('/invitation', invitationRouter);
+  app.use('/branch', branchRouter);
 
   app.use(ErrorMiddleware.handleError);
 
