@@ -5,8 +5,8 @@ import { TokenServices } from "../token/token.services";
 import { BranchServices } from "../branch/branch.services";
 import { inviteTemplate } from "@/utils/template.helper";
 import { MembershipServices } from "../organization/membership.services";
-
 import { 
+  ErrorII,
   InvalidCredentials, 
   RecordNotFound 
 } from "@/errors";
@@ -15,11 +15,11 @@ import {
   getDateAfterInterval, 
   sanitizeObject 
 } from "@/utils/data.helpers";
-
 import { 
   Invitation, 
   InvitationUpdate, 
-  InviteEmailParams 
+  InviteEmailParams, 
+  TableName
 } from "../organization/organization.types";
 
 
@@ -87,21 +87,6 @@ export class InvitationServices {
 
   /**
    * 
-   * @param receiverEmail 
-   * @param invite 
-   */
-  public static async sendInviteEmail(
-    receiverEmail: string, 
-    invite: InviteEmailParams
-  ) {
-    const subject = `Kita - You've Been Invited to Join ${invite.orgName}`;
-    const content = inviteTemplate(invite);
-
-    await sendEmail(receiverEmail, subject, content);
-  }
-
-  /**
-   * 
    * @param senderID 
    * @param receiverID 
    * @param token 
@@ -134,16 +119,37 @@ export class InvitationServices {
   /**
    * 
    * @param inviteID 
+   * @param inviteURL 
    */
-  public static async reInvite( inviteID: string ) {
+  public static async reInvite( 
+    inviteID: string, 
+    inviteURL: string 
+  ) {
     const token = TokenServices.createToken();
     const expiresAt = getDateAfterInterval( new Date(), '3d' );
+
+    const data = await BranchServices.findMembership(
+      inviteID,
+      'invitation_id'
+    );
 
     await InvitationServices.update(inviteID, {
       'token': token,
       'status': 're-invited',
       'expires_at': expiresAt
     });
+
+    await InvitationServices.sendInviteEmail(
+      data.organization_invitations.receiver.email, {
+        'orgName': data.branches.organizations.org_name,
+        'receiverName': data.organization_invitations.receiver.firstname,
+        'senderEmail': data.organization_invitations.sender.email,
+        'branchName': data.branches.branch_name,
+        'roleName': data.roles.role,
+        'expirationDate': expiresAt,
+        'acceptURL': `${inviteURL}/invite?token=${token}`,
+      }
+    )
   }
 
   /**
@@ -157,14 +163,39 @@ export class InvitationServices {
     status: 'accepted' | 'rejected',
     token: string
   ) {
-    // @TODO: Update branch_members status
-    // @TODO: update organization_members status
+    const org = await MembershipServices.update({
+      status: status,
+      invitation_id: inviteID,
+      user_id: receiver_id
+    });
+
+    await BranchServices.update({
+      status: status,
+      org_mem_id: org[0].id!,
+      invitation_id: inviteID
+    }, TableName.branchMem);
+
 
     await InvitationServices.update(inviteID, {
       'status': status,
       'token': token,
       'accepted_at': status === 'accepted'? new Date() : null
     });
+  }
+  
+  /**
+   * 
+   * @param receiverEmail 
+   * @param invite 
+   */
+  public static async sendInviteEmail(
+    receiverEmail: string, 
+    invite: InviteEmailParams
+  ) {
+    const subject = `Kita - You've Been Invited to Join ${invite.orgName}`;
+    const content = inviteTemplate(invite);
+
+    await sendEmail(receiverEmail, subject, content);
   }
 
   /**
@@ -190,4 +221,6 @@ export class InvitationServices {
       `Invitation with ID ${inviteID} is not found.` 
     );
   }
+
+
 }

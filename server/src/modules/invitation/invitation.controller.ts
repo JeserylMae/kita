@@ -1,3 +1,4 @@
+import { BranchServices } from '../branch/branch.services';
 import { Invitation } from '../organization/organization.types';
 import { InvitationServices } from './invitation.services';
 import { InvalidCredentials } from '@/errors';
@@ -71,5 +72,76 @@ export class InvitationController {
     }
   }
 
-  // @TODO: Get invite list
+  /**
+   * 
+   * @param req 
+   * @param res 
+   * @param next 
+   */
+  public static async reinvite(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const inviteID = req.params.id;
+      const { inviteURL } = req.body;
+
+      if (typeof inviteID !== 'string') {
+        throw new InvalidCredentials(
+          'Invalid invitation ID.'
+        );
+      }
+  
+      await InvitationServices.reInvite(
+        inviteID,
+        inviteURL
+      );
+
+      res.status(201).json({
+        'success': true,
+        'message': 'Invitation sent.'
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  /**
+   * 
+   * @param req 
+   * @param res 
+   * @param next 
+   */
+  public static async getInvitations (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const orgMemID = req.params.id;
+  
+      if (typeof orgMemID !== 'string') {
+        throw new InvalidCredentials(
+          'Invalid organization member id.'
+        );
+      }
+  
+      const invitations = BranchServices.findMembership(
+        orgMemID,
+        'org_mem_id',
+        false
+      );
+
+      res.status(200).json({
+        'success': true,
+        'message': 'Invitations retrieved successfully.',
+        'invitations': invitations
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
 }
