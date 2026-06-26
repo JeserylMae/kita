@@ -1,8 +1,17 @@
 import { supabase } from "@/config/db";
-import { InvalidCredentials, RecordNotFound } from "@/errors";
+import { InvalidCredentials } from "@/errors";
 
 
 export class BranchServices {
+  /**
+   * 
+   * @param branchID 
+   * @param orgMemID 
+   * @param role 
+   * @param inviteID 
+   * @param selectFields 
+   * @returns 
+   */
   public static async storeMembership(
     branchID: string,
     orgMemID: string,
