@@ -1,5 +1,7 @@
 import { supabase } from "@/config/db";
 import { InvalidCredentials } from "@/errors";
+import { OrgMembershipParams } from "./organization.types";
+import { BaseRepository } from "../base/base.repository";
 
 
 export class MembershipServices {
@@ -65,6 +67,17 @@ export class MembershipServices {
 
     if (!error) return data[0];
 
-    throw new InvalidCredentials('Failed to store organization membership.');
+    throw new InvalidCredentials(
+      'Failed to store organization membership.'
+    );
+  }
+
+  public static async update( 
+    org: OrgMembershipParams 
+  ) {
+    const orgDB = new BaseRepository("organization_members");
+    const data = await orgDB.upsert(org);
+
+    return data;
   }
 }
