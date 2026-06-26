@@ -6,6 +6,10 @@ import { TableName } from "../organization/organization.types";
 
 
 export class BranchServices {
+  public static async store() {
+    
+  }
+
   /**
    * 
    * @param branchID 
@@ -45,6 +49,13 @@ export class BranchServices {
     );
   }
 
+  /**
+   * 
+   * @param id 
+   * @param column 
+   * @param single 
+   * @returns 
+   */
   public static async findMembership(
     id: string,
     column: 'id'|'branch_id'|'org_mem_id'|'invitation_id' = 'id',
@@ -81,6 +92,12 @@ export class BranchServices {
     throw new ErrorII(error.message);
   }
 
+  /**
+   * 
+   * @param branch 
+   * @param table 
+   * @returns 
+   */
   public static async update<T extends Record<string, any>>(
     branch: T,
     table: TableName
