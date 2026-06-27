@@ -19,8 +19,7 @@ export class BranchServices {
   public static async storeMembership(
     branchID: string,
     orgMemID: string,
-    role: string,
-    inviteID: string,
+    roleID: string,
     ...selectFields: string[]
   ) {
     const slctStr = selectFields.join(", ");
@@ -30,9 +29,8 @@ export class BranchServices {
       .upsert({
         'branch_id': branchID,
         'org_mem_id': orgMemID,
-        'role': role,
-        'status': 'invited',
-        'invitation_id': inviteID
+        'role_id': roleID,
+        'status': 'accepted'
       }, {
         onConflict: 'org_mem_id,branch_id',
         ignoreDuplicates: true
