@@ -5,30 +5,46 @@ export enum TableName {
   brand = 'organization_brands_subs',
   orgMem = 'organization_members',
   branch = 'branches',
-  branchMem = 'branch_members'
+  branchMem = 'branch_members',
+  orgInv = 'organization_invitations'
 };
 
-export interface Invitation {
-  senderEmail: string;
-  receiverEmail: string;
-  organizationID: string;
-  branchID: string;
-  role: string;
-  employeCode: string; 
-  employmentDate: Date;
+export interface InvitationParams {
+  id?: string;
+  sender_id: string;
+  receiver_id?: string;
+  receiver_email: string;
+  role_id: string;
+  org_id: string;
+  branch_id: string;
+  status: string;
   url: string;
 }
 
 export interface InvitationUpdate {
-  token?: string;
-  status: 'accepted' | 'rejected' | 're-invited';
+  id: string;
+  token: string;
+  receiver_id?: string;
+  org_id?: string;
+  branch_id?: string;
+  role_id?: string;
   expires_at?: Date;
-  accepted_at?: Date | null;
+  sent_at?: Date;
+  status?: 'accepted' | 'rejected' | 're-invited';
+}
+
+export interface InvitationResponseParams {
+  id: string;
+  org_id: string;
+  branch_id: string;
+  role_id: string;
+  receiver_id: string;
+  accepted_at: Date | null;
+  status?: 'accepted' | 'rejected' | 're-invited';
 }
 
 export interface InviteEmailParams {
   orgName: string;
-  receiverName: string;
   senderEmail: string;
   branchName: string;
   roleName: string;

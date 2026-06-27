@@ -108,13 +108,10 @@ export class MembershipServices {
    * @param employmentDate 
    * @returns 
    */
-  public static async store(
+  public static async store<K extends keyof OrgMembershipParams>(
     orgID: string,
     userID: string,
-    inviteID: string,
-    employeeCode: string,
-    employmentDate: Date,
-    ...selectFields: string[]
+    ...selectFields: K[]
   ) {   
     const slctStr = selectFields.join(", ");
 
@@ -126,18 +123,16 @@ export class MembershipServices {
       .upsert({
         'org_id': orgID,
         'user_id': userID,
-        'invitation_id': inviteID,
-        'status': 'invited',
-        'employee_code': employeeCode,
-        'employment_date': employmentDate,
+        'status': 'accepted',
         'is_default_org': rOrgs.length === 0
       }, {
         onConflict: 'user_id,org_id',
         ignoreDuplicates: true
       })
-      .select(slctStr);
+      .select(slctStr)
+      .single();
 
-    if (!error) return data[0];
+    if (!error) return data as unknown as Pick<OrgMembershipParams, K>;
 
     throw new InvalidCredentials(
       'Failed to store organization membership.'

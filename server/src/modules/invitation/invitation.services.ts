@@ -16,11 +16,13 @@ import {
   sanitizeObject 
 } from "@/utils/data.helpers";
 import { 
-  Invitation, 
+  InvitationParams, 
+  InvitationResponseParams, 
   InvitationUpdate, 
   InviteEmailParams, 
   TableName
 } from "../organization/organization.types";
+import { BaseRepository } from "../base/base.repository";
 
 
 const DB_TABLE = 'organization_invitations';
@@ -32,54 +34,20 @@ export class InvitationServices {
    * @param invite 
    */
   public static async createInvitation( 
-    senderID: string,
-    invite: Invitation
+    invite: InvitationParams
   ) {
-    const receiver = await UserServices
-      .findByEmail(invite.receiverEmail, 'id', 'firstname');
-    
     const token = TokenServices.createToken();
     const expiresAt = getDateAfterInterval(new Date(), '3d');
 
-    const inviteID = await InvitationServices.store(
-      senderID,
-      receiver.id!,
-      token,
-      expiresAt
-    );
-  
-    const org = await MembershipServices.store(
-      invite.organizationID,
-      receiver.id!,
-      inviteID,
-      invite.employeCode,
-      invite.employmentDate,
-      'id', 'organizations(org_name)'
-    ) as unknown as { 
-      'id': string, 
-      'organizations': { 'org_name': string} 
-    };
-
-    const brc = await BranchServices
-      .storeMembership(
-        invite.branchID,
-        org.id,
-        invite.role,
-        inviteID,
-        'id', 'role', 'branches(branch_name)'
-      ) as unknown as {
-        'id': string,
-        'role': string,
-        'branches': { 'branch_name': string }
-      };
+    const inviteData = await InvitationServices
+      .store(invite, token, expiresAt);
     
     await InvitationServices.sendInviteEmail(
-      invite.receiverEmail, {
-      'orgName': org.organizations.org_name,
-      'receiverName': receiver.firstname!,
-      'senderEmail': invite.senderEmail,
-      'branchName': brc.branches.branch_name,
-      'roleName': brc.role,
+      invite.receiver_email, {
+      'orgName': inviteData.org[0]!.org_name,
+      'senderEmail': inviteData.sender[0]!.email,
+      'branchName': inviteData.brc[0]!.branch_name,
+      'roleName': inviteData.role[0]!.role,
       'expirationDate': expiresAt,
       'acceptURL': `${invite.url}/invite?token=${token}`
     })
@@ -94,24 +62,32 @@ export class InvitationServices {
    * @returns 
    */
   public static async store( 
-    senderID: string, 
-    receiverID: string,
+    invitation: InvitationParams,
     token: string,
     expiresAt: Date
   ) {
     const { data, error } = await supabase
       .from(DB_TABLE)
       .insert({
-        'sender_id': senderID,
-        'receiver_id': receiverID,
+        'sender_id': invitation.sender_id,
+        'receiver_email': invitation.receiver_email,
+        'role_id': invitation.role_id,
+        'org_id': invitation.org_id,
+        'branch_id': invitation.branch_id,
         'token': token,
         'status': 'invited',
         'expires_at': expiresAt,
-        'accepted_at': null
+        'sent_at': new Date()
       })
-      .select('id');
+      .select(`
+        sender:users!sender_id(email),
+        org:organizations!org_id(org_name),
+        brc:branches!branch_id(branch_name),
+        role:roles!role_id(role)
+      `)
+      .single();
     
-    if (!error) return data[0]?.id;
+    if (!error) return data;
 
     throw new InvalidCredentials('Failed to create invitation.');
   }
@@ -128,59 +104,74 @@ export class InvitationServices {
     const token = TokenServices.createToken();
     const expiresAt = getDateAfterInterval( new Date(), '3d' );
 
-    const data = await BranchServices.findMembership(
-      inviteID,
-      'invitation_id'
-    );
-
-    await InvitationServices.update(inviteID, {
+    const invitation = await InvitationServices.update(inviteID, {
+      'id': inviteID,
       'token': token,
       'status': 're-invited',
-      'expires_at': expiresAt
+      'expires_at': expiresAt,
+      'sent_at': new Date()
     });
 
     await InvitationServices.sendInviteEmail(
-      data.organization_invitations.receiver.email, {
-        'orgName': data.branches.organizations.org_name,
-        'receiverName': data.organization_invitations.receiver.firstname,
-        'senderEmail': data.organization_invitations.sender.email,
-        'branchName': data.branches.branch_name,
-        'roleName': data.roles.role,
+      invitation.receiver_email, {
+        'orgName': invitation.org[0]!.org_name,
+        'senderEmail': invitation.sender[0]!.email,
+        'branchName': invitation.brc[0]!.branch_name,
+        'roleName': invitation.role[0]!.role,
         'expirationDate': expiresAt,
         'acceptURL': `${inviteURL}/invite?token=${token}`,
       }
     )
   }
 
-  /**
-   * 
-   * @param inviteID 
-   * @param status 
-   */
   public static async respond(
-    receiver_id: string,
-    inviteID: string,
-    status: 'accepted' | 'rejected',
+    invitation: InvitationResponseParams,
     token: string
   ) {
-    const org = await MembershipServices.update({
-      status: status,
-      invitation_id: inviteID,
-      user_id: receiver_id
-    });
+    const invDB = new BaseRepository(TableName.orgInv);
 
-    await BranchServices.save({
-      status: status,
-      org_mem_id: org[0].id!,
-      invitation_id: inviteID
-    }, TableName.branchMem);
+    const idata = await InvitationServices.find(
+      invitation.id,
+      'id', 'token', 'expires_at'
+    );
+    
+    if (idata.id.trim() === "") {
+      throw new InvalidCredentials(
+        'Invitation does not exists.'
+      );
+    }
 
+    if (idata.token !== token) {
+      throw new InvalidCredentials(
+        'Incorrect token.'
+      );
+    }
+    
+    TokenServices.verify({
+      'isavailable': true,
+      'expires_at': idata.expires_at!
+    })
 
-    await InvitationServices.update(inviteID, {
-      'status': status,
-      'token': token,
-      'accepted_at': status === 'accepted'? new Date() : null
-    });
+    if (invitation.status === 'accepted') {
+      const org = await MembershipServices.store(
+        invitation.org_id!,
+        invitation.receiver_id!,
+        'id'
+      );
+  
+      await BranchServices.storeMembership(
+        invitation.branch_id!,
+        org.id!,
+        invitation.role_id!
+      );
+    }
+
+    await invDB.upsert({
+      'id': invitation.id,
+      'status': invitation.status,
+      'accepted_at': invitation.status === 'accepted'
+        ? new Date() : null
+    })
   }
   
   /**
@@ -198,6 +189,23 @@ export class InvitationServices {
     await sendEmail(receiverEmail, subject, content);
   }
 
+  public static async find<K extends keyof InvitationUpdate>(
+    inviteID: string,
+    ...fields: K[]
+  ) {
+    const slctStr = fields.join(', ');
+
+    const { data, error } = await supabase
+      .from(TableName.orgInv)
+      .select(slctStr)
+      .eq('id', inviteID)
+      .single();
+
+    if (!error) return data as unknown as Pick<InvitationUpdate, K>;
+
+    throw new ErrorII(error.message);
+  }
+
   /**
    * 
    * @param inviteID 
@@ -213,14 +221,25 @@ export class InvitationServices {
     const { data, error } = await supabase
       .from(DB_TABLE)
       .update(inviteData)
-      .eq('id', inviteID);
+      .select(`
+        receiver_email,
+        sender:users!sender_id(email),
+        org:organizations!org_id(org_name),
+        brc:branches!branch_id(branch_name),
+        role:roles!role_id(role)
+      `)
+      .eq('id', inviteID)
+      .single();
 
-    if (!error) return;
+    if (!error) return data;
 
     throw new RecordNotFound(
       `Invitation with ID ${inviteID} is not found.` 
     );
   }
 
-
+  public static async delete( inviteID: string ) {
+    const invDB = new BaseRepository(TableName.orgInv);
+    await invDB.delete(inviteID);
+  }
 }

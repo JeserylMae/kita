@@ -89,7 +89,7 @@ export class UserServices {
       .eq('email', email)
       .single();
 
-    if ( !error ) return data as unknown as User;
+    if ( !error ) return data;
 
     throw new RecordNotFound(
       `Account with email ${email} does not exist`
