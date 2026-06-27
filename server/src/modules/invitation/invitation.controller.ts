@@ -1,5 +1,5 @@
 import { BranchServices } from '../branch/branch.services';
-import { Invitation } from '../organization/organization.types';
+import { InvitationParams, InvitationResponseParams } from '../organization/organization.types';
 import { InvitationServices } from './invitation.services';
 import { InvalidCredentials } from '@/errors';
 import { Request, Response, NextFunction } from 'express';
@@ -13,18 +13,14 @@ export class InvitationController {
    * @param next 
    */
   public static async invite(
-    req: Request<any, any, Invitation>,
+    req: Request<any, any, InvitationParams>,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const senderID = req.user?.id;
       const invitation  = req.body;
 
-      InvitationServices.createInvitation(
-        senderID!, 
-        invitation
-      );
+      InvitationServices.createInvitation(invitation);
 
       res.status(201).json({
         'success': true,
@@ -43,12 +39,12 @@ export class InvitationController {
    * @param next 
    */
   public static async respondToInvitation(
-    req: Request,
+    req: Request<any, any, InvitationResponseParams>,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const { receiverEmail, inviteID, status } = req.body;
+      const invitation = req.body;
       const token = req.params.token;
 
       if (typeof token !== 'string') {
@@ -56,10 +52,7 @@ export class InvitationController {
       }
 
       await InvitationServices.respond( 
-        receiverEmail, 
-        inviteID, 
-        status, 
-        token
+        invitation, token
       );
 
       res.status(201).json({
@@ -138,6 +131,32 @@ export class InvitationController {
         'success': true,
         'message': 'Invitations retrieved successfully.',
         'invitations': invitations
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  public static async delete(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const invID = req.params.id;
+
+      if (typeof invID !== 'string') {
+        throw new InvalidCredentials(
+          'Invitation ID is not valid.'
+        );
+      }
+
+      await InvitationServices.delete(invID);
+
+      res.status(200).json({
+        'success': true,
+        'message': 'Invitation was deleted.'
       });
     }
     catch (error: unknown) {
