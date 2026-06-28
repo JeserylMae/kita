@@ -3,7 +3,7 @@ import config from "@/config";
 import { User } from "../user/user.types";
 import { supabase } from '@/config/db';
 import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
-import { importPKCS8, SignJWT } from "jose";
+import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
 import { getDateAfterInterval, sanitizeObject } from '@/utils/data.helpers';
 import { SessionServices } from './sessions.services';
 
@@ -36,10 +36,10 @@ export class TokenServices {
       sid:       sessionID!,
       verified:  user.verified_at ? true : false,
     };
-  
+
     const jwt = await new SignJWT( payload )
       .setProtectedHeader({ alg })
-      .setIssuedAt()
+      .setIssuedAt(new Date)
       .setIssuer(config.tokenIss)
       .setAudience(config.tokenAud)
       .setExpirationTime(config.expDuration)
@@ -169,6 +169,23 @@ export class TokenServices {
     if (isExpired) {
       throw new InvalidCredentials('Token already expired.');
     }
+  }
+
+  public static async verifyAccessToken(token: Token) {
+    const alg = config.signingAlg;
+    const spki = config.publicKey;
+
+    const pub = await importSPKI(spki, alg);
+
+    const { payload, protectedHeader } = await jwtVerify(
+      token.token_hash!,
+      pub, {
+        issuer: config.tokenIss,
+        audience: config.tokenAud
+      }
+    );
+
+    return payload;
   }
 
   public static async setUsed( tokenID: string ) {

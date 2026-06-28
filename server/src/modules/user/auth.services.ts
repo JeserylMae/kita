@@ -3,11 +3,20 @@ import { v4 as uuidv4 } from "uuid";
 import { UserServices } from './user.services';
 import { TokenServices } from '../token/token.services';
 import { PasswordServices } from './password.services';
-import { AccountNotVerified } from "@/errors";
+import { AccountNotVerified, ErrorII } from "@/errors";
 import { SessionServices } from '../token/sessions.services';
+import { supabase } from '@/config/db';
 
 
 // @TODO: add role validation via middleware
+
+type PermissionInfo = {
+  role: string;
+  scope: string;
+};
+
+const permissionsCache: Record<string, PermissionInfo[]> = {};
+const rolesCache: Record<string, string[]> = {}; 
 
 export class AuthServices {
   /**
@@ -119,6 +128,40 @@ export class AuthServices {
       .find(sessionID);
 
     await SessionServices.delete(session.id!);
+  }
+
+  public static async getPermissionInfo( permission: string ) {
+    if (permission in permissionsCache) {
+      return permissionsCache[permission];
+    }
+
+    const { data, error } = await supabase
+      .from('role_permissions_view')
+      .select('role, scope')
+      .eq('code', permission);
+
+    if (error) {
+      throw new ErrorII(error.message);
+    } 
+
+    permissionsCache[permission] = data;
+
+    return data;
+  }
+
+  public static getRoleScope( 
+    role: string,
+    permissions: PermissionInfo[] 
+  ) {  
+    if (role in rolesCache) return rolesCache[role];
+
+    const scopes = permissions
+      .filter((arr) => arr.role === role)
+      .map((arr) => arr.scope);
+  
+    rolesCache[role] = scopes;
+
+    return scopes;
   }
 }
 

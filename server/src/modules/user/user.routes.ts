@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import AuthController from './auth.controllers';
-import { UserMiddleware } from './user.middleware';
+import { requireGuest, verifyToken } from '@/middleware/auth.middleware';
 
 
 const userRouter = Router();
@@ -8,13 +8,13 @@ const userRouter = Router();
 userRouter.post('/signup', AuthController.signup);
 userRouter.post(
   '/signin', 
-  UserMiddleware.requireGuest,
+  requireGuest,
   AuthController.signin
 );
 
 userRouter.post(
   '/logout', 
-  UserMiddleware.attachUser,
+  verifyToken,
   AuthController.logout
 );
 
