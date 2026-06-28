@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import { User, UserServices } from "./user.services";
-import { InvalidCredentials } from "@/errors";
+import { User } from "./user.types";
+import { UserServices } from "./user.services";
 import { sanitizeObject } from "@/utils/data.helpers";
-
+import { InvalidCredentials } from "@/errors";
+import { NextFunction, Request, Response } from "express";
 
 export class UserController {
   /**
@@ -20,10 +20,6 @@ export class UserController {
   
       const user = await UserServices.findByEmail(email, '*');
   
-      // @TODO: Add organizations select (include all info about org.)
-      // @TODO: Add branches select (include all info about branch.)
-      // @TODO: Select role id
-
       res.status(200).json({
         'success': true,
         'message': 'User information were retrieved.',

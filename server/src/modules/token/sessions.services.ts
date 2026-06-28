@@ -16,16 +16,21 @@ export class SessionServices {
    * 
    * @param session 
    */
-  public static async insert( session: Session ) {
+  public static async insert( 
+    session: Session, 
+    ...selectFields: string[] 
+  ) {
     const sessionData = sanitizeObject(session);
+    const slctStr = selectFields.join(", ");
 
     const { data, error } = await supabase
       .from('sessions')
-      .insert(sessionData);
+      .insert(sessionData)
+      .select(slctStr);
     
-    if (error) {
-      throw new ConflictError('Failed to save session info.');
-    }
+    if (!error) return data;
+    
+    throw new ConflictError('Failed to save session info.');
   }
 
   /**
@@ -34,8 +39,8 @@ export class SessionServices {
    * @param fields 
    * @returns 
    */
-  public static async findByUser( 
-    user_id: string, 
+  public static async find( 
+    sessionID: string, 
     ...fields: string[] 
   ) {
     const selectStr = fields.join(', ');
@@ -43,12 +48,12 @@ export class SessionServices {
     const { data, error } = await supabase
       .from('sessions')
       .select(selectStr)
-      .eq('user_id', user_id)
+      .eq('id', sessionID)
       .single();
     
     if (error) {
       throw new RecordNotFound(
-        `No session info for user with ID ${user_id} was found.`
+        `No session info for user was found.`
       );
     }
 

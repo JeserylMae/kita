@@ -1,55 +1,9 @@
+import { User } from "./user.types";
 import { supabase } from "@/config/db";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { ConflictError, RecordNotFound } from "@/errors";
 
-
-// @TODO: Add org id and branch id
-export interface User {
-  id?: string;
-  auth_id?: string;
-  
-  firstname?: string;
-  middlename?: string;
-  lastname?: string;
-  suffix?: string;
-
-  house_number?: string;
-  street?: string;
-  barangay?: string;
-  city?: string;
-  province?: string;
-  region?: string;
-
-  birthdate?: Date;
-
-  role_id?: string; // remove this
-
-  email?: string;
-  password?: string;
-
-  updated_at?: Date;
-  verified_at?: Date;
-}
-
 export class UserServices {
-  /**
-   * 
-   * @param role 
-   * @returns 
-   */
-  public static async getRoleID( role: string )
-  : Promise<string> {
-    const { data, error } = await supabase
-      .from('roles')
-      .select('id')
-      .eq('role', role)
-      .single();
-
-    if (!error) return data.id;
-    
-    throw new ConflictError('Invalid role.');
-  }
-
   /**
    * 
    * @param user 
@@ -77,9 +31,9 @@ export class UserServices {
    * @param fields 
    * @returns 
    */
-  public static async findByEmail( 
+  public static async findByEmail<K extends keyof User>( 
     email: string, 
-    ...fields: string[] 
+    ...fields: K[] 
   ) {
     const selectStr = fields.join(', ');
 
@@ -89,7 +43,7 @@ export class UserServices {
       .eq('email', email)
       .single();
 
-    if ( !error ) return data as unknown as User;
+    if ( !error ) return data as unknown as Pick<User, K>;
 
     throw new RecordNotFound(
       `Account with email ${email} does not exist`
