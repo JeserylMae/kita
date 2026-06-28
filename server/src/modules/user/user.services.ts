@@ -31,9 +31,9 @@ export class UserServices {
    * @param fields 
    * @returns 
    */
-  public static async findByEmail( 
+  public static async findByEmail<K extends keyof User>( 
     email: string, 
-    ...fields: string[] 
+    ...fields: K[] 
   ) {
     const selectStr = fields.join(', ');
 
@@ -43,7 +43,7 @@ export class UserServices {
       .eq('email', email)
       .single();
 
-    if ( !error ) return data as unknown as User;
+    if ( !error ) return data as unknown as Pick<User, K>;
 
     throw new RecordNotFound(
       `Account with email ${email} does not exist`
