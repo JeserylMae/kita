@@ -35,4 +35,9 @@ export default {
     path.resolve( process.cwd(), 'private.pem'),
     'utf-8'
   ),
+
+  publicKey: readFileSync(
+    path.resolve( process.cwd(), 'public.pem' ),
+    'utf-8'
+  ),
 };

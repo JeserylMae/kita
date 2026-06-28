@@ -5,7 +5,9 @@ declare global {
       user?: {
         id: string;
         sid: string;
+        role: string;
       };
+      scopes?: string[],
     }
   }
 }
