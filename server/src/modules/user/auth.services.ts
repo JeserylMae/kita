@@ -8,7 +8,6 @@ import { SessionServices } from '../token/sessions.services';
 
 
 // @TODO: add role validation via middleware
-// @TODO: Add JSdocs
 
 export class AuthServices {
   /**
@@ -21,16 +20,13 @@ export class AuthServices {
   public static async signup(
     email: string, 
     password: string, 
-    role: string
   ): Promise<boolean> {
     const hashedPassword = await hash(password);
-    const role_id = await UserServices.getRoleID(role);
     
     const success = await UserServices.insert({
       auth_id: uuidv4(),
       email: email, 
       password: hashedPassword,
-      role_id: role_id,
       updated_at: new Date(),
     });
 
@@ -52,7 +48,6 @@ export class AuthServices {
         email,
         'id',
         'auth_id', 
-        'role_id',
         'verified_at'
       );
 
@@ -81,7 +76,7 @@ export class AuthServices {
     const user = await UserServices.findByEmail(email, 'id');
     const resetURL = `${resetClientLink}/reset-password?token=${token}`;
 
-    await TokenServices.store(user.id!, token, '1min');
+    await TokenServices.store(user.id!, token, '15min');
     await PasswordServices.sendResetEmail(email, resetURL);
   }
 
@@ -119,9 +114,9 @@ export class AuthServices {
    * 
    * @param userID 
    */
-  public static async logout( userID: string ) {
+  public static async logout( sessionID: string ) {
     const session = await SessionServices
-      .findByUser(userID, 'id');
+      .find(sessionID);
 
     await SessionServices.delete(session.id!);
   }

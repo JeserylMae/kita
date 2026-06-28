@@ -18,6 +18,7 @@ const requiredEnv = ( key: string ) => {
 
 export default {
   port: requiredEnv('PORT'),
+  domain: requiredEnv('DOMAIN'),
 
   databaseURL: requiredEnv('DATABASE_URL'),
   dbSecret: requiredEnv('DB_SECRET_KEY'),

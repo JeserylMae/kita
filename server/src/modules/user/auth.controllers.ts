@@ -1,8 +1,6 @@
-import { decodeJwt } from 'jose';
 import { AuthServices } from './auth.services';
 import { TokenServices } from '../token/token.services';
 import { NextFunction, Request, Response } from 'express';
-import { InvalidCredentials } from '@/errors';
 
 
 export default class AuthController {
@@ -18,10 +16,10 @@ export default class AuthController {
     next: NextFunction 
   ) {
     try {
-      const { email, password, role } = req.body;
+      const { email, password } = req.body;
   
       const success = await AuthServices
-        .signup(email, password, role);
+        .signup(email, password);
   
       return res.status(201).json({ 
         'success': success,
@@ -47,8 +45,12 @@ export default class AuthController {
       const { email, password } = req.body;
 
       const user = await AuthServices.signin(email, password);
-      const acsToken = await TokenServices.createAccessToken(user!);
-      await TokenServices.createRefreshToken(user!, '7d');
+
+      const session = (
+        await TokenServices.createRefreshToken(user!, '7d')
+      ) as unknown as { 'id': string };
+
+      const acsToken = await TokenServices.createAccessToken(user!, session.id);
 
       res.cookie('ACCESS-TOKEN', acsToken, {
         httpOnly: true,
@@ -129,10 +131,11 @@ export default class AuthController {
     next: NextFunction
   ) {
     try {
-      const userID = req.user?.id;
+      const sessionID = req.user?.sid;
 
-      await AuthServices.logout(userID!);
+      await AuthServices.logout(sessionID!);
 
+      res.clearCookie('ACCESS-TOKEN');
       res.status(200).json({
         success: true,
         message: 'Logout successful.',
