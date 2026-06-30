@@ -57,7 +57,8 @@ export class AuthServices {
         email,
         'id',
         'auth_id', 
-        'verified_at'
+        'verified_at',
+        'default_org'
       );
 
     if ( !user.verified_at ) {

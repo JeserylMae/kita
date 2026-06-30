@@ -21,6 +21,8 @@ export interface User {
   email?: string;
   password?: string;
 
+  default_org?: string;
+
   updated_at?: Date;
   verified_at?: Date;
 }
