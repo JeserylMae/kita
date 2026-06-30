@@ -3,6 +3,7 @@ import { OrganizationService } from "./organization.services";
 import { OrgMembershipParams, OrgParams, TableName } from "./organization.types";
 import e, { NextFunction, Request, Response } from "express";
 import { MembershipServices } from "./membership.services";
+import { canAccessUser } from "../base/base.services";
 
 
 export class OrganizationController {
@@ -19,8 +20,11 @@ export class OrganizationController {
   ) {
     try {
       const userID = req.user?.id; 
+      const pscope = req.scopes;
       const withBranches = req.query.withBranches === 'true';
       const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
+
+      if (!canAccessUser(pscope)) return;
   
       const data = await MembershipServices
         .findMembership( userID!, { 
@@ -52,6 +56,9 @@ export class OrganizationController {
   ) {
     try {
       const orgID = req.params.orgID;
+      const pscope = req.scopes;
+
+      if (!canAccessUser(pscope)) return;
 
       if (typeof orgID !== 'string') {
         throw new InvalidCredentials(
@@ -115,7 +122,10 @@ export class OrganizationController {
     next: NextFunction
   ) {
     try {
+      const pscope = req.scopes;
       const member = req.body;
+
+      if (!canAccessUser(pscope)) return;
   
       await MembershipServices.update(member);
   
@@ -157,7 +167,10 @@ export class OrganizationController {
    next: NextFunction
   ) {
     try {
+      const pscope = req.scopes;
       const id = req.params.id;
+
+      if (!canAccessUser(pscope)) return;
 
       if (typeof id !== 'string') {
         throw new InvalidCredentials(
@@ -189,7 +202,10 @@ export class OrganizationController {
     next: NextFunction
   ) {
     try {
+      const pscope = req.scopes;
       const memberID = req.params.id;
+
+      if (!canAccessUser(pscope)) return;
 
       await MembershipServices.delete(memberID);
       
@@ -219,9 +235,14 @@ export class OrganizationController {
   ) {
     try {
       let message = "";
+      const pscopes = req.scopes;
       const { organization, brands, founders, membership } = req.body;
       
+      if (!canAccessUser(pscopes)) return;
+
       if (action === 'create') {
+        organization.role = 'owner';
+        
         await OrganizationService.store(
           organization,
           brands,
@@ -262,6 +283,9 @@ export class OrganizationController {
       next: NextFunction
     ) => {
       const { id } = req.body;
+      const pscope = req.scopes;
+
+      if (!canAccessUser(pscope)) return;
 
       await OrganizationService.deleteHandler(
         id,

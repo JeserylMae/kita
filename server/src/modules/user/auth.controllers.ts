@@ -1,6 +1,10 @@
 import { AuthServices } from './auth.services';
 import { TokenServices } from '../token/token.services';
 import { NextFunction, Request, Response } from 'express';
+import { MembershipServices } from '../organization/membership.services';
+import { OrganizationService } from '../organization/organization.services';
+import { BranchServices } from '../branch/branch.services';
+import { UserServices } from './user.services';
 
 
 export default class AuthController {
@@ -44,13 +48,30 @@ export default class AuthController {
     try {
       const { email, password } = req.body;
 
+      let orgrole = null;
+      let orgmemID = null;
       const user = await AuthServices.signin(email, password);
 
       const session = (
         await TokenServices.createRefreshToken(user!, '7d')
       ) as unknown as { 'id': string };
 
-      const acsToken = await TokenServices.createAccessToken(user!, session.id);
+      if (user?.default_org) {
+        const org = await MembershipServices.findRole(
+          user.id!,
+          user?.default_org
+        )
+        orgrole = org?.roles[0]?.role;
+        orgmemID = org?.id;
+      }
+
+      const acsToken = await TokenServices.createAccessToken(
+        user!, 
+        session.id,
+        user?.default_org ?? null,
+        orgrole,
+        orgmemID
+      );
 
       res.cookie('ACCESS-TOKEN', acsToken, {
         httpOnly: true,

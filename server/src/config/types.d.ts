@@ -5,8 +5,16 @@ declare global {
       user?: {
         id: string;
         sid: string;
-        role: string;
       };
+      org?: {
+        id: string | null;
+        role: string | null;
+        orgmemID: string | null;
+      } 
+      branch?: {
+        id: string | null;
+        role: string | null;
+      }
       scopes?: string[],
     }
   }
