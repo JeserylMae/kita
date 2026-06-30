@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from "express";
 import { BrcParams } from "./branch.types";
-import { BranchServices } from "./branch.services";
 import { TableName } from "../organization/organization.types";
+import { canAccessUser } from "../base/base.services";
+import { BranchServices } from "./branch.services";
 import { InvalidCredentials } from "@/errors";
+import { NextFunction, Request, Response } from "express";
+import { TokenServices } from "../token/token.services";
 
 
 export class BranchController {
@@ -13,14 +15,27 @@ export class BranchController {
    * @param next 
    * @returns 
    */
-  public static create(
+  public static async create(
     req: Request,
     res: Response,
     next: NextFunction 
   ) {
-    return BranchController.save(
-      req, res, next, 'create'
-    );
+    try {
+      const { branch, brcmem } = req.body;
+      const pscope = req.scopes;
+  
+      if (!canAccessUser(pscope)) return;
+  
+      await BranchServices.storeBranch(branch, brcmem);
+
+      res.status(201).json({
+        'success': true,
+        'message': 'Branch was created.'
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
   }
 
   /**
@@ -36,6 +51,9 @@ export class BranchController {
   ) {
     try {
       const id = req.params.id;
+      const pscope = req.scopes;
+
+      if (!canAccessUser(pscope)) return;
 
       if (typeof id !== 'string') {
         throw new InvalidCredentials(
@@ -51,6 +69,50 @@ export class BranchController {
         'brcMembers': data 
       });
     }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  public static async selectBranch(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const branchID = req.params.id;
+      const org = req.org;
+      const user = req.user;
+  
+      if (typeof branchID !== 'string') {
+        throw new InvalidCredentials(
+          'Invalid branch ID.'
+        );
+      }
+
+      const brc = await BranchServices.findRole(org?.orgmemID!, branchID);
+
+      const acsToken = await TokenServices.createAccessToken(
+        { id: user?.id! }, 
+        user?.sid!,
+        org?.id!,
+        org?.role!,
+        org?.orgmemID!,
+        branchID,
+        brc?.role
+      );
+
+      res.cookie('ACCESS-TOKEN', acsToken, {
+        httpOnly: true,
+        secure: true, 
+        sameSite: 'strict'
+      })
+      .status(200)
+      .json({
+        'success': true,
+        'message': 'Branch selected',
+      });
+    } 
     catch (error: unknown) {
       next(error);
     }
@@ -140,6 +202,9 @@ export class BranchController {
   ) {
     try {
       const branch = req.body;
+      const pscope = req.scopes;
+
+      if (!canAccessUser(pscope)) return;
 
       await BranchServices.save(
         branch, 
@@ -174,6 +239,9 @@ export class BranchController {
   ) {
     try {
       const id = req.params.id;
+      const pscope = req.scopes;
+
+      if (!canAccessUser(pscope)) return;
       
       const col = record === 'brc'
         ? 'branch_id'

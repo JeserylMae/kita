@@ -1,19 +1,24 @@
+import { InvalidCredentials } from "@/errors";
 
 
-export const canAccessUser = (
-  scope: string[], requesterID: string, targetUserID: string
-) => {
+export const canAccessUser = ( scope: string[] | undefined ) => {
+  const errMsg = 'You do not have sufficient permissions for this operation.'
+
+  if (!scope) {
+    throw new InvalidCredentials(errMsg);
+  }
+
   if (scope.includes("ORG")) {
-    return requesterID  === targetUserID;
+    return true;
   }
 
   if (scope.includes("BRC")) {
-    return requesterID === targetUserID;
+    return true;
   }
 
   if (scope.includes("SELF")) {
-    return requesterID === targetUserID;
+    return true;
   }
 
-  return false;
+  throw new InvalidCredentials(errMsg);
 }

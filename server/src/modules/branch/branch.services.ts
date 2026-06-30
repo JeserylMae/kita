@@ -1,12 +1,28 @@
 import { supabase } from "@/config/db";
 import { ErrorII, InvalidCredentials } from "@/errors";
-import { BrcMemberParams } from "./branch.types";
+import { BrcMemberParams, BrcParams } from "./branch.types";
 import { BaseRepository } from "../base/base.repository";
 import { TableName } from "../organization/organization.types";
 import { sanitizeObject } from "@/utils/data.helpers";
 
 
 export class BranchServices {
+  public static async findRole( 
+    orgMemID: string,
+    branchID: string, 
+  ) {
+    const { data, error } = await supabase
+      .from(TableName.branchMem)
+      .select('roles(role)')
+      .eq('org_mem_id', orgMemID)
+      .eq('branch_id', branchID)
+      .single();
+      
+    if(!error) return data?.roles[0] ?? null;
+
+    throw new ErrorII(error.message);
+  }
+
   /**
    * 
    * @param branchID 
@@ -42,6 +58,16 @@ export class BranchServices {
     throw new InvalidCredentials(
       'Failed to store branch membership.'
     );
+  }
+
+  public static async storeBranch(
+    branch: BrcParams,
+    brcmem: BrcMemberParams
+  ) {
+    const data = (await BranchServices.save(branch, TableName.branch))[0];
+
+    brcmem.branch_id = data.id;
+    await BranchServices.save(brcmem, TableName.branchMem);
   }
 
   /**
