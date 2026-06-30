@@ -2,10 +2,10 @@ import crypto from 'crypto';
 import config from "@/config";
 import { User } from "../user/user.types";
 import { supabase } from '@/config/db';
-import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
-import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
-import { getDateAfterInterval, sanitizeObject } from '@/utils/data.helpers';
 import { SessionServices } from './sessions.services';
+import { getDateAfterInterval } from '@/utils/data.helpers';
+import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
+import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
 
 
 export interface Token {
@@ -24,7 +24,12 @@ export class TokenServices {
    */
   public static async createAccessToken( 
     user: User,
-    sessionID: string 
+    sessionID: string,
+    orgID: string | null,
+    orgRole: string | null,
+    orgmemID: string | null,
+    branchID: string | null = null,
+    branchRole: string | null = null
   ) {
     const alg = config.signingAlg;
     const pkcs8 = config.privateKey;
@@ -32,9 +37,14 @@ export class TokenServices {
     const pri = await importPKCS8( pkcs8, alg );
   
     const payload = {
-      sub:       user.id!,
-      sid:       sessionID!,
-      verified:  user.verified_at ? true : false,
+      sub:        user.id!,
+      sid:        sessionID!,
+      corg:       orgID,
+      orgrole:    orgRole,
+      orgmemid:   orgmemID,
+      branchid:   branchID,
+      branchrole: branchRole,
+      verified:   user.verified_at ? true : false,
     };
 
     const jwt = await new SignJWT( payload )
