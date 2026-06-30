@@ -6,6 +6,22 @@ import { sanitizeObject } from "@/utils/data.helpers";
 
 
 export class MembershipServices {
+  public static async findRole( 
+    userID: string,
+    defaultOrg: string 
+  ) {
+    const { data, error } = await supabase
+      .from(TableName.orgMem)
+      .select('id, roles(role)')
+      .eq('user_id', userID)
+      .eq('org_id', defaultOrg)
+      .single();
+
+    if(!error) return data;
+
+    throw new ErrorII(error.message);
+  }
+
   /**
    * 
    * @param userID 
@@ -22,7 +38,6 @@ export class MembershipServices {
     // organization_members.org_id = organizations.id
     let slctStr = (`
       org_id,
-      is_default_org,
       employee_code,
       status,
       organizations( org_name, icon, hex_color )
@@ -123,8 +138,7 @@ export class MembershipServices {
       .upsert({
         'org_id': orgID,
         'user_id': userID,
-        'status': 'accepted',
-        'is_default_org': rOrgs.length === 0
+        'status': 'accepted'
       }, {
         onConflict: 'user_id,org_id',
         ignoreDuplicates: true

@@ -11,6 +11,7 @@ import {
   OrgParams, 
   TableName 
 } from "./organization.types";
+import { UserServices } from "../user/user.services";
 
 
 export class OrganizationService {
@@ -44,6 +45,10 @@ export class OrganizationService {
     const injectPair = { org_id: rOrg[0].id!};
     const mdata = { ...membership, ...injectPair};
     await membershipDB.upsert(mdata);
+
+    await UserServices.update(mdata.user_id!, {
+      'default_org': rOrg[0].id!
+    });
   }
 
   /**
