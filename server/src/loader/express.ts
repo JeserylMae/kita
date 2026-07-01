@@ -5,6 +5,7 @@ import { ErrorMiddleware } from '@/middleware/error.middleware';
 import organizationRouter from '@/modules/organization/organization.routes';
 import invitationRouter from '@/modules/invitation/invitation.routes';
 import branchRouter from '@/modules/branch/branch.routes';
+import itemRouter from '@/modules/inventory/items/items.routes';
 
 
 interface Params {
@@ -20,6 +21,8 @@ export const loader = ({ app }: Params) => {
   app.use('/organization', organizationRouter);
   app.use('/invitation', invitationRouter);
   app.use('/branch', branchRouter);
+  
+  app.use('/inventory/items', itemRouter);
 
   app.use(ErrorMiddleware.handleError);
 
