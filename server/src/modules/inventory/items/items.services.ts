@@ -1,5 +1,8 @@
 import { supabase } from "@/config/db";
 import { ErrorII } from "@/errors";
+import { ItemInsert, ItemUpdate } from "./items.types";
+import { BaseRepository } from "@/modules/base/base.repository";
+import { sanitizeObject } from "@/utils/data.helpers";
 
 
 export class ItemsServices {
@@ -36,6 +39,48 @@ export class ItemsServices {
     if (!error) return data;
 
     throw new ErrorII(error.message);
+  }
+
+  public static async store( 
+    item: ItemInsert,
+    createdBy?: string 
+  ) {
+    const idata = { 
+      ...item, 
+      current_quantity: item.init_quantity, 
+      status: 'in stock'
+    }
+
+    if (createdBy) {
+      idata.created_by = createdBy;
+    }
+    
+    const db = new BaseRepository('inventory_items');
+    await db.upsert(idata);
+  }
+
+  public static async update( item: ItemUpdate ) {
+    const obj = sanitizeObject(item);
+    const idata = { 
+      ...obj,
+      updated_at: new Date()
+    }
+    
+    const { data, error } = await supabase
+      .from('inventory_items')
+      .upsert(idata, {
+        onConflict: 'id,branch_id',
+        ignoreDuplicates: true
+      });
+    
+    if (!error) return;
+
+    throw new ErrorII(error.message);
+  }
+
+  public static async delete( id: string ) {
+    const db = new BaseRepository('inventory_items');
+    await db.delete(id);
   }
 }
 
