@@ -33,9 +33,11 @@ export class UserServices {
    */
   public static async findByEmail<K extends keyof User>( 
     email: string, 
-    ...fields: K[] 
+    ...fields: (K | '*')[]
   ) {
-    const selectStr = fields.join(', ');
+    const selectStr = fields.includes('*') 
+      ? '*'
+      : fields.join(', ');
 
     const { data, error } = await supabase
       .from('users')
