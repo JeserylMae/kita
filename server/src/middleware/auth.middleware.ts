@@ -1,9 +1,8 @@
 import { decodeJwt } from "jose";
-import { ErrorII, InvalidCredentials } from "@/errors";
+import { InvalidCredentials } from "@/errors";
 import { NextFunction, Request, Response } from "express"
 import { TokenServices } from "@/modules/token/token.services";
 import { AuthServices } from "@/modules/user/auth.services";
-import { type } from "node:os";
 
 
 const loadAccessToken = (
@@ -105,6 +104,34 @@ export const verifyPermission = ( permission: string ) =>
   }
 };
 
+export const verifyScope = ( requiredScope: string[] ) =>
+async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try { 
+      const usrScope = req.scopes;
+
+      const errMsg = 'You do not have sufficient permissions for this operation.'
+
+      if (!usrScope) {
+        throw new InvalidCredentials(errMsg);
+      }
+
+      const hasScope = requiredScope.every(scope => 
+        usrScope.includes(scope));
+
+      if (!hasScope) {
+        throw new InvalidCredentials(errMsg);
+      }
+
+      next();
+    } 
+    catch (error: unknown) {
+      next(error);
+    } 
+  }
 
 export const requireGuest = (
     req: Request,
