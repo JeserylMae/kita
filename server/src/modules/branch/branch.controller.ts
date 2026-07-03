@@ -1,6 +1,5 @@
 import { BrcParams } from "./branch.types";
 import { TableName } from "../organization/organization.types";
-import { canAccessUser } from "../base/base.services";
 import { BranchServices } from "./branch.services";
 import { InvalidCredentials } from "@/errors";
 import { NextFunction, Request, Response } from "express";
@@ -22,9 +21,6 @@ export class BranchController {
   ) {
     try {
       const { branch, brcmem } = req.body;
-      const pscope = req.scopes;
-  
-      if (!canAccessUser(pscope)) return;
   
       await BranchServices.storeBranch(branch, brcmem);
 
@@ -51,9 +47,6 @@ export class BranchController {
   ) {
     try {
       const id = req.params.id;
-      const pscope = req.scopes;
-
-      if (!canAccessUser(pscope)) return;
 
       if (typeof id !== 'string') {
         throw new InvalidCredentials(
@@ -202,9 +195,6 @@ export class BranchController {
   ) {
     try {
       const branch = req.body;
-      const pscope = req.scopes;
-
-      if (!canAccessUser(pscope)) return;
 
       await BranchServices.save(
         branch, 
@@ -239,9 +229,6 @@ export class BranchController {
   ) {
     try {
       const id = req.params.id;
-      const pscope = req.scopes;
-
-      if (!canAccessUser(pscope)) return;
       
       const col = record === 'brc'
         ? 'branch_id'
