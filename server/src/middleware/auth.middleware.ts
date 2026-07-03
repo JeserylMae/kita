@@ -106,32 +106,32 @@ export const verifyPermission = ( permission: string ) =>
 
 export const verifyScope = ( requiredScope: string[] ) =>
 async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try { 
-      const usrScope = req.scopes;
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try { 
+    const usrScope = req.scopes;
 
-      const errMsg = 'You do not have sufficient permissions for this operation.'
+    const errMsg = 'You do not have sufficient permissions for this operation.'
 
-      if (!usrScope) {
-        throw new InvalidCredentials(errMsg);
-      }
+    if (!usrScope) {
+      throw new InvalidCredentials(errMsg);
+    }
 
-      const hasScope = requiredScope.every(scope => 
-        usrScope.includes(scope));
+    const hasScope = requiredScope.every(scope => 
+      usrScope.includes(scope));
 
-      if (!hasScope) {
-        throw new InvalidCredentials(errMsg);
-      }
+    if (!hasScope) {
+      throw new InvalidCredentials(errMsg);
+    }
 
-      next();
-    } 
-    catch (error: unknown) {
-      next(error);
-    } 
-  }
+    next();
+  } 
+  catch (error: unknown) {
+    next(error);
+  } 
+}
 
 export const requireGuest = (
     req: Request,
