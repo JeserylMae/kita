@@ -1,6 +1,6 @@
-import { verifyPermission, verifyToken } from "@/middleware/auth.middleware";
 import { Router } from "express";
-import { MovementController } from "./movement.controller";
+import * as MovementController from "./movement.controller";
+import { verifyPermission, verifyToken } from "@/middleware/auth.middleware";
 
 
 const movementRouter = Router();
@@ -26,7 +26,7 @@ movementRouter.patch('/:id',
 movementRouter.delete('/:id',
   verifyToken,
   verifyPermission('delete.'),
-  MovementController.delete
+  MovementController.deleteMovement
 );
 
 export default movementRouter;
