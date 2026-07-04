@@ -1,11 +1,12 @@
 import crypto from 'crypto';
 import config from "@/config";
-import { User } from "../user/user.types";
+import { UserSelect } from "../user/user.types";
 import { supabase } from '@/config/db';
-import { SessionServices } from './sessions.services';
 import { getDateAfterInterval } from '@/utils/data.helpers';
 import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
 import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
+
+import * as SessionServices from './sessions.services';
 
 
 export interface Token {
@@ -16,211 +17,210 @@ export interface Token {
   expires_at?: Date;
 }
 
-export class TokenServices {
-  /**
-   * 
-   * @param authID 
-   * @returns 
-   */
-  public static async createAccessToken( 
-    user: User,
-    sessionID: string,
-    orgID: string | null,
-    orgRole: string | null,
-    orgmemID: string | null,
-    branchID: string | null = null,
-    branchRole: string | null = null
-  ) {
-    const alg = config.signingAlg;
-    const pkcs8 = config.privateKey;
+/**
+ * 
+ * @param authID 
+ * @returns 
+ */
+export const createAccessToken = async ( 
+  user: UserSelect,
+  sessionID: string,
+  orgID: string | null,
+  orgRole: string | null,
+  orgmemID: string | null,
+  branchID: string | null = null,
+  branchRole: string | null = null
+) => {
+  const alg = config.signingAlg;
+  const pkcs8 = config.privateKey;
+
+  const pri = await importPKCS8( pkcs8, alg );
+
+  const payload = {
+    sub:        user.id!,
+    sid:        sessionID!,
+    corg:       orgID,
+    orgrole:    orgRole,
+    orgmemid:   orgmemID,
+    branchid:   branchID,
+    branchrole: branchRole,
+    verified:   user.verified_at ? true : false,
+  };
+
+  const jwt = await new SignJWT( payload )
+    .setProtectedHeader({ alg })
+    .setIssuedAt(new Date)
+    .setIssuer(config.tokenIss)
+    .setAudience(config.tokenAud)
+    .setExpirationTime(config.expDuration)
+    .sign(pri);
+
+  return jwt;
+}
+
+/**
+ * 
+ * @param user 
+ * @param token 
+ * @param expDuration 
+ * Examples:
+ * - "15s"   = 15 seconds
+ * - "15min" = 15 minutes
+ * - "2h"    = 2 hours
+ * - "7d"    = 7 days
+ * - "2w"    = 2 weeks
+ * - "1m"    1 month
+ */
+export const createRefreshToken = async ( 
+  user: UserSelect, 
+  expDuration: string 
+) => {
+  const refreshToken = createToken();
+
+  const createdAt = new Date();
+  const expiresAt = getDateAfterInterval(
+    createdAt,
+    expDuration
+  )
+
+  const session = await SessionServices.insert({
+    user_id: user!.id!,
+    refresh_token_hash: refreshToken,
+    expires_at: expiresAt,
+    created_at: createdAt
+  }, "id");
+
+  return session[0];
+}
+
+/**
+ * 
+ * @returns 
+ */
+export const createToken = () => {
+  const token = crypto.randomBytes(32).toString();
+
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  return hashedToken;
+}
+
+/**
+ * 
+ * @param userID 
+ * @param token 
+ * @param expires 
+ * Examples:
+ * - "15s"   = 15 seconds
+ * - "15min" = 15 minutes
+ * - "2h"    = 2 hours
+ * - "7d"    = 7 days
+ * - "2w"    = 2 weeks
+ * - "1m"    1 month
+ * Default: 15min
+ */
+export const store = async (
+  userID: string,
+  token: string, 
+  expires: string = '15min'
+) => {
+  const createdAt = new Date();
+  const expiresAt = getDateAfterInterval(createdAt, expires);
+
+  const { data, error } = await supabase
+    .from('password_reset_tokens')
+    .insert({
+      'user_id': userID,
+      'token_hash': token,
+      'expires_at': expiresAt,
+      'created_at': createdAt,
+    });
   
-    const pri = await importPKCS8( pkcs8, alg );
-  
-    const payload = {
-      sub:        user.id!,
-      sid:        sessionID!,
-      corg:       orgID,
-      orgrole:    orgRole,
-      orgmemid:   orgmemID,
-      branchid:   branchID,
-      branchrole: branchRole,
-      verified:   user.verified_at ? true : false,
-    };
-
-    const jwt = await new SignJWT( payload )
-      .setProtectedHeader({ alg })
-      .setIssuedAt(new Date)
-      .setIssuer(config.tokenIss)
-      .setAudience(config.tokenAud)
-      .setExpirationTime(config.expDuration)
-      .sign(pri);
-  
-    return jwt;
-  }
-
-  /**
-   * 
-   * @param user 
-   * @param token 
-   * @param expDuration 
-   * Examples:
-   * - "15s"   = 15 seconds
-   * - "15min" = 15 minutes
-   * - "2h"    = 2 hours
-   * - "7d"    = 7 days
-   * - "2w"    = 2 weeks
-   * - "1m"    1 month
-   */
-  public static async createRefreshToken( 
-    user: User, 
-    expDuration: string 
-  ) {
-    const refreshToken = TokenServices.createToken();
-
-    const createdAt = new Date();
-    const expiresAt = getDateAfterInterval(
-      createdAt,
-      expDuration
-    )
-
-    const session = await SessionServices.insert({
-      user_id: user!.id!,
-      refresh_token_hash: refreshToken,
-      expires_at: expiresAt,
-      created_at: createdAt
-    }, "id");
-
-    return session[0];
-  }
-
-  /**
-   * 
-   * @returns 
-   */
-  public static createToken() {
-    const token = crypto.randomBytes(32).toString();
-  
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
-  
-    return hashedToken;
-  }
-
-  /**
-   * 
-   * @param userID 
-   * @param token 
-   * @param expires 
-   * Examples:
-   * - "15s"   = 15 seconds
-   * - "15min" = 15 minutes
-   * - "2h"    = 2 hours
-   * - "7d"    = 7 days
-   * - "2w"    = 2 weeks
-   * - "1m"    1 month
-   * Default: 15min
-   */
-  public static async store(
-    userID: string,
-    token: string, 
-    expires: string = '15min'
-  ) {
-    const createdAt = new Date();
-    const expiresAt = getDateAfterInterval(createdAt, expires);
-  
-    const { data, error } = await supabase
-      .from('password_reset_tokens')
-      .insert({
-        'user_id': userID,
-        'token_hash': token,
-        'expires_at': expiresAt,
-        'created_at': createdAt,
-      });
-    
-    if (error) {
-      throw new ConflictError(error.message);
-    }
-  }
-
-  /**
-   * 
-   * @param token 
-   * @returns 
-   */
-  public static async find( token: string ) {
-    const { data, error } = await supabase
-      .from('password_reset_tokens')
-      .select('*')
-      .eq('token_hash', token)
-      .single();
-  
-    if (error) {
-      throw new RecordNotFound('Token is not valid.');
-    }
-  
-    delete data['created_at'];
-  
-    return data as unknown as Token;
-  }
-
-  /**
-   * 
-   * @param token 
-   */
-  public static verify( token: Token ) {
-    const isExpired = token.expires_at! < new Date();
-
-    if (!token.isavailable) {
-      throw new InvalidCredentials('Token already used.');
-    }
-
-    if (isExpired) {
-      throw new InvalidCredentials('Token already expired.');
-    }
-  }
-
-  public static async verifyAccessToken(token: Token) {
-    const alg = config.signingAlg;
-    const spki = config.publicKey;
-
-    const pub = await importSPKI(spki, alg);
-
-    const { payload, protectedHeader } = await jwtVerify(
-      token.token_hash!,
-      pub, {
-        issuer: config.tokenIss,
-        audience: config.tokenAud
-      }
-    );
-
-    return payload;
-  }
-
-  public static async setUsed( tokenID: string ) {
-    const { data, error } = await supabase
-      .from('password_reset_tokens')
-      .update({ 'isavailable': false })
-      .eq('id', tokenID);
-
-    if (error) {
-      throw new RecordNotFound('Failed to update token.');
-    }
-  }
-
-  /**
-   * 
-   * @param tokenID 
-   */
-  public static async delete(tokenID: string) {
-    const { data, error } = await supabase
-      .from('password_reset_tokens')
-      .delete()
-      .eq('id', tokenID);
-    
-    if (error) {
-      throw new ErrorII('Failed to delete token.');
-    }
+  if (error) {
+    throw new ConflictError(error.message);
   }
 }
+
+/**
+ * 
+ * @param token 
+ * @returns 
+ */
+export const find = async ( token: string ) => {
+  const { data, error } = await supabase
+    .from('password_reset_tokens')
+    .select('*')
+    .eq('token_hash', token)
+    .single();
+
+  if (error) {
+    throw new RecordNotFound('Token is not valid.');
+  }
+
+  delete data['created_at'];
+
+  return data as unknown as Token;
+}
+
+/**
+ * 
+ * @param token 
+ */
+export const verify = ( token: Token ) => {
+  const isExpired = token.expires_at! < new Date();
+
+  if (!token.isavailable) {
+    throw new InvalidCredentials('Token already used.');
+  }
+
+  if (isExpired) {
+    throw new InvalidCredentials('Token already expired.');
+  }
+}
+
+export const verifyAccessToken = async (token: Token) => {
+  const alg = config.signingAlg;
+  const spki = config.publicKey;
+
+  const pub = await importSPKI(spki, alg);
+
+  const { payload, protectedHeader } = await jwtVerify(
+    token.token_hash!,
+    pub, {
+      issuer: config.tokenIss,
+      audience: config.tokenAud
+    }
+  );
+
+  return payload;
+}
+
+export const setUsed = async ( tokenID: string ) => {
+  const { data, error } = await supabase
+    .from('password_reset_tokens')
+    .update({ 'isavailable': false })
+    .eq('id', tokenID);
+
+  if (error) {
+    throw new RecordNotFound('Failed to update token.');
+  }
+}
+
+/**
+ * 
+ * @param tokenID 
+ */
+export const deleteToken = async (tokenID: string) => {
+  const { data, error } = await supabase
+    .from('password_reset_tokens')
+    .delete()
+    .eq('id', tokenID);
+  
+  if (error) {
+    throw new ErrorII('Failed to delete token.');
+  }
+}
+
