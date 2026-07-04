@@ -1,8 +1,8 @@
-import { MembershipServices } from '../organization/membership.services';
 import { NextFunction, Request, Response } from 'express';
 
 import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
+import * as MembershipServices from '../organization/membership.services';
 
 
 /**
