@@ -1,4 +1,5 @@
-import { InvalidCredentials } from "@/errors";
+import { supabase } from "@/config/db";
+import { ErrorII, InvalidCredentials } from "@/errors";
 import { BaseRepository } from "../base/base.repository";
 import { update as userUpdate } from "../user/user.services";
 
@@ -11,13 +12,17 @@ import {
   sanitizeObject 
 } from "@/utils/data.helpers";
 
-import { 
-  Brand, 
-  Founder, 
-  OrgMembershipParams, 
-  OrgParams, 
-  TableName 
+import {  
+  MembershipInsert,
+  OrgInsert, 
+  TableName, 
+  OrgUpdate,
+  BrandInsert,
+  FounderInsert,
+  BrandUpdate,
+  FounderUpdate
 } from "./organization.types";
+import { PostgrestError } from "@supabase/supabase-js";
 
 
 /**
@@ -28,32 +33,30 @@ import {
  * @param membership 
  */
 export const store = async (
-  org: OrgParams,
-  brands: Brand[],
-  founders: Founder[],
-  membership: OrgMembershipParams
+  userID: string,
+  org: OrgInsert,
+  brands: BrandInsert[],
+  founders: FounderInsert[],
+  membership: MembershipInsert
 ) => {
   // remove key-value pairs with null as value.
   const odata = sanitizeObject(org);
 
-  const orgDB = new BaseRepository(TableName.org);
-  const membershipDB = new BaseRepository(TableName.orgMem);
+  const { data, error } = await supabase
+    .from(TableName.org)
+    .insert(odata)
+    .select('id')
+    .single();
 
-  const rOrg = await orgDB.upsert(odata);
+  if (error) throw new ErrorII(error.message);
   
-  await saveRelations(
-    rOrg[0].id!,
+  await storeRelations(
+    data.id,
+    userID,
     brands,
-    founders
+    founders,
+    membership
   );
-  
-  const injectPair = { org_id: rOrg[0].id!};
-  const mdata = { ...membership, ...injectPair};
-  await membershipDB.upsert(mdata);
-
-  await userUpdate(mdata.user_id!, {
-    'default_org': rOrg[0].id!
-  });
 }
 
 /**
@@ -63,26 +66,24 @@ export const store = async (
  * @param founders 
  */
 export const update = async (
-  org: OrgParams,
-  brands: Brand[],
-  founders: Founder[]
+  orgID: string,
+  org: OrgUpdate,
+  brands: BrandUpdate[],
+  founders: FounderUpdate[]
 ) => {
-  if (!org.id && !org.org_name) {
-    throw new InvalidCredentials(
-      'ID and Organization name are required.'
-    );
-  }
-
   const odata = sanitizeObject(org);
-  const orgDB = new BaseRepository(TableName.org);
   
-  const rOrg = await orgDB.upsert(odata);
+  const { data, error } = await supabase
+    .from(TableName.org)
+    .update(odata)
+    .eq('id', orgID)
+    .select('id')
+    .single();
   
-  await saveRelations(
-    rOrg[0].id!,
-    brands,
-    founders
-  );
+  if (error) throw new ErrorII(error.message);
+
+  await updateRelations(data.id, brands);
+  await updateRelations(data.id, founders);
 }
 
 /**
@@ -133,22 +134,62 @@ export const deleteHandler = async (
  * @param brands 
  * @param founders 
  */
-export const saveRelations = async (
+// Check whether export is necessary
+const storeRelations = async (
   orgID: string,
-  brands: Brand[],
-  founders: Founder[]
+  userID: string,
+  brands: BrandInsert[],
+  founders: FounderInsert[],
+  membership: MembershipInsert
 ) => {
   const injectPair = { org_id: orgID };
 
   if (brands.length > 0) {
     const brandDB = new BaseRepository(TableName.brand);
     const bdata = injectPropertyIntoObjects(brands, injectPair);
-    await brandDB.upsert(bdata);
+    await brandDB.insert(bdata);
   }
   
   if (founders.length > 0) {
     const founderDB = new BaseRepository(TableName.founder);
     const fdata = injectPropertyIntoObjects(founders, injectPair);
-    await founderDB.upsert(fdata);
+    await founderDB.insert(fdata);
+  }
+
+  if (membership) {  
+    const mdata = { ...membership, ...injectPair};
+    const membershipDB = new BaseRepository(TableName.orgMem);
+    
+    await membershipDB.insert(mdata);
+    await userUpdate(userID, {
+      'default_org': orgID
+    });
+  }
+}
+
+const updateRelations = async <T extends Record<string, any>> (
+  orgID: string,
+  records: T[]
+) => {
+  if (records.length <= 0) return;
+
+  const results = await Promise.allSettled(
+    records.map(record => {
+      supabase
+        .from(TableName.brand)
+        .update({
+          ...record,
+          org_id: orgID
+        })
+        .eq('id', record.id)
+    })
+  );
+
+  const failed = results.filter(
+    (r): r is PromiseRejectedResult => r.status === "rejected"
+  );
+
+  if (failed.length > 0) {
+    throw new ErrorII(`Some updates failed: ${failed}`);
   }
 }

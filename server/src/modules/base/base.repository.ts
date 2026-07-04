@@ -32,6 +32,19 @@ export class BaseRepository {
     throw new ErrorII(error.message);
   }
 
+  public async insert<T extends Record<string, any>>(
+    record: T | T[]
+  ) {
+    const { data, error } = await supabase
+      .from(this.table)
+      .insert(record as any)
+      .select();
+
+    if (!error) return data;
+
+    throw new ErrorII(error.message);
+  }
+
   /**
    * 
    * @param record 

@@ -2,7 +2,8 @@ import { supabase } from "@/config/db";
 import { BaseRepository } from "../base/base.repository";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { 
-  OrgMembershipParams, 
+  MembershipSelect, 
+  MembershipUpdate, 
   TableName 
 } from "./organization.types";
 import { 
@@ -131,7 +132,7 @@ export const findAllMembers = async (
  * @param employmentDate 
  * @returns 
  */
-export const store = async <K extends keyof OrgMembershipParams>(
+export const store = async <K extends keyof MembershipSelect>(
   orgID: string,
   userID: string,
   ...selectFields: K[]
@@ -153,7 +154,7 @@ export const store = async <K extends keyof OrgMembershipParams>(
     .select(slctStr)
     .single();
 
-  if (!error) return data as unknown as Pick<OrgMembershipParams, K>;
+  if (!error) return data as unknown as Pick<MembershipSelect, K>;
 
   throw new InvalidCredentials(
     'Failed to store organization membership.'
@@ -166,16 +167,25 @@ export const store = async <K extends keyof OrgMembershipParams>(
  * @returns 
  */
 export const update = async ( 
-  org: OrgMembershipParams 
+  orgMemID: string,
+  orgID: string,
+  org: MembershipUpdate
 ) => {
-  const orgDB = new BaseRepository(TableName.orgMem);
-
   org.updated_at = new Date();
 
   const odata = sanitizeObject(org);
-  const data = await orgDB.upsert(odata);
 
-  return data;
+  const { data, error } = await supabase
+    .from(TableName.orgMem)
+    .update(odata)
+    .eq('id', orgMemID)
+    .eq('org_id', orgID)
+    .select('*')
+    .single();
+
+  if (!error) return data;
+
+  throw new ErrorII(error.message);
 }
 
 export const deleteMembership = async ( memberID: any ) => {
