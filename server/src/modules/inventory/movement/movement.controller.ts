@@ -1,8 +1,6 @@
-import { canAccessUser } from "@/modules/base/base.services";
-import { NextFunction, Request, Response } from "express";
-import { PassThrough } from "node:stream";
 import { MovementServices } from "./movement.services";
 import { MovementInsert, MovementUpdate } from "./movement.types";
+import { NextFunction, Request, Response } from "express";
 
 
 export class MovementController {
@@ -59,9 +57,11 @@ export class MovementController {
     next: NextFunction
   ) {
     try {
+      const id = req.params.id!;
+      const branchID = req.branch?.id!;
       const movement = req.body;
 
-      await MovementServices.update(movement);
+      await MovementServices.update(id, branchID, movement);
 
       res.status(201).json({
         'success': true,
@@ -79,7 +79,7 @@ export class MovementController {
     next: NextFunction
   ) {
     try {
-      const { id } = req.body;
+      const id = req.params.id!;
 
       await MovementServices.delete(id);
 

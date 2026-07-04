@@ -11,13 +11,13 @@ movementRouter.get('/',
   MovementController.get
 );
 
-movementRouter.put('/', 
+movementRouter.post('/', 
   verifyToken,
   verifyPermission('insert.'),
   MovementController.store
 );
 
-movementRouter.patch('/',
+movementRouter.patch('/:id',
   verifyToken,
   verifyPermission('update.'),
   MovementController.update

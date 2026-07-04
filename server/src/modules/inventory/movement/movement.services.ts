@@ -38,17 +38,28 @@ export class MovementServices {
     }
 
     const db = new BaseRepository('inventory_movements');
-    await db.upsert(data);
+    await db.store(data);
   }
 
-  public static async update( movement: MovementUpdate ) {
-    const data = {
+  public static async update( 
+    id: string,
+    branchID: string,
+    movement: MovementUpdate 
+  ) {
+    const idata = {
       ...sanitizeObject(movement),
       'updated_at': new Date()
     }
 
-    const db = new BaseRepository('inventory_movements');
-    await db.upsert(data);
+    const { data, error } = await supabase
+      .from('inventory_movements')
+      .update(idata)
+      .eq('id', id)
+      .eq('branch_id', branchID);
+
+    if (!error) return;
+
+    throw new ErrorII(error.message);
   }
 
   public static async delete( id: string ) {
