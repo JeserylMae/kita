@@ -11,7 +11,6 @@ export interface ProductInsert {
 }
 
 export interface ProductUpdate {
-  id: string;
   name?: string; 
   brand?: string;
   category_id?: string;
@@ -35,9 +34,7 @@ export interface VariantInsert {
   barcode?: string;
 }
 
-// add updated_at
 export interface VariantUpdate {
-  id: string;
   item_code?: string;
   sku?: string;
   color?: string;

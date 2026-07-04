@@ -12,19 +12,19 @@ productRouter.get('/',
   ProductController.getAll
 );
 
-productRouter.put('/',
+productRouter.post('/',
   verifyToken,
   verifyPermission('insert.orgprd'),
   ProductController.store
 );
 
-productRouter.patch('/', 
+productRouter.patch('/:id', 
   verifyToken,
   verifyPermission('update.orgprd'),
   ProductController.update
 );
 
-productRouter.patch('/variant',
+productRouter.patch('/variant/:id',
   verifyToken,
   verifyPermission('update.prdvar'),
   ProductController.updateVariant 
@@ -36,7 +36,7 @@ productRouter.delete('/:id',
   ProductController.delete
 );
 
-productRouter.delete('/:id/variant',
+productRouter.delete('/variant/:id',
   verifyToken,
   verifyPermission('delete.prdvar'),
   ProductController.deleteVariant

@@ -1,7 +1,6 @@
-import { canAccessUser } from "@/modules/base/base.services";
-import { NextFunction, Request, Response } from "express";
 import { ProductServices } from "./product.services";
 import { ProductUpdate, VariantUpdate } from "./product.types";
+import { NextFunction, Request, Response } from "express";
 
 
 type UpdateBody = ProductUpdate | VariantUpdate;
@@ -13,10 +12,7 @@ export class ProductController {
     next: NextFunction
   ) {
     try {
-      const pscope = req.scopes;
       const orgID = req.org?.id;
-
-      if (!canAccessUser(pscope)) return;
 
       const products = await ProductServices.getAll(orgID!);
 
@@ -37,12 +33,9 @@ export class ProductController {
     next: NextFunction
   ) {
     try {
-      const pscope = req.scopes;
       const orgID = req.org?.id;
       const orgMemID = req.org?.orgmemID;
       const { product, variants } = req.body;
-      
-      if (!canAccessUser(pscope)) return;
 
       await ProductServices.store(
         product,
@@ -95,12 +88,11 @@ export class ProductController {
       next: NextFunction
     ) => {
       try {
-        const pscope = req.scopes;
         const data = req.body;
+        const id = req.params.id!;
+        const orgID = req.org?.id!;
 
-        if (!canAccessUser(pscope)) return;
-
-        await ProductServices.update(data, table);
+        await ProductServices.update(id, orgID, data, table);
 
         res.status(200).json({
           success: true,
@@ -122,10 +114,7 @@ export class ProductController {
       next: NextFunction
     ) => {
       try {
-        const pscope = req.scopes;
-        const { id } = req.body;
-
-        if (!canAccessUser(pscope)) return;
+        const id = req.params.id!;
 
         await ProductServices.delete(id, table);
 
