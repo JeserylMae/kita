@@ -1,10 +1,10 @@
-import { BrcParams } from "./branch.types";
 import { TableName } from "../organization/organization.types";
 import { createAccessToken} from "../token/token.services";
 import { InvalidCredentials } from "@/errors";
 import { NextFunction, Request, Response } from "express";
 
 import * as BranchServices from "./branch.services";
+import { BranchUpdate, MemberUpdate } from "./branch.types";
 
 
 /**
@@ -20,9 +20,16 @@ export const create = async (
   next: NextFunction 
 ) => {
   try {
-    const { branch, brcmem } = req.body;
+    const orgID = req.org?.id!;
+    const orgMemID = req.org?.orgmemID!;
+    const { branch, roleID } = req.body;
 
-    await BranchServices.storeBranch(branch, brcmem);
+    await BranchServices.storeBranch(
+      orgID,
+      orgMemID,
+      roleID,
+      branch
+    );
 
     res.status(201).json({
       'success': true,
@@ -46,13 +53,9 @@ export const findMembers = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id;
-
-    if (typeof id !== 'string') {
-      throw new InvalidCredentials(
-        'ID must be a string.'
-      );
-    }
+    // Note: the passed id in the params are used for validation
+    // whether req.branch.id === req.params.id
+    const id = req.branch?.id!;
 
     const data = await BranchServices.findMembers(id);
 
@@ -119,13 +122,11 @@ export const selectBranch = async (
  * @returns 
  */
 export const update = (
-  req: Request,
+  req: Request<any, any, BranchUpdate>,
   res: Response,
   next: NextFunction 
 ) => {
-  return save(
-    req, res, next, 'update'
-  );
+  return save(req, res, next);
 }
 
 /**
@@ -136,13 +137,11 @@ export const update = (
  * @returns 
  */
 export const updateMember = (
-  req: Request,
+  req: Request<any, any, MemberUpdate>,
   res: Response,
   next: NextFunction
 ) => {
-  return save(
-    req, res, next, 'update', TableName.branchMem
-  );
+  return save(req, res, next, TableName.branchMem);
 }
 
 /**
@@ -187,27 +186,21 @@ export const deleteMember = (
  * @param action 
  */
 const save = async (
-  req: Request<any, any, BrcParams>,
+  req: Request<any, any, BranchUpdate | MemberUpdate>,
   res: Response,
   next: NextFunction,
-  action: 'create' | 'update',
   table: TableName = TableName.branch
 ) => {
   try {
-    const branch = req.body;
+    const id = req.params.id;
+    const record = req.body;
 
-    await BranchServices.save(
-      branch, 
-      table
-    );
+    await BranchServices
+      .save(id, record, table);
 
-    let message = action === 'create'
-      ? 'Branch was successfully created.'
-      : 'Branch was successfully updated.';
-
-    res.status(201).json({
+    res.status(200).json({
       'success': true,
-      'message': message
+      'message': 'Record was successfully updated.'
     });
   }
   catch (error:unknown) {
