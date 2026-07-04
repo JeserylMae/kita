@@ -1,6 +1,10 @@
+import * as AuthController from './auth.controllers';
+
 import { Router } from 'express';
-import AuthController from './auth.controllers';
-import { requireGuest, verifyToken } from '@/middleware/auth.middleware';
+import { 
+  requireGuest, 
+  verifyToken 
+} from '@/middleware/auth.middleware';
 
 
 const userRouter = Router();
