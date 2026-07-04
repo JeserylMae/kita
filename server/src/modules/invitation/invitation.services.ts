@@ -1,8 +1,8 @@
 import { supabase } from "@/config/db";
 import { sendEmail } from "../email/email.services";
-import { BranchServices } from "../branch/branch.services";
 import { inviteTemplate } from "@/utils/template.helper";
 import { BaseRepository } from "../base/base.repository";
+import { storeMembership } from "../branch/branch.services";
 
 import { 
   ErrorII,
@@ -157,7 +157,7 @@ export const respond = async (
       'id'
     );
 
-    await BranchServices.storeMembership(
+    await storeMembership(
       invitation.branch_id!,
       org.id!,
       invitation.role_id!

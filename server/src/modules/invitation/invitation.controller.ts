@@ -1,4 +1,4 @@
-import { BranchServices } from '../branch/branch.services';
+import { findMembership } from '../branch/branch.services';
 import { InvalidCredentials } from '@/errors';
 
 import { 
@@ -129,7 +129,7 @@ export const getInvitations = async (
       );
     }
 
-    const invitations = await BranchServices.findMembership(
+    const invitations = await findMembership(
       orgMemID,
       'org_mem_id',
       false
