@@ -43,23 +43,29 @@ export class ItemsServices {
 
   public static async store( 
     item: ItemInsert,
-    createdBy?: string 
+    createdBy: string 
   ) {
     const idata = { 
       ...item, 
       current_quantity: item.init_quantity, 
-      status: 'in stock'
-    }
-
-    if (createdBy) {
-      idata.created_by = createdBy;
+      status: 'in stock',
+      created_by: createdBy
     }
     
-    const db = new BaseRepository('inventory_items');
-    await db.upsert(idata);
+    const { data, error } = await supabase
+      .from('inventory_items')
+      .insert(idata);
+
+    if (!error) return;
+
+    throw new ErrorII(error.message);
   }
 
-  public static async update( item: ItemUpdate ) {
+  public static async update( 
+    itemID: string,
+    branchID: string,
+    item: ItemUpdate 
+  ) {
     const obj = sanitizeObject(item);
     const idata = { 
       ...obj,
@@ -68,10 +74,9 @@ export class ItemsServices {
     
     const { data, error } = await supabase
       .from('inventory_items')
-      .upsert(idata, {
-        onConflict: 'id,branch_id',
-        ignoreDuplicates: true
-      });
+      .update(idata)
+      .eq('id', itemID)
+      .eq('branch_id', branchID);
     
     if (!error) return;
 

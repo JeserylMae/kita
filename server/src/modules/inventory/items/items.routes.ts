@@ -5,7 +5,7 @@ import { ItemsController } from "./items.controller";
 
 const itemRouter = Router();
 
-itemRouter.put('/',
+itemRouter.post('/',
   verifyToken,
   verifyPermission('insert.invtitm'),
   ItemsController.create
@@ -17,7 +17,7 @@ itemRouter.get('/',
   ItemsController.get
 );
 
-itemRouter.patch('/',
+itemRouter.patch('/:id',
   verifyToken,
   verifyPermission('update.invtitm'),
   ItemsController.update

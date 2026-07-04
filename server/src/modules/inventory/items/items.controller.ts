@@ -1,8 +1,7 @@
-import { ItemInsert, ItemUpdate } from "./items.types";
 import { ItemsServices } from "./items.services";
-import { canAccessUser } from "../base/base.services";
-import { NextFunction, Request, Response } from "express";
 import { InvalidCredentials } from "@/errors";
+import { ItemInsert, ItemUpdate } from "./items.types";
+import { NextFunction, Request, Response } from "express";
 
 
 export class ItemsController {
@@ -12,16 +11,10 @@ export class ItemsController {
     next: NextFunction
   ) {
     try {
-      const pscope = req.scopes;
       const item = req.body;
+      const userID = req.user?.id!;
 
-      if (!canAccessUser(pscope)) return;
-
-      if (!item.created_by) {
-        item.created_by = req.user?.id!;
-      }
-
-      await ItemsServices.store(item);
+      await ItemsServices.store(item, userID);
 
       res.status(201).json({
         'success': true,
@@ -34,16 +27,13 @@ export class ItemsController {
   }
 
   public static async get(
-    req: Request<any, any, ItemInsert>,
+    req: Request,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const pscope = req.scopes;
-      const branchID = req.branch?.id!;
       const orgID = req.org?.id!;
-
-      if (!canAccessUser(pscope)) return;
+      const branchID = req.branch?.id!;
 
       if (typeof branchID === null
         || typeof orgID === null
@@ -53,7 +43,8 @@ export class ItemsController {
         );
       }
 
-      const items = await ItemsServices.getAllItems(branchID, orgID);
+      const items = await ItemsServices
+        .getAllItems(branchID, orgID);
 
       res.status(200).json({
         'success': true,
@@ -72,12 +63,11 @@ export class ItemsController {
     next: NextFunction
   ) {
     try {
-      const pscope = req.scopes;
       const item = req.body;
+      const itemID = req.params.id!;
+      const branchID = req.branch?.id!;
 
-      if (!canAccessUser(pscope)) return;
-
-      await ItemsServices.update(item);
+      await ItemsServices.update(itemID, branchID, item);
 
       res.status(201).json({
         'success': true,
@@ -95,16 +85,7 @@ export class ItemsController {
     next: NextFunction
   ) {
     try { 
-      const id = req.params.id;
-      const pscope = req.scopes;
-
-      if (!canAccessUser(pscope)) return;
-
-      if (typeof id !== 'string') {
-        throw new InvalidCredentials(
-          'Invalid inventory item ID.'
-        );
-      }
+      const id = req.params.id!;
 
       await ItemsServices.delete(id);
 

@@ -7,7 +7,7 @@ declare global {
         sid: string;
         role: string;
       };
-      scopes?: string[],
+      scopes?: string;
     }
   }
 }

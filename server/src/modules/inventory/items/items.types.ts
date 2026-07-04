@@ -11,12 +11,9 @@ export interface ItemInsert {
   unit_price: number;
   expiry_date: Date;
   remarks?: string;
-  created_by?: string;
 }
 
 export interface ItemUpdate {
-  id: string;
-  branch_id: string;
   product_variant_id?: string;
   item_code?: string;
   batch_code?: string;
