@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
-import { ItemsController } from "./items.controller";
+import * as ItemsController from "./items.controller";
 
 
 const itemRouter = Router();
@@ -26,7 +26,7 @@ itemRouter.patch('/:id',
 itemRouter.delete('/:id',
   verifyToken,
   verifyPermission('delete.invtitm'),
-  ItemsController.delete
+  ItemsController.deletItem
 );
 
 export default itemRouter;
