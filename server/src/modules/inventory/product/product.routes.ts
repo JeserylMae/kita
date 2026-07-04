@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { ProductServices } from './product.services';
-import { ProductController } from './product.controller';
+import * as ProductController from './product.controller';
 import { verifyPermission, verifyToken } from '@/middleware/auth.middleware';
 
 
@@ -33,7 +32,7 @@ productRouter.patch('/variant/:id',
 productRouter.delete('/:id',
   verifyToken,
   verifyPermission('delete.orgprd'),
-  ProductController.delete
+  ProductController.deleteProduct
 );
 
 productRouter.delete('/variant/:id',
