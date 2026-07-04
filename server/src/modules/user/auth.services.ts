@@ -1,12 +1,12 @@
 import { hash } from '@node-rs/argon2';
 import { supabase } from '@/config/db';
 import { v4 as uuidv4 } from "uuid";
-import { TokenServices } from '../token/token.services';
 import { PermissionInfo } from './user.types';
-import { SessionServices } from '../token/sessions.services';
 import { AccountNotVerified, ErrorII } from "@/errors";
 
 import * as UserServices from './user.services';
+import * as TokenServices from '../token/token.services';
+import * as SessionServices from '../token/sessions.services';
 import * as PasswordServices from './password.services';
 
 
@@ -103,7 +103,7 @@ export const resetPassword = async (
 
   const user = await UserServices.findByEmail(email, 'id');
   
-  await TokenServices.delete(tokenData.id!);
+  await TokenServices.deleteToken(tokenData.id!);
 
   const hashedPassword = await hash(newPassword);
   await UserServices.update(
@@ -125,7 +125,7 @@ export const logout = async (
   const session = await SessionServices
     .find(sessionID);
 
-  await SessionServices.delete(session.id!);
+  await SessionServices.deleteSession(session.id!);
 }
 
 export const getPermissionInfo =  async ( 
