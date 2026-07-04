@@ -1,4 +1,4 @@
-import { User } from "./user.types";
+import { UserUpdate } from "./user.types";
 import { UserServices } from "./user.services";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { InvalidCredentials } from "@/errors";
@@ -39,22 +39,21 @@ export class UserController {
    * @param next 
    */
   public static async update ( 
-    req: Request<{}, {}, User>, 
+    req: Request<any, any, UserUpdate>, 
     res: Response,
     next: NextFunction 
   ) {
     try {
+      const userID = req.params.id;
       const user = req.body;
       
       // @TODO: Move this to middleware.
-      if (!user.id) throw new InvalidCredentials(
+      if (userID) throw new InvalidCredentials(
         'User ID is a required field.'
       );
-      const id = user.id;
-      delete user.id;
 
       const userData = sanitizeObject(user);
-      await UserServices.update(id, userData);
+      await UserServices.update(userID, userData);
 
       res.status(201).json({
         'success': true,

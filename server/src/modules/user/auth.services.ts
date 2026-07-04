@@ -1,22 +1,17 @@
 import { hash } from '@node-rs/argon2';
+import { supabase } from '@/config/db';
 import { v4 as uuidv4 } from "uuid";
 import { UserServices } from './user.services';
 import { TokenServices } from '../token/token.services';
+import { PermissionInfo } from './user.types';
+import { SessionServices } from '../token/sessions.services';
 import { PasswordServices } from './password.services';
 import { AccountNotVerified, ErrorII } from "@/errors";
-import { SessionServices } from '../token/sessions.services';
-import { supabase } from '@/config/db';
-
 
 // @TODO: add role validation via middleware
 
-type PermissionInfo = {
-  role: string;
-  scope: string;
-};
-
-const permissionsCache: Record<string, PermissionInfo[]> = {};
 const rolesCache: Record<string, string[]> = {}; 
+const permissionsCache: Record<string, PermissionInfo[]> = {};
 
 export class AuthServices {
   /**
@@ -35,8 +30,7 @@ export class AuthServices {
     const success = await UserServices.insert({
       auth_id: uuidv4(),
       email: email, 
-      password: hashedPassword,
-      updated_at: new Date(),
+      password: hashedPassword
     });
 
     return success;

@@ -5,7 +5,10 @@ import { requireGuest, verifyToken } from '@/middleware/auth.middleware';
 
 const userRouter = Router();
 
-userRouter.post('/signup', AuthController.signup);
+userRouter.post('/signup', 
+  AuthController.signup
+);
+
 userRouter.post(
   '/signin', 
   requireGuest,
@@ -18,7 +21,12 @@ userRouter.post(
   AuthController.logout
 );
 
-userRouter.post('/reset-password', AuthController.resetPassword);
-userRouter.post('/forgot-password', AuthController.requestForgotPassword);
+userRouter.post('/reset-password', 
+  AuthController.resetPassword
+);
+
+userRouter.post('/forgot-password', 
+  AuthController.requestForgotPassword
+);
 
 export default userRouter;

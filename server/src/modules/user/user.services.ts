@@ -1,7 +1,7 @@
-import { User } from "./user.types";
 import { supabase } from "@/config/db";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { ConflictError, RecordNotFound } from "@/errors";
+import { UserSelect, UserInsert, UserUpdate } from "./user.types";
 
 export class UserServices {
   /**
@@ -9,7 +9,7 @@ export class UserServices {
    * @param user 
    * @returns 
    */
-  public static async insert( user: User ) {
+  public static async insert( user: UserInsert ) {
     const userData = sanitizeObject(user);
 
     const { data, error } = await supabase
@@ -31,7 +31,7 @@ export class UserServices {
    * @param fields 
    * @returns 
    */
-  public static async findByEmail<K extends keyof User>( 
+  public static async findByEmail<K extends keyof UserSelect>( 
     email: string, 
     ...fields: (K | '*')[]
   ) {
@@ -45,7 +45,7 @@ export class UserServices {
       .eq('email', email)
       .single();
 
-    if ( !error ) return data as unknown as Pick<User, K>;
+    if ( !error ) return data as unknown as Pick<UserSelect, K>;
 
     throw new RecordNotFound(
       `Account with email ${email} does not exist`
@@ -59,9 +59,12 @@ export class UserServices {
    */
   public static async update( 
     id: string, 
-    user: User 
+    user: UserUpdate
   ) {
-    const userData = sanitizeObject(user);
+    const userData = {
+      ...sanitizeObject(user),
+      updated_at: new Date()
+    };
 
     const { data, error } = await supabase
       .from('users')
