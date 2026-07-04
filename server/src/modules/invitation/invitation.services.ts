@@ -157,11 +157,12 @@ export const respond = async (
       'id'
     );
 
-    await storeMembership(
-      invitation.branch_id!,
-      org.id!,
-      invitation.role_id!
-    );
+    await storeMembership({
+      branch_id: invitation.branch_id!,
+      org_mem_id: org.id!,
+      role_id: invitation.role_id!,
+      status: invitation.status
+    });
   }
 
   await invDB.upsert({
