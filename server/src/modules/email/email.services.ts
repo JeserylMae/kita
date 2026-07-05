@@ -1,5 +1,9 @@
+import fs from 'fs';
+import path from 'path';
 import config from "@/config";
 import { Resend } from "resend";
+import Handlebars from "handlebars";
+import { InviteEmailParams } from "@/modules/organization/organization.types";
 
 
 /**
@@ -24,3 +28,13 @@ export const sendEmail = async (
   })
   return data;
 }
+
+
+const inviteSource = fs.readFileSync(
+  path.join(process.cwd(), "templates/invite.html"),
+  "utf-8"
+);
+
+const template = Handlebars.compile<InviteEmailParams>(inviteSource);
+
+export const renderInvite = ( data: InviteEmailParams ) => template(data);
