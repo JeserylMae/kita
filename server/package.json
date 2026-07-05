@@ -19,6 +19,7 @@
     "dotenv": "^17.4.2",
     "escape-html": "^1.0.3",
     "express": "^5.2.1",
+    "handlebars": "^4.7.9",
     "jose": "^6.2.3",
     "resend": "^6.14.0",
     "uuid": "^14.0.0"
