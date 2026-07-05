@@ -12,6 +12,24 @@ import {
 } from "@/errors";
 
 
+export const isUserInOrg = async (
+  orgID: string,
+  userID: string
+) => {
+  const { data, error } = await supabase
+    .from(TableName.orgMem)
+    .select('id')
+    .eq('org_id', orgID)
+    .eq('user_id', userID)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return !!data;
+};
+
 export const findRole = async ( 
   userID: string,
   defaultOrg: string 
