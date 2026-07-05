@@ -80,19 +80,19 @@
     </div>
 
     <h1>
-      You're Invited to Join <strong class="gradient-text">${{orgName}}</strong>
+      You're Invited to Join <strong class="gradient-text">{{orgName}}</strong>
     </h1>
 
     <div class="container">
-      <p>${{senderEmail}} has invited you to join <strong>${{orgName}}</strong>.</p>
+      <p>{{senderEmail}} has invited you to join <strong>{{orgName}}</strong>.</p>
       <p>You have been assigned the following access:</p>
       <ul>
-        <li><strong>Branch:</strong> ${{branchName}}</li>
-        <li><strong>Role:</strong> ${{roleName}}</li>
+        <li><strong>Branch:</strong>{{branchName}}</li>
+        <li><strong>Role:</strong>{{roleName}}</li>
       </ul>
       
       <p style="margin: 1.5rem 0rem;">
-        <a href="${invite.acceptURL}" 
+        <a href="{{acceptURL}}" 
         style="text-decoration: none; 
           color: white; 
           padding: 0.7rem; 
@@ -101,7 +101,7 @@
           <strong>Accept Invitation</strong></a>
       </p>
 
-      <p>This invitation will expire on <strong>${{expirationDate}}</strong>.</p>
+      <p>This invitation will expire on <strong>{{expirationDate}}</strong>.</p>
       <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
     </div>
   </div>
