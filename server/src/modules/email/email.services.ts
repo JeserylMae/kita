@@ -1,5 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 import config from "@/config";
 import { Resend } from "resend";
+import Handlebars from "handlebars";
+import { InviteEmailParams } from "@/modules/organization/organization.types";
+import { verifyEmail } from '../user/user.types';
 
 
 /**
@@ -24,3 +29,21 @@ export const sendEmail = async (
   })
   return data;
 }
+
+
+const inviteSource = fs.readFileSync(
+  path.join(process.cwd(), "templates/invite.html"),
+  "utf-8"
+);
+
+const verifyEmailSource = fs.readFileSync(
+  path.join(process.cwd(), "templates/invite.html"),
+  "utf-8"
+);
+
+const iTemplate = Handlebars.compile<InviteEmailParams>(inviteSource);
+const veTemplate = Handlebars.compile<verifyEmail>(verifyEmailSource);
+
+
+export const renderInvite = ( data: InviteEmailParams ) => iTemplate(data);
+export const renderVerifyEmail = ( data: verifyEmail ) => veTemplate(data);

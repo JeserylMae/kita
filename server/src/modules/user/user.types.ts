@@ -4,6 +4,11 @@ export type PermissionInfo = {
   scope: string;
 };
 
+export interface verifyEmail {
+  email: string;
+  acceptURL: string;
+}
+
 export interface UserSelect {
   id?: string;
   auth_id?: string;
@@ -29,6 +34,8 @@ export interface UserSelect {
 
   updated_at?: Date;
   verified_at?: Date;
+  verification_token?: string;
+  token_expires_at?: Date;
 }
 
 
@@ -51,6 +58,9 @@ export interface UserInsert {
 
   email: string;
   password: string;
+
+  verification_token: string;
+  token_expires_at: Date;
 }
 
 export interface UserUpdate {
@@ -73,5 +83,7 @@ export interface UserUpdate {
 
   default_org?: string;
   
-  verified_at?: Date;
+  verified_at?: Date;  
+  verification_token?: string;
+  token_expires_at?: Date;
 }
