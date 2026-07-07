@@ -1,8 +1,7 @@
 import { supabase } from "@/config/db";
-import { sendEmail } from "../email/email.services";
-import { inviteTemplate } from "@/utils/template.helper";
 import { BaseRepository } from "../base/base.repository";
 import { storeMembership } from "../branch/branch.services";
+import { renderInvite, sendEmail } from "../email/email.services";
 
 import { 
   ErrorII,
@@ -183,7 +182,7 @@ export const sendInviteEmail = async (
   invite: InviteEmailParams
 ) => {
   const subject = `Kita - You've Been Invited to Join ${invite.orgName}`;
-  const content = inviteTemplate(invite);
+  const content = renderInvite(invite);
 
   await sendEmail(receiverEmail, subject, content);
 }

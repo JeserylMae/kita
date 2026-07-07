@@ -14,6 +14,24 @@ import {
 
 
 
+export const isUserInBranch = async (
+  branchId: string,
+  userId: string
+) => {
+  const { data, error } = await supabase
+    .from('branch_members')
+    .select('id, organization_members!inner(user_id)')
+    .eq('branch_id', branchId)
+    .eq('organization_members.user_id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return !!data;
+};
+
 export const findRole = async ( 
   orgMemID: string,
   branchID: string, 
