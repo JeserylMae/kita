@@ -1,8 +1,16 @@
 import { decodeJwt } from "jose";
-import { ErrorII, InvalidCredentials } from "@/errors";
-import { NextFunction, Request, Response } from "express"
-import { TokenServices } from "@/modules/token/token.services";
-import { AuthServices } from "@/modules/user/auth.services";
+import { InvalidCredentials } from "@/errors";
+import { verifyAccessToken } from "@/modules/token/token.services";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response 
+} from "express"
+import { 
+  getRoleScope, 
+  getPermissionInfo 
+} from "@/modules/user/auth.services";
 
 
 const loadAccessToken = (
@@ -19,7 +27,6 @@ const loadAccessToken = (
   return { acsToken, claims };
 }
 
-
 export const verifyToken = async (
   req: Request,
   res: Response,
@@ -27,7 +34,7 @@ export const verifyToken = async (
 ) => {
   const { acsToken, claims } = loadAccessToken(req);
 
-  const payload = await TokenServices.verifyAccessToken({
+  const payload = await verifyAccessToken({
     token_hash: acsToken
   });
 
@@ -41,7 +48,16 @@ export const verifyToken = async (
 
   if ( typeof claims.sub !== 'string' 
     || typeof claims.sid !== 'string' 
-    || typeof claims.role !== 'string'
+    || typeof claims.corg !== null
+    || typeof claims.orgrole !== null
+    || typeof claims.orgmemid !== null
+    || typeof claims.branchid !== null
+    || typeof claims.branchrole !== null
+    || typeof claims.corg !== 'string'
+    || typeof claims.orgrole !== 'string'
+    || typeof claims.orgmemid !== 'string'
+    || typeof claims.branchid !== 'string'
+    || typeof claims.branchrole !== 'string'
   ) {
     throw new InvalidCredentials('Subject ID not found.');
   }
@@ -49,8 +65,16 @@ export const verifyToken = async (
   req.user = {
     id: claims.sub,
     sid: claims.sid,
-    role: claims.role,
   };
+  req.org = {
+    id: claims.corg,
+    role: claims.orgrole,
+    orgmemID: claims.orgmemid
+  }
+  req.branch = {
+    id: claims.branchid,
+    role: claims.branchrole
+  }
   next();
 }
 
@@ -61,9 +85,18 @@ export const verifyPermission = ( permission: string ) =>
     next: NextFunction
   ) => {
   try {
-    const role = req.user!.role
-    const pInfo = await AuthServices.getPermissionInfo(permission);
-    const scopes = AuthServices.getRoleScope(role, pInfo!);
+    const role = req.branch?.role 
+      ? req.branch.role
+      : req.org?.role === 'owner' ? 'super_admin' : null;
+    
+    if (!role) {
+      throw new InvalidCredentials(
+        'Cannot perform action. User has insufficient permission.'
+      );
+    }
+
+    const pInfo = await getPermissionInfo(permission);
+    const scopes = await getRoleScope(role, pInfo!);
 
     if (!scopes || scopes.length <= 0) {
       throw new InvalidCredentials('Unauthorized user.');
@@ -77,7 +110,6 @@ export const verifyPermission = ( permission: string ) =>
     next(error);
   }
 };
-
 
 export const requireGuest = (
     req: Request,

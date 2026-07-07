@@ -82,11 +82,10 @@ export interface OrgParams {
 export interface OrgMembershipParams {
   id?: string;
   org_id?: string;
-  user_id?: string;
-  invitation_id?: string;
+  user_id?: string;   
   status?: string;
   employee_code?: string;
   employment_date?: Date;
-  is_default_org?: boolean;
+  role?: 'owner' | 'admin' | 'member';
   updated_at?: Date;
 }
