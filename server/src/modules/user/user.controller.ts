@@ -17,9 +17,13 @@ export const me = async (
   next: NextFunction 
 ) => {
   try {
-    const { email } = req.body;
+    const userID = req.user?.id;
 
-    const user = await UserServices.findByEmail(email, '*');
+    if (!userID) { 
+      throw new InvalidCredentials('Invalid user ID.');
+    }
+
+    const user = await UserServices.me(userID);
 
     res.status(200).json({
       'success': true,

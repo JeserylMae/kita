@@ -54,6 +54,20 @@ export const findByEmail = async <K extends keyof UserSelect>(
   );
 }
 
+export const me = async ( id: string ) => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (!error) return data;
+
+  throw new RecordNotFound(
+    'Account does not exists.'
+  );
+}
+
 /**
  * 
  * @param id 
