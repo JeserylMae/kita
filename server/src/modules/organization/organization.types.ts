@@ -52,37 +52,75 @@ export interface InviteEmailParams {
   acceptURL: string;
 }
 
-export interface Founder {
-  id?: string;
+export interface BrandInsert {
+  org_id: string;
+  name: string;
+}
+
+export interface BrandUpdate {
+  id: string;
+  org_id: string;
+  name: string;
+}
+
+export interface FounderInsert {
   firstname: string;
   middlename?: string | null;
   lastname: string;
   suffix?: string | null;
 }
 
-export interface Brand {
-  id?: string;
-  org_id: string;
-  name: string;
+export interface FounderUpdate {
+  id: string;
+  firstname?: string;
+  middlename?: string | null;
+  lastname?: string;
+  suffix?: string | null;
 }
 
-export interface OrgParams {
-  id?: string;
+export interface OrgInsert {
   org_name: string;
-  icon: string;
-  hex_color: string;
-  status: string;
-  founded: Date;
-  headquarters: string;
-  address: string;
-  website: string;
-  industry: string;
+  icon?: string;
+  hex_color?: string;
+  status?: string;
+  founded?: Date;
+  headquarters?: string;
+  address?: string;
+  website?: string;
+  industry?: string;
 }
 
-export interface OrgMembershipParams {
+export interface OrgUpdate {
+  org_name?: string;
+  icon?: string;
+  hex_color?: string;
+  status?: string;
+  founded?: Date;
+  headquarters?: string;
+  address?: string;
+  website?: string;
+  industry?: string;
+}
+
+export interface MembershipSelect {
   id?: string;
   org_id?: string;
   user_id?: string;   
+  status?: string;
+  employee_code?: string;
+  employment_date?: Date;
+  role?: 'owner' | 'admin' | 'member';
+  updated_at?: Date;
+}
+
+export interface MembershipInsert {  
+  status: string;
+  employee_code?: string;
+  employment_date?: Date;
+  role?: 'owner' | 'admin' | 'member';
+}
+
+export interface MembershipUpdate {
   status?: string;
   employee_code?: string;
   employment_date?: Date;

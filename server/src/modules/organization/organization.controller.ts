@@ -1,5 +1,5 @@
 import { InvalidCredentials } from "@/errors";
-import { OrgMembershipParams, TableName } from "./organization.types";
+import { BrandUpdate, MembershipUpdate, OrgInsert, OrgUpdate, TableName } from "./organization.types";
 import { NextFunction, Request, Response } from "express";
 
 import * as MembershipServices from "./membership.services";
@@ -51,13 +51,9 @@ export const getMembers = async (
   next: NextFunction
 ) => {
   try {
-    const orgID = req.params.orgID;
-
-    if (typeof orgID !== 'string') {
-      throw new InvalidCredentials(
-        'Organization ID must be string.'
-      );
-    }
+    // Note: the passed id in the params are used for validation
+    // whether req.org.id === req.params.id
+    const orgID = req.org?.id!;
 
     const data = await MembershipServices
       .findAllMembers(orgID);
@@ -85,7 +81,31 @@ export const create = async (
   res: Response, 
   next: NextFunction
 ) => {
-  return save(req, res, next, 'create');
+  try {
+    const { 
+      organization, 
+      brands, 
+      founders, 
+      membership 
+    } = req.body;
+    const userID = req.user?.id;
+
+    await OrganizationService.store(
+      userID!,
+      organization,
+      brands,
+      founders,
+      membership
+    );
+
+    res.status(201).json({
+      'success': true,
+      'message': 'Organization created successfully.'
+    });
+  }
+  catch (error: unknown) {
+    next(error);
+  }
 }
 
 /**
@@ -96,11 +116,35 @@ export const create = async (
  * @returns 
  */
 export const update = async (
-  req: Request, 
+  req: Request,
   res: Response, 
   next: NextFunction
 ) => {
-  return save(req, res, next, 'update');
+  try {
+    const { 
+      organization, 
+      brands, 
+      founders
+    } = req.body;
+    // Note: the passed id in the params are used for validation
+    // whether req.org.id === req.params.id
+    const orgID = req.org?.id!;
+  
+    await OrganizationService.update(
+      orgID,
+      organization,
+      brands,
+      founders
+    );
+
+    res.status(201).json({
+      'success': true,
+      'message': 'Organization updated successfully.'
+    });
+  }
+  catch (error: unknown) {
+    next(error);
+  }
 }
 
 /**
@@ -110,14 +154,22 @@ export const update = async (
  * @param next 
  */
 export const updateMember = async (
-  req: Request<any, any, OrgMembershipParams>,
+  req: Request<any, any, MembershipUpdate>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    // Note: the passed id in the params are used for validation
+    // whether req.org.id === req.params.id
+    const orgID = req.org?.id!;
+    const orgMemID = req.params.id;
     const member = req.body;
 
-    await MembershipServices.update(member);
+    await MembershipServices.update(
+      orgMemID,
+      orgID,
+      member
+    );
 
     res.status(201).json({
       'success': true,
@@ -128,16 +180,6 @@ export const updateMember = async (
     next(error);
   }
 }
-
-/**
- * Returns delete handler
- */
-export const deleteFounder = () => createDeleteHandler( TableName.founder );
-
-/**
- * Returns delete handler
- */
-export const deleteBrand = () => createDeleteHandler( TableName.brand );
 
 /**
  * 
@@ -151,7 +193,7 @@ export const deleteOrg = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id;
+    const id = req.org?.id;
 
     if (typeof id !== 'string') {
       throw new InvalidCredentials(
@@ -198,56 +240,16 @@ export const deleteMember = async (
 }
 
 /**
- * 
- * @param req 
- * @param res 
- * @param next 
- * @param action 
- * @returns 
+ * Returns delete handler
  */
-const save = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-  action: 'create' | 'update'
-) => {
-  try {
-    let message = "";
-    const { 
-      organization, 
-      brands, 
-      founders, 
-      membership 
-    } = req.body;
+export const deleteFounder = () => 
+  createDeleteHandler( TableName.founder );
 
-    if (action === 'create') {
-      organization.role = 'owner';
-      
-      await OrganizationService.store(
-        organization,
-        brands,
-        founders,
-        membership
-      );
-      message = 'Organization created successfully.';
-    } 
-    else {
-      await OrganizationService.update(
-        organization,
-        brands,
-        founders
-      );
-      message = 'Organization updated successfully.';
-    }
-    
-    return res.status(200).json({
-      "success": true,
-      "message": message
-    });
-  } catch (error) {
-    next(error);
-  }
-}
+/**
+ * Returns delete handler
+ */
+export const deleteBrand = () => 
+  createDeleteHandler( TableName.brand );
 
 /**
  * 
@@ -262,9 +264,25 @@ const createDeleteHandler = async (
     res: Response,
     next: NextFunction
   ) => {
-    const { id } = req.body;
+    try {
+      const id = req.params.id;
+  
+      if (typeof id !== 'string') {
+        throw new InvalidCredentials(
+          'ID is not valid.'
+        );
+      }
+  
+      await OrganizationService
+        .deleteHandler( id, table, res, next );
 
-    await OrganizationService
-      .deleteHandler( id, table, res, next );
-  };
+      res.status(200).json({
+        'success': true,
+        'message': 'Record was deleted.'
+      });
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
 }

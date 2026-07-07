@@ -4,8 +4,8 @@ import { sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "../base/base.repository";
 
 import { 
-  BrcMemberParams, 
-  BrcParams 
+  BranchInsert, 
+  MemberInsert
 } from "./branch.types";
 import { 
   ErrorII, 
@@ -58,24 +58,14 @@ export const findRole = async (
  * @returns 
  */
 export const storeMembership = async (
-  branchID: string,
-  orgMemID: string,
-  roleID: string,
+  member: MemberInsert,
   ...selectFields: string[]
 ) => {
   const slctStr = selectFields.join(", ");
 
   const { data, error } = await supabase
     .from('branch_members')
-    .upsert({
-      'branch_id': branchID,
-      'org_mem_id': orgMemID,
-      'role_id': roleID,
-      'status': 'accepted'
-    }, {
-      onConflict: 'org_mem_id,branch_id',
-      ignoreDuplicates: true
-    })
+    .insert(member)
     .select(slctStr);
 
   if (!error) return data[0];
@@ -86,13 +76,30 @@ export const storeMembership = async (
 }
 
 export const storeBranch = async (
-  branch: BrcParams,
-  brcmem: BrcMemberParams
+  orgID: string,
+  orgMemID: string,
+  roleID: string,
+  branch: BranchInsert
 ) => {
-  const data = (await save(branch, TableName.branch))[0];
+  const bdata = {
+    ...sanitizeObject(branch),
+    'org_id': orgID
+  }
 
-  brcmem.branch_id = data.id;
-  await save(brcmem, TableName.branchMem);
+  const { data, error } = await supabase
+    .from(TableName.branch)
+    .insert(bdata)
+    .select('id')
+    .single();
+
+  if (error) throw new ErrorII(error.message);
+
+  await storeMembership({
+    branch_id: data.id,
+    org_mem_id: orgMemID,
+    role_id: roleID,
+    status: 'accepted'
+  })
 }
 
 /**
@@ -170,14 +177,17 @@ export const findMembers = async (
  * @returns 
  */
 export const save = async <T extends Record<string, any>>(
+  id: string,
   branch: T,
   table: TableName
 ) => {
-  const brcDB = new BaseRepository(table);
   const bdata = sanitizeObject(branch);
-
   bdata.updated_at = new Date();
-  const data = await brcDB.upsert(bdata);
+  
+  const { data, error } = await supabase
+    .from(table)
+    .update(bdata)
+    .eq('id', id);
   
   return data;
 }
