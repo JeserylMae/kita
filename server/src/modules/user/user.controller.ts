@@ -19,10 +19,6 @@ export const me = async (
   try {
     const userID = req.user?.id;
 
-    if (!userID) { 
-      throw new InvalidCredentials('Invalid user ID.');
-    }
-
     const user = await UserServices.me(userID);
 
     res.status(200).json({
@@ -52,8 +48,7 @@ export const update = async (
     const userID = req.params.id;
     const user = req.body;
     
-    // @TODO: Move this to middleware.
-    if (userID) throw new InvalidCredentials(
+    if (!userID) throw new InvalidCredentials(
       'User ID is a required field.'
     );
 
