@@ -1,8 +1,16 @@
 import { decodeJwt } from "jose";
 import { InvalidCredentials } from "@/errors";
-import { NextFunction, Request, Response } from "express"
-import { TokenServices } from "@/modules/token/token.services";
-import { AuthServices } from "@/modules/user/auth.services";
+import { verifyAccessToken } from "@/modules/token/token.services";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response 
+} from "express"
+import { 
+  getRoleScope, 
+  getPermissionInfo 
+} from "@/modules/user/auth.services";
 
 
 const loadAccessToken = (
@@ -19,7 +27,6 @@ const loadAccessToken = (
   return { acsToken, claims };
 }
 
-
 export const verifyToken = async (
   req: Request,
   res: Response,
@@ -27,7 +34,7 @@ export const verifyToken = async (
 ) => {
   const { acsToken, claims } = loadAccessToken(req);
 
-  const payload = await TokenServices.verifyAccessToken({
+  const payload = await verifyAccessToken({
     token_hash: acsToken
   });
 
@@ -88,8 +95,8 @@ export const verifyPermission = ( permission: string ) =>
       );
     }
 
-    const pInfo = await AuthServices.getPermissionInfo(permission);
-    const scopes = AuthServices.getRoleScope(role, pInfo!);
+    const pInfo = await getPermissionInfo(permission);
+    const scopes = await getRoleScope(role, pInfo!);
 
     if (!scopes || scopes.length <= 0) {
       throw new InvalidCredentials('Unauthorized user.');
@@ -103,35 +110,6 @@ export const verifyPermission = ( permission: string ) =>
     next(error);
   }
 };
-
-export const verifyScope = ( requiredScope: string[] ) =>
-async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try { 
-    const usrScope = req.scopes;
-
-    const errMsg = 'You do not have sufficient permissions for this operation.'
-
-    if (!usrScope) {
-      throw new InvalidCredentials(errMsg);
-    }
-
-    const hasScope = requiredScope.every(scope => 
-      usrScope.includes(scope));
-
-    if (!hasScope) {
-      throw new InvalidCredentials(errMsg);
-    }
-
-    next();
-  } 
-  catch (error: unknown) {
-    next(error);
-  } 
-}
 
 export const requireGuest = (
     req: Request,
