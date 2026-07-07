@@ -85,6 +85,9 @@ export const verifyPermission = ( permission: string ) =>
     next: NextFunction
   ) => {
   try {
+    // If user is not yet member of any branch 
+    // and user's organization role is owner
+    // role is super_admin
     const role = req.branch?.role 
       ? req.branch.role
       : req.org?.role === 'owner' ? 'super_admin' : null;
