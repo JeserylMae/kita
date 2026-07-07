@@ -24,12 +24,11 @@ export const loader = ({ app }: Params) => {
   app.use('/organization', organizationRouter);
   app.use('/invitation', invitationRouter);
   app.use('/branch', branchRouter);
-  app.use('/inventory/movement', movementRouter);
-  app.use('/product', productRouter);
   
   app.use('/inventory/items', itemRouter);
-
-  app.use('transaction', txnRouter);
+  app.use('/product', productRouter);
+  app.use('/inventory/movement', movementRouter);
+  app.use('/transaction', txnRouter);
 
   app.use(ErrorMiddleware.handleError);
 

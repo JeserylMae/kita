@@ -23,7 +23,8 @@ export class BaseRepository {
 
     let query = supabase
       .from(this.table)
-      .select(slctStr);
+      .select(slctStr)
+      .eq('org_id', orgID);
 
     const { data, error } = await query;
 
