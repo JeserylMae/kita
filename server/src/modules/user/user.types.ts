@@ -1,6 +1,15 @@
 
+export type PermissionInfo = {
+  role: string;
+  scope: string;
+};
 
-export interface User {
+export interface verifyEmail {
+  email: string;
+  acceptURL: string;
+}
+
+export interface UserSelect {
   id?: string;
   auth_id?: string;
   
@@ -25,4 +34,56 @@ export interface User {
 
   updated_at?: Date;
   verified_at?: Date;
+  verification_token?: string;
+  token_expires_at?: Date;
+}
+
+
+export interface UserInsert {  
+  auth_id: string;
+
+  firstname?: string;
+  middlename?: string;
+  lastname?: string;
+  suffix?: string;
+
+  house_number?: string;
+  street?: string;
+  barangay?: string;
+  city?: string;
+  province?: string;
+  region?: string;
+
+  birthdate?: Date;
+
+  email: string;
+  password: string;
+
+  verification_token: string;
+  token_expires_at: Date;
+}
+
+export interface UserUpdate {
+  firstname?: string;
+  middlename?: string;
+  lastname?: string;
+  suffix?: string;
+
+  house_number?: string;
+  street?: string;
+  barangay?: string;
+  city?: string;
+  province?: string;
+  region?: string;
+
+  birthdate?: Date;
+
+  email?: string;
+  password?: string;
+
+  default_org?: string;
+  
+  verified_at?: Date;  
+  verification_token?: string;
+  token_expires_at?: Date;
 }

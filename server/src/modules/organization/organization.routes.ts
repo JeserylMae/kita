@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { OrganizationController } from "./organization.controller";
 import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
+
+import * as OrganizationController from "./organization.controller";
 
 
 const organizationRouter = Router();

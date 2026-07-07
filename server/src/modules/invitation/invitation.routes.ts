@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { InvitationController } from "./invitation.controller";
+import * as InvitationController from "./invitation.controller";
 
 
 const invitationRouter = Router();
@@ -26,7 +26,7 @@ invitationRouter.get('/:id',
 
 // /invitation/idstr
 invitationRouter.delete('/:id',
-  InvitationController.delete
+  InvitationController.deleteInvitation
 );
 
 export default invitationRouter;

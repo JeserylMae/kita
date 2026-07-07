@@ -1,46 +1,45 @@
 import { verify }   from "@node-rs/argon2";
 import { sendEmail } from "../email/email.services";
-import { UserServices } from "./user.services";
 import { resetPwdTemplate } from "@/utils/template.helper";
 import { ErrorII, InvalidCredentials } from "@/errors";
 
+import * as UserServices from "./user.services";
 
-export class PasswordServices {
-  /**
-   * 
-   * @param email 
-   * @param password 
-   * @returns 
-   */
-  public static async verifyPassword(
-    email: string, 
-    password: string
-  ) {
-    const user = await UserServices
-      .findByEmail(email, 'password');    
 
-    if ( await verify( user.password!, password ))
-      return true;
-    
-    throw new InvalidCredentials('Incorrect password.');
+/**
+ * 
+ * @param email 
+ * @param password 
+ * @returns 
+ */
+export const verifyPassword = async (
+  email: string, 
+  password: string
+) => {
+  const user = await UserServices
+    .findByEmail(email, 'password');    
+
+  if ( await verify( user.password!, password ))
+    return true;
+  
+  throw new InvalidCredentials('Incorrect password.');
+}
+
+/**
+ * 
+ * @param usrEmail 
+ */
+export const sendResetEmail = async (
+  userEmail: string, 
+  resetURL: string
+) => {
+  const mailData = await sendEmail(
+    userEmail,
+    'Kita - Forget Account Password',
+    resetPwdTemplate(resetURL)
+  );
+  
+  if (mailData) {
+    throw new ErrorII('Failed to send email.');
   }
-
-  /**
-   * 
-   * @param usrEmail 
-   */
-  public static async sendResetEmail(
-    userEmail: string, 
-    resetURL: string
-  ) {
-    const mailData = await sendEmail(
-      userEmail,
-      'Kita - Forget Account Password',
-      resetPwdTemplate(resetURL)
-    );
-    
-    if (mailData) {
-      throw new ErrorII('Failed to send email.');
-    }
-  }
-} 
+}
