@@ -23,6 +23,13 @@ export class AccountNotVerified extends ErrorII {
   }
 }
 
+export class Forbidden extends ErrorII {
+  constructor( message: string ) {
+    super( message, 403 );
+    this.name = 'Forbidden';
+  }
+}
+
 export class InvalidCredentials extends ErrorII {
   constructor( message: string ) {
     super( message, 401 );

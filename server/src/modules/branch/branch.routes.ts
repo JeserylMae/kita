@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { BranchController } from "./branch.controller";
 import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
+
+import * as BranchController from "./branch.controller";
 
 
 const branchRouter = Router();
@@ -37,7 +38,7 @@ branchRouter.patch('/member/',
 branchRouter.delete('/:id',
   verifyToken,
   verifyPermission('delete.brc'),
-  BranchController.delete
+  BranchController.deleteBranch
 );
 
 branchRouter.delete('/member/:id',
