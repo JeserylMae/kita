@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
+import { InvalidCredentials } from '@/errors';
 
 
 /**
@@ -17,10 +18,10 @@ export const signup = async (
   next: NextFunction 
 ) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, url } = req.body;
 
     const success = await AuthServices
-      .signup(email, password);
+      .signup(email, password, url);
 
     return res.status(201).json({ 
       'success': success,
@@ -82,6 +83,53 @@ export const signin = async (
     });
   }
   catch ( error: unknown ) {
+    next(error);
+  }
+}
+
+export const verifyEmail = async (
+  req: Request, 
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+    const token = req.query.token;
+
+    if (typeof token !== 'string') {
+      throw new InvalidCredentials('Invalid token');
+    }
+
+    await AuthServices.verifyEmail(email, token);
+
+    res.status(200).json({
+      'success': true,
+      'message': 'If an unverified account exists for ' +
+        'this email a verification email has been sent.'
+    });
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const resendEmailVerification = async (
+  req: Request, 
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, acceptURL} = req.body;
+
+    await AuthServices.resendVerificationEmail(email, acceptURL);
+
+    res.status(200).json({
+      'success': true,
+      'message': 'If an unverified account exists for ' +
+        'this email a new verification email has been sent.'
+    });
+  }
+  catch (error: unknown) {
     next(error);
   }
 }

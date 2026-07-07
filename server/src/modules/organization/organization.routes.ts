@@ -6,13 +6,13 @@ import * as OrganizationController from "./organization.controller";
 
 const organizationRouter = Router();
 
-organizationRouter.get('/memberships',
+organizationRouter.get('/memberships/me',
   verifyToken,
   verifyPermission('select.orgmem'),
   OrganizationController.getOrganizations
 );
 
-organizationRouter.get('/:orgID',
+organizationRouter.get('/:id',
   verifyToken,
   verifyPermission('select.orgmem'),
   OrganizationController.getMembers
@@ -23,13 +23,13 @@ organizationRouter.post('/',
   OrganizationController.create
 );
 
-organizationRouter.patch('/',
+organizationRouter.patch('/:id',
   verifyToken,
   verifyPermission('update.org'),
   OrganizationController.update
 )
 
-organizationRouter.patch('/member',
+organizationRouter.patch('/:orgID/member/:id',
   verifyToken,
   verifyPermission('update.orgmem'),
   OrganizationController.updateMember
@@ -47,7 +47,7 @@ organizationRouter.delete('/brand/:id',
   OrganizationController.deleteBrand
 );
 
-organizationRouter.delete('/:id',
+organizationRouter.delete('/',
   verifyToken,
   verifyPermission('delete.org'),
   OrganizationController.deleteOrg

@@ -2,12 +2,14 @@ import { hash } from '@node-rs/argon2';
 import { supabase } from '@/config/db';
 import { v4 as uuidv4 } from "uuid";
 import { PermissionInfo } from './user.types';
-import { AccountNotVerified, ErrorII } from "@/errors";
+import { AccountNotVerified, ConflictError, ErrorII, InvalidCredentials } from "@/errors";
 
 import * as UserServices from './user.services';
 import * as TokenServices from '../token/token.services';
 import * as SessionServices from '../token/sessions.services';
 import * as PasswordServices from './password.services';
+import { renderVerifyEmail, sendEmail } from '../email/email.services';
+import { getDateAfterInterval } from '@/utils/data.helpers';
 
 
 // @TODO: add role validation via middleware
@@ -25,14 +27,26 @@ const permissionsCache: Record<string, PermissionInfo[]> = {};
 export const signup = async (
   email: string, 
   password: string, 
+  url: string
 ): Promise<boolean> => {
   const hashedPassword = await hash(password);
+
+  const token = TokenServices.createToken();
+  const expiresAt = getDateAfterInterval(new Date(), '24h');
   
   const success = await UserServices.insert({
     auth_id: uuidv4(),
     email: email, 
-    password: hashedPassword
+    password: hashedPassword,
+    verification_token: token,
+    token_expires_at: expiresAt
   });
+
+  if (!success) {
+    throw new ErrorII('Sign up failed.');
+  }
+
+  await sendVerificationEmail(email, token, url);
 
   return success;
 }
@@ -66,6 +80,75 @@ export const signin = async (
     .verifyPassword( email, password );
 
   return (pwdVerified) ? user : null;
+}
+
+/**
+ * 
+ * @param email 
+ * @param token 
+ */
+export const verifyEmail = async (
+  email: string,
+  token: string
+) => {
+  const user = await UserServices.findByEmail(
+    email, 
+    'id', 
+    'verification_token', 
+    'token_expires_at'
+  );
+
+  if (!user.id) {
+    throw new InvalidCredentials(
+      'Failed to accept verification.'
+    );
+  }
+
+  if (!user.token_expires_at 
+    || user.token_expires_at < new Date()) {
+    throw new InvalidCredentials('Token has expired.');
+  }
+
+  if (!user.verification_token
+    || user.verification_token !== token) {
+    throw new InvalidCredentials('Invalid token.');
+  }
+
+  UserServices.update(user.id, {
+    verified_at: new Date()
+  })
+}
+
+export const resendVerificationEmail =  async (
+  email: string,
+  url: string
+) => {
+  const user = await UserServices.findByEmail(
+    email,
+    'id',
+    'verified_at',
+    'token_expires_at'
+);
+
+  if (!user.id || user.token_expires_at! > new Date()) {
+    throw new InvalidCredentials(
+      'Failed to resend verification.'
+    );
+  }
+
+  if (user.verified_at) {
+    throw new ConflictError('Account was already verified.');
+  }
+
+  const token = TokenServices.createToken();
+  const expiresAt = getDateAfterInterval(new Date(), '24h');
+
+  await UserServices.update(user.id, {
+    token_expires_at: expiresAt,
+    verification_token: token
+  });
+
+  await sendVerificationEmail(email, token, url);
 }
 
 /**
@@ -162,4 +245,21 @@ export const getRoleScope = async (
   rolesCache[role] = scopes;
 
   return scopes;
+}
+
+const sendVerificationEmail = async (
+  email: string,
+  token: string,
+  acceptURL: string
+) => {
+  const content = renderVerifyEmail({
+    email: email,
+    acceptURL: `${acceptURL}?token=${token}`
+  });
+
+  await sendEmail(
+    email, 
+    'Kita - Verify your email', 
+    content
+  );
 }

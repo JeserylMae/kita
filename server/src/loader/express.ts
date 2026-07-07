@@ -6,6 +6,9 @@ import organizationRouter from '@/modules/organization/organization.routes';
 import invitationRouter from '@/modules/invitation/invitation.routes';
 import branchRouter from '@/modules/branch/branch.routes';
 import txnRouter from '@/modules/inventory/transaction/transaction.routes';
+import movementRouter from '@/modules/inventory/movement/movement.routes';
+import productRouter from '@/modules/inventory/product/product.routes';
+import itemRouter from '@/modules/inventory/items/items.routes';
 
 
 interface Params {
@@ -21,6 +24,10 @@ export const loader = ({ app }: Params) => {
   app.use('/organization', organizationRouter);
   app.use('/invitation', invitationRouter);
   app.use('/branch', branchRouter);
+  app.use('/inventory/movement', movementRouter);
+  app.use('/product', productRouter);
+  
+  app.use('/inventory/items', itemRouter);
 
   app.use('transaction', txnRouter);
 

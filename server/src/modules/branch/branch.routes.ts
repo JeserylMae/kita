@@ -6,7 +6,7 @@ import * as BranchController from "./branch.controller";
 
 const branchRouter = Router();
 
-branchRouter.put('/',
+branchRouter.post('/',
   verifyToken,
   verifyPermission('insert.brc'),
   BranchController.create
@@ -18,18 +18,18 @@ branchRouter.get('/member/:id',
   BranchController.findMembers
 );
 
-branchRouter.get('/',
+branchRouter.get('/:id',
   verifyToken,
   BranchController.selectBranch
 );
 
-branchRouter.patch('/',
+branchRouter.patch('/:id',
   verifyToken,
   verifyPermission('update.brc'),
   BranchController.update
 );
 
-branchRouter.patch('/member/',
+branchRouter.patch('/member/:id',
   verifyToken,
   verifyPermission('update.brcmem'),
   BranchController.updateMember
