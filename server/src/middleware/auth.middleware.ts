@@ -11,7 +11,16 @@ import {
   getRoleScope, 
   getPermissionInfo 
 } from "@/modules/user/auth.services";
-import { AuthRequest, BrcRequest, OrgRequest } from "@/config/types";
+import { 
+  AuthRequest, 
+  BrcRequest, 
+  OrgRequest 
+} from "@/config/types";
+import { 
+  assertAuth, 
+  assertOrg, 
+  assertBrc 
+} from "@/modules/base/base.services";
 
 
 
@@ -79,11 +88,13 @@ export const requireAuth = async (
 }
 
 export const requireOrg = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertAuth(req);
+
     const claims = req.context.user.claims;
 
     if ( typeof claims.corg !== 'string'
@@ -107,11 +118,13 @@ export const requireOrg = (
 }
 
 export const requireBrc = (
-  req: OrgRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertOrg(req);
+
     const claims = req.context.user.claims;
 
     if ( typeof claims.brcid !== 'string'
@@ -133,11 +146,13 @@ export const requireBrc = (
 }
 
 export const verifyOrgPermission = async (
-  req: BrcRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try{
+    assertBrc(req);
+
     const role = req.context.org.role;
 
     if ( role !== 'owner' && role !== 'admin') {
@@ -153,11 +168,13 @@ export const verifyOrgPermission = async (
 
 export const verifyBrcPermission = ( permission: string ) =>{
   async (
-    req: BrcRequest,
+    req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      assertBrc(req);
+      
       const role = req.context.brc.role;
 
       const pInfo = await getPermissionInfo(permission);

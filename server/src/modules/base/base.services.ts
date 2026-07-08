@@ -1,7 +1,11 @@
+import { Request } from "express";
 import { ErrorII } from "@/errors";
 import { EnumName } from "./base.types";
 import { supabase } from "@/config/db";
+import { Forbidden } from "@/errors";
 import { TableName } from "../organization/organization.types";
+import { AuthRequest, BrcRequest, OrgRequest } from "@/config/types";
+
 
 export const getEnum = async ( name: EnumName ) => {
   const { data, error } = await supabase
@@ -34,3 +38,21 @@ export const doesRecordExist = async (
 
   return (count ?? 0) > 0;
 };
+
+export function assertAuth(req: Request): asserts req is AuthRequest {
+  if (!(req as Partial<AuthRequest>).context?.user) {
+    throw new Forbidden("Authentication required");
+  }
+}
+
+export function assertOrg(req: Request): asserts req is OrgRequest {
+  if (!(req as Partial<OrgRequest>).context?.org) {
+    throw new Forbidden("Organization required");
+  }
+}
+
+export function assertBrc(req: Request): asserts req is BrcRequest {
+  if (!(req as Partial<BrcRequest>).context?.brc) {
+    throw new Forbidden("Branch required");
+  }
+}
