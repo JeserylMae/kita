@@ -33,7 +33,7 @@ export interface InvitationUpdate {
   status?: 'accepted' | 'rejected' | 're-invited';
 }
 
-export interface InvitationResponseParams {
+export interface InvitationResponse {
   id: string;
   org_id: string;
   branch_id: string;

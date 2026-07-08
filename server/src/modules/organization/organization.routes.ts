@@ -1,66 +1,72 @@
 import { Router } from "express";
-import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
 
 import * as OrganizationController from "./organization.controller";
+import { requireAuth, requireOrg, verifyOrgPermission } from "@/middleware/auth.middleware";
 
 
 const organizationRouter = Router();
 
 organizationRouter.get('/memberships/me',
-  verifyToken,
-  verifyPermission('select.orgmem'),
+  requireAuth,
   OrganizationController.getOrganizations
 );
 
 organizationRouter.get('/:id',
-  verifyToken,
-  verifyPermission('select.orgmem'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.getMembers
 );
 
 organizationRouter.get('/switch/:id', 
-  verifyToken,
+  requireAuth,
   OrganizationController.switchOrganization
 );
 
 organizationRouter.post('/',
-  verifyToken,
+  requireAuth,
   OrganizationController.create
 );
 
 organizationRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.org'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.update
 )
 
 organizationRouter.patch('/:orgID/member/:id',
-  verifyToken,
-  verifyPermission('update.orgmem'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.updateMember
 );
 
 organizationRouter.delete('/founder/:id',
-  verifyToken,
-  verifyPermission('delete.org'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.deleteFounder
 );
 
 organizationRouter.delete('/brand/:id',
-  verifyToken,
-  verifyPermission('delete.org'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.deleteBrand
 );
 
 organizationRouter.delete('/',
-  verifyToken,
-  verifyPermission('delete.org'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.deleteOrg
 );
 
 organizationRouter.delete('/member/:id',
-  verifyToken,
-  verifyPermission('delete.orgmem'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.deleteMember
 );
 
