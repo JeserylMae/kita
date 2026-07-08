@@ -1,31 +1,39 @@
 import { Router } from "express";
-import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
 import * as ItemsController from "./items.controller";
+import { requireAuth, requireBrc, requireOrg, verifyBrcPermission } from "@/middleware/auth.middleware";
 
 
 const itemRouter = Router();
 
 itemRouter.post('/',
-  verifyToken,
-  verifyPermission('insert.invtitm'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('insert.invtitm'),
   ItemsController.create
 );
 
 itemRouter.get('/',
-  verifyToken,
-  verifyPermission('select.invtitm'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('select.invtitm'),
   ItemsController.get
 );
 
 itemRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.invtitm'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('update.invtitm'),
   ItemsController.update
 );
 
 itemRouter.delete('/:id',
-  verifyToken,
-  verifyPermission('delete.invtitm'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('delete.invtitm'),
   ItemsController.deletItem
 );
 

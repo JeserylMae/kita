@@ -2,7 +2,6 @@
 
 export interface ItemInsert {
   product_variant_id: string;
-  branch_id: string;
   item_code: string;
   batch_code: string;
   init_quantity: number;
@@ -11,6 +10,7 @@ export interface ItemInsert {
   unit_price: number;
   expiry_date: Date;
   remarks?: string;
+  created_bt_name: string;
 }
 
 export interface ItemUpdate {

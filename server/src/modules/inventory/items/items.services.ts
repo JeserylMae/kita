@@ -42,13 +42,17 @@ export const getAllItems = async (
 
 export const store = async ( 
   item: ItemInsert,
-  createdBy: string 
+  branchID: string,
+  createdByID: string,
+  createdByRole: string
 ) => {
   const idata = { 
     ...item, 
     current_quantity: item.init_quantity, 
     status: 'in stock',
-    created_by: createdBy
+    branch_id: branchID,
+    created_by: createdByID,
+    created_by_role: createdByRole
   }
   
   const { data, error } = await supabase
