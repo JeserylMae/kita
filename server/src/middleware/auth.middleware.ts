@@ -114,15 +114,15 @@ export const requireBrc = (
   try {
     const claims = req.context.user.claims;
 
-    if ( typeof claims.branchid !== 'string'
-      || typeof claims.branchrole !== 'string'
+    if ( typeof claims.brcid !== 'string'
+      || typeof claims.brcrole !== 'string'
       || typeof claims.brcmemid !== 'string'
     ) {
       throw new Forbidden(ERROR_MSG);
     }
 
     (req as BrcRequest).context.brc = {
-      id: claims.brid,
+      id: claims.brcid,
       role: claims.brcrole,
       memID: claims.brcmemid
     }

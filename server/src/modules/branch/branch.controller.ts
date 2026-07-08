@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 
 import * as BranchServices from "./branch.services";
 import { BranchUpdate, MemberUpdate } from "./branch.types";
+import { accessTokenCookieOptions } from "@/config/types";
 
 
 /**
@@ -95,15 +96,13 @@ export const selectBranch = async (
       org?.role!,
       org?.orgmemID!,
       branchID,
-      brc?.role
+      brc?.roles[0]?.role,
+      brc?.id
     );
 
-    res.cookie('ACCESS-TOKEN', acsToken, {
-      httpOnly: true,
-      secure: true, 
-      sameSite: 'strict'
-    })
-    .status(200)
+    res.cookie('ACCESS-TOKEN', acsToken, 
+      accessTokenCookieOptions
+    ).status(200)
     .json({
       'success': true,
       'message': 'Branch selected',

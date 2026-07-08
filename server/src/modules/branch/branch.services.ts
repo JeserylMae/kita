@@ -38,12 +38,12 @@ export const findRole = async (
 ) => {
   const { data, error } = await supabase
     .from(TableName.branchMem)
-    .select('roles(role)')
+    .select('id, roles(role)')
     .eq('org_mem_id', orgMemID)
     .eq('branch_id', branchID)
     .single();
     
-  if(!error) return data?.roles[0] ?? null;
+  if(!error) return data;
 
   throw new ErrorII(error.message);
 }
