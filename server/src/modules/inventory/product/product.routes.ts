@@ -1,43 +1,49 @@
 import { Router } from 'express';
 import * as ProductController from './product.controller';
-import { verifyPermission, verifyToken } from '@/middleware/auth.middleware';
+import { requireAuth, requireOrg, verifyOrgPermission } from '@/middleware/auth.middleware';
 
 
 const productRouter = Router();
 
 productRouter.get('/',
-  verifyToken,
-  verifyPermission('select.orgprd'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.getAll
 );
 
 productRouter.post('/',
-  verifyToken,
-  verifyPermission('insert.orgprd'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.store
 );
 
 productRouter.patch('/:id', 
-  verifyToken,
-  verifyPermission('update.orgprd'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.update
 );
 
 productRouter.patch('/variant/:id',
-  verifyToken,
-  verifyPermission('update.prdvar'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.updateVariant 
 );
 
 productRouter.delete('/:id',
-  verifyToken,
-  verifyPermission('delete.orgprd'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.deleteProduct
 );
 
 productRouter.delete('/variant/:id',
-  verifyToken,
-  verifyPermission('delete.prdvar'),
+  requireAuth,
+  requireOrg,
+  verifyOrgPermission,
   ProductController.deleteVariant
 );
 
