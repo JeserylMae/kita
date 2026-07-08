@@ -42,6 +42,12 @@ interface BranchContext {
   scopes: string[];
 }
 
+export type TypedRequest<
+  Params = {},
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = {}
+> = Request<Params, ResBody, ReqBody, ReqQuery>;
 
 export type AuthRequest<
   Params = any,
