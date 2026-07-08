@@ -1,6 +1,9 @@
-import * as MovementServices from "./movement.services";
+import { IdParams } from "@/modules/base/base.types";
+import { assertBrc } from "@/modules/base/base.services";
 import { MovementInsert, MovementUpdate } from "./movement.types";
 import { NextFunction, Request, Response } from "express";
+
+import * as MovementServices from "./movement.services";
 
 
 export const get = async (
@@ -9,9 +12,11 @@ export const get = async (
   next: NextFunction
 ) => {
   try {
-    const branchID = req.branch?.id;
+    assertBrc(req);
 
-    const data = await MovementServices.getAll(branchID!);
+    const branchID = req.context.brc.id;
+
+    const data = await MovementServices.getAll(branchID);
 
     res.status(200).json({
       'success': true,
@@ -30,15 +35,14 @@ export const store = async (
   next: NextFunction
 ) => {
   try {
-    const movement = req.body;
-    const orgMemID = req.org?.orgmemID;
-    const branchID = req.branch?.id;
+    assertBrc(req);
 
-    await MovementServices.store(
-      movement,
-      orgMemID!,
-      branchID!
-    );
+    const movement = req.body;
+    const branchID = req.context.brc.id;
+    const orgMemID = req.context.org.memID;
+
+    await MovementServices
+      .store(movement, orgMemID, branchID);
 
     res.status(201).json({
       'success': true,
@@ -51,14 +55,16 @@ export const store = async (
 }
 
 export const update = async (
-  req: Request<any, any, MovementUpdate>,
+  req: Request<IdParams, any, MovementUpdate>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id!;
-    const branchID = req.branch?.id!;
+    assertBrc(req);
+
+    const id = req.params.id;
     const movement = req.body;
+    const branchID = req.context.brc.id;
 
     await MovementServices.update(id, branchID, movement);
 
@@ -73,12 +79,14 @@ export const update = async (
 }
 
 export const deleteMovement = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id!;
+    assertBrc(req);
+
+    const id = req.params.id;
 
     await MovementServices.deleteMovement(id);
 

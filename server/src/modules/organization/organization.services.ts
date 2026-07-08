@@ -67,23 +67,30 @@ export const store = async (
  */
 export const update = async (
   orgID: string,
-  org: OrgUpdate,
-  brands: BrandUpdate[],
-  founders: FounderUpdate[]
+  org?: OrgUpdate,
+  brands?: BrandUpdate[],
+  founders?: FounderUpdate[]
 ) => {
-  const odata = sanitizeObject(org);
-  
-  const { data, error } = await supabase
-    .from(TableName.org)
-    .update(odata)
-    .eq('id', orgID)
-    .select('id')
-    .single();
-  
-  if (error) throw new ErrorII(error.message);
+  if (org) {
+    const odata = sanitizeObject(org);
 
-  await updateRelations(data.id, brands);
-  await updateRelations(data.id, founders);
+    const { data, error } = await supabase
+      .from(TableName.org)
+      .update(odata)
+      .eq('id', orgID)
+      .select('id')
+      .single();
+
+    if (error) throw new ErrorII(error.message);
+  }
+  
+  if (brands) {
+    await updateRelations(orgID, brands);
+  }
+
+  if (founders) {
+    await updateRelations(orgID, founders);
+  }
 }
 
 /**

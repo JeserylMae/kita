@@ -1,28 +1,16 @@
+import * as z from 'zod';
+import { 
+  BranchInsertSchema, 
+  BranchUpdateSchema, 
+  MemberInsertSchema, 
+  MemberUpdateSchema 
+} from './branch.schemas';
 
-export interface MemberInsert {
-  branch_id: string;
-  org_mem_id: string;
-  role_id: string;
-  status: string;
-}
 
-export interface MemberUpdate {
-  role_id?: string;
-  status?: string;
-  starred?: boolean;
-}
+export type MemberInsert = z.infer<typeof MemberInsertSchema>;
 
-export interface BranchInsert {
-  branch_name: string;
-  icon?: string;
-  color?: string;
-  address?: string;
-}
+export type MemberUpdate = z.infer<typeof MemberUpdateSchema>;
 
-export interface BranchUpdate {
-  branch_name?: string;
-  icon?: string;
-  color?: string;
-  status?: string;
-  address?: string;
-}
+export type BranchInsert = z.infer<typeof BranchInsertSchema>; 
+
+export type BranchUpdate = z.infer<typeof BranchUpdateSchema>;

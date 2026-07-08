@@ -1,31 +1,52 @@
 import { Router } from "express";
-import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
+import { invtMiddlewares } from "../inventory.middlewares";
+
 import * as ItemsController from "./items.controller";
+
+import { 
+  validateBody, 
+  validateIdParams 
+} from "@/middleware/validation.middleware";
+
+import { 
+  ItemInsertSchema, 
+  ItemUpdateSchema 
+} from "./items.schemas";
+
+import { 
+  requireAuth, 
+  requireBrc, 
+  requireOrg
+} from "@/middleware/auth.middleware";
 
 
 const itemRouter = Router();
 
+itemRouter.use(requireAuth);
+itemRouter.use(requireOrg);
+itemRouter.use(requireBrc);
+
 itemRouter.post('/',
-  verifyToken,
-  verifyPermission('insert.invtitm'),
+  ...invtMiddlewares('insert.invtitm'),
+  validateBody(ItemInsertSchema),
   ItemsController.create
 );
 
 itemRouter.get('/',
-  verifyToken,
-  verifyPermission('select.invtitm'),
+  ...invtMiddlewares('select.invtitm'),
   ItemsController.get
 );
 
 itemRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.invtitm'),
+  ...invtMiddlewares('update.invtitm'),
+  validateIdParams,
+  validateBody(ItemUpdateSchema),
   ItemsController.update
 );
 
 itemRouter.delete('/:id',
-  verifyToken,
-  verifyPermission('delete.invtitm'),
+  ...invtMiddlewares('delete.invtitm'),
+  validateIdParams,
   ItemsController.deletItem
 );
 

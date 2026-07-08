@@ -1,11 +1,28 @@
+import { IdParams } from "../base/base.types";
+import { createAccessToken } from "../token/token.services";
 import { InvalidCredentials } from "@/errors";
-import { BrandUpdate, MembershipUpdate, OrgInsert, OrgUpdate, TableName } from "./organization.types";
-import { NextFunction, Request, Response } from "express";
+import { accessTokenCookieOptions } from "@/config/types.d";
 
 import * as MembershipServices from "./membership.services";
 import * as OrganizationService from "./organization.services";
-import { createAccessToken } from "../token/token.services";
-import { accessTokenCookieOptions } from "@/config/types";
+
+import { 
+  assertAuth, 
+  assertOrg 
+} from "../base/base.services";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response 
+} from "express";
+
+import { 
+  MembershipUpdate, 
+  OrgInsertRequest, 
+  OrgUpdateRequest, 
+  TableName 
+} from "./organization.types";
 
 
 /**
@@ -20,7 +37,9 @@ export const getOrganizations = async (
   next: NextFunction
 ) => {
   try {
-    const userID = req.user?.id;
+    assertAuth(req);
+
+    const userID = req.context.user.id;
     const withBranches = req.query.withBranches === 'true';
     const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
 
@@ -53,9 +72,11 @@ export const getMembers = async (
   next: NextFunction
 ) => {
   try {
+    assertOrg(req);
+
     // Note: the passed id in the params are used for validation
     // whether req.org.id === req.params.id
-    const orgID = req.org?.id!;
+    const orgID = req.context.org.id;
 
     const data = await MembershipServices
       .findAllMembers(orgID);
@@ -72,23 +93,22 @@ export const getMembers = async (
 }
 
 export const switchOrganization = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const orgID = req.params.id;
-    const userID = req.user.id;
+    assertAuth(req);
 
-    if (typeof orgID !== 'string') {
-      throw new InvalidCredentials('Invalid organization ID.');
-    }
+    const orgID = req.params.id;
+    const userID = req.context.user.id;
+    const sessionID = req.context.user.sid;
 
     const org = await MembershipServices.findRole(userID, orgID);
 
     const acsToken = await createAccessToken(
       { id: userID },
-      req.user.sid,
+      sessionID,
       orgID,
       org.roles[0]?.role,
       org.id
@@ -115,18 +135,20 @@ export const switchOrganization = async (
  * @returns 
  */
 export const create = async (
-  req: Request, 
+  req: Request<any, any, OrgInsertRequest>, 
   res: Response, 
   next: NextFunction
 ) => {
   try {
+    assertAuth(req);
+
     const { 
       organization, 
       brands, 
       founders, 
       membership 
     } = req.body;
-    const userID = req.user?.id;
+    const userID = req.context.user.id;
 
     await OrganizationService.store(
       userID!,
@@ -154,11 +176,13 @@ export const create = async (
  * @returns 
  */
 export const update = async (
-  req: Request,
+  req: Request<any, any, OrgUpdateRequest>,
   res: Response, 
   next: NextFunction
 ) => {
   try {
+    assertOrg(req);
+
     const { 
       organization, 
       brands, 
@@ -166,7 +190,7 @@ export const update = async (
     } = req.body;
     // Note: the passed id in the params are used for validation
     // whether req.org.id === req.params.id
-    const orgID = req.org?.id!;
+    const orgID = req.context.org.id;
   
     await OrganizationService.update(
       orgID,
@@ -192,14 +216,16 @@ export const update = async (
  * @param next 
  */
 export const updateMember = async (
-  req: Request<any, any, MembershipUpdate>,
+  req: Request<IdParams, any, MembershipUpdate>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertOrg(req);
+
     // Note: the passed id in the params are used for validation
     // whether req.org.id === req.params.id
-    const orgID = req.org?.id!;
+    const orgID = req.context.org.id;
     const orgMemID = req.params.id;
     const member = req.body;
 
@@ -231,7 +257,9 @@ export const deleteOrg = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.org?.id;
+    assertOrg(req);
+
+    const id = req.context.org.id;
 
     if (typeof id !== 'string') {
       throw new InvalidCredentials(
@@ -258,11 +286,13 @@ export const deleteOrg = async (
  * @param next 
  */
 export const deleteMember = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertAuth(req);
+
     const memberID = req.params.id;
 
     await MembershipServices.deleteMembership(memberID);
@@ -298,11 +328,13 @@ const createDeleteHandler = async (
   table: TableName
 ) => {
   return async (
-    req: Request,
+    req: Request<IdParams>,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      assertOrg(req);
+
       const id = req.params.id;
   
       if (typeof id !== 'string') {

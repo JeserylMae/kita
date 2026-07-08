@@ -14,7 +14,8 @@ import {
 import { 
   AuthRequest, 
   BrcRequest, 
-  OrgRequest 
+  OrgRequest, 
+  TypedRequest
 } from "@/config/types";
 import { 
   assertAuth, 
@@ -49,7 +50,7 @@ export const requireGuest = (
 }
 
 export const requireAuth = async (
-  req: Request,
+  req: TypedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -88,7 +89,7 @@ export const requireAuth = async (
 }
 
 export const requireOrg = (
-  req: Request,
+  req: TypedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -118,7 +119,7 @@ export const requireOrg = (
 }
 
 export const requireBrc = (
-  req: Request,
+  req: TypedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -146,7 +147,7 @@ export const requireBrc = (
 }
 
 export const verifyOrgPermission = async (
-  req: Request,
+  req: TypedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -166,9 +167,9 @@ export const verifyOrgPermission = async (
   }
 }
 
-export const verifyBrcPermission = ( permission: string ) =>{
-  async (
-    req: Request,
+export const verifyBrcPermission = ( permission: string ) => {
+  return async (
+    req: TypedRequest,
     res: Response,
     next: NextFunction
   ) => {

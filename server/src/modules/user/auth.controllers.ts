@@ -1,10 +1,12 @@
+import { assertAuth } from '../base/base.services';
+import { ResetPasswordParams, SignupParams } from './user.types';
+import { InvalidCredentials } from '@/errors';
+import { accessTokenCookieOptions } from '@/config/types.d';
 import { NextFunction, Request, Response } from 'express';
 
 import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
-import { InvalidCredentials } from '@/errors';
-import { accessTokenCookieOptions } from '@/config/types';
 
 
 /**
@@ -14,7 +16,7 @@ import { accessTokenCookieOptions } from '@/config/types';
  * @returns 
  */
 export const signup = async ( 
-  req: Request, 
+  req: Request<any, any, SignupParams>, 
   res: Response,
   next: NextFunction 
 ) => {
@@ -166,7 +168,7 @@ export const requestForgotPassword = async (
  * @param res 
  */
 export const resetPassword = async (
-  req: Request, 
+  req: Request<any, any, ResetPasswordParams>, 
   res: Response,
   next: NextFunction
 ) => {
@@ -198,7 +200,9 @@ export const logout = async (
   next: NextFunction
 ) => {
   try {
-    const sessionID = req.user?.sid;
+    assertAuth(req);
+    
+    const sessionID = req.context.user.id;
 
     await AuthServices.logout(sessionID!);
 

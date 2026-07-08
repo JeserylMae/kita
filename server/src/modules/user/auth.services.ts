@@ -39,7 +39,7 @@ export const signup = async (
     email: email, 
     password: hashedPassword,
     verification_token: token,
-    token_expires_at: expiresAt
+    token_expires_at: expiresAt.toISOString()
   });
 
   if (!success) {
@@ -115,7 +115,7 @@ export const verifyEmail = async (
   }
 
   UserServices.update(user.id, {
-    verified_at: new Date()
+    verified_at: new Date().toISOString()
   })
 }
 
@@ -144,7 +144,7 @@ export const resendVerificationEmail =  async (
   const expiresAt = getDateAfterInterval(new Date(), '24h');
 
   await UserServices.update(user.id, {
-    token_expires_at: expiresAt,
+    token_expires_at: expiresAt.toISOString(),
     verification_token: token
   });
 

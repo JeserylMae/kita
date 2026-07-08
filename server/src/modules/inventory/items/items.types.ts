@@ -1,28 +1,10 @@
+import * as z from 'zod';
+import { 
+  ItemInsertSchema, 
+  ItemUpdateSchema 
+} from './items.schemas';
 
 
-export interface ItemInsert {
-  product_variant_id: string;
-  branch_id: string;
-  item_code: string;
-  batch_code: string;
-  init_quantity: number;
-  reorder_level: number;
-  unit_cost: number   
-  unit_price: number;
-  expiry_date: Date;
-  remarks?: string;
-}
+export type ItemInsert = z.infer<typeof ItemInsertSchema>;
 
-export interface ItemUpdate {
-  product_variant_id?: string;
-  item_code?: string;
-  batch_code?: string;
-  init_quantity?: number;
-  current_quantity?: number;
-  reorder_level?: number;
-  unit_cost?: number   
-  unit_price?: number;
-  expiry_date?: Date;
-  status?: 'in stock' | 'low stock' | 'out of stock' | 'expired';
-  remarks?: string;
-}
+export type ItemUpdate = z.infer<typeof ItemUpdateSchema>;

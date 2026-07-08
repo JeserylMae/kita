@@ -1,4 +1,11 @@
+import * as z from 'zod';
 
+
+export const IdParamsSchema = z.object({
+  id: z.uuid()
+});
+
+export type IdParams = z.infer<typeof IdParamsSchema>;
 
 export enum EnumName {
   MovementType = 'movement_type_options',

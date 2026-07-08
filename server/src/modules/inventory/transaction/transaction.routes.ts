@@ -1,19 +1,30 @@
-import { verifyPermission, verifyToken } from "@/middleware/auth.middleware";
 import { Router } from "express";
+import { validateBody } from "@/middleware/validation.middleware";
+import { invtMiddlewares } from "../inventory.middlewares";
+import { QueryParamsSchema } from "./transaction.schemas";
 import { findAll, findDetails } from "./transaction.controller";
+
+import { 
+  requireAuth, 
+  requireBrc, 
+  requireOrg
+} from "@/middleware/auth.middleware";
 
 
 const txnRouter = Router();
 
+txnRouter.use(requireAuth);
+txnRouter.use(requireOrg);
+txnRouter.use(requireBrc);
+
 txnRouter.get('/',
-  verifyToken,
-  verifyPermission('select.txn'),
+  ...invtMiddlewares('select.txn'),
   findAll
 );
 
 txnRouter.get('/details',
-  verifyToken,
-  verifyPermission('select.txn'),
+  ...invtMiddlewares('select.txn'),
+  validateBody(QueryParamsSchema),
   findDetails
 );
 

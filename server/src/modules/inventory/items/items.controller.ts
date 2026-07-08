@@ -1,7 +1,9 @@
-import * as ItemsServices from "./items.services";
-import { InvalidCredentials } from "@/errors";
+import { IdParams } from "@/modules/base/base.types";
+import { assertBrc } from "@/modules/base/base.services";
 import { ItemInsert, ItemUpdate } from "./items.types";
 import { NextFunction, Request, Response } from "express";
+
+import * as ItemsServices from "./items.services";
 
 
 export const create = async (
@@ -10,10 +12,15 @@ export const create = async (
   next: NextFunction
 ) => {
   try {
-    const item = req.body;
-    const userID = req.user?.id!;
+    assertBrc(req);
 
-    await ItemsServices.store(item, userID);
+    const item = req.body;
+    const userID = req.context.user.id;
+    const branchID = req.context.brc.id;
+    const userRole = req.context.brc.role;
+
+    await ItemsServices
+      .store(item, branchID, userID, userRole);
 
     res.status(201).json({
       'success': true,
@@ -31,16 +38,10 @@ export const get = async (
   next: NextFunction
 ) => {
   try {
-    const orgID = req.org?.id!;
-    const branchID = req.branch?.id!;
+    assertBrc(req);
 
-    if (typeof branchID === null
-      || typeof orgID === null
-    ) {
-      throw new InvalidCredentials(
-        'Invalid access token.'
-      );
-    }
+    const orgID = req.context.org.id;
+    const branchID = req.context.brc.id;
 
     const items = await ItemsServices
       .getAllItems(branchID, orgID);
@@ -57,14 +58,16 @@ export const get = async (
 }
 
 export const update = async (
-  req: Request<any, any, ItemUpdate>,
+  req: Request<IdParams, any, ItemUpdate>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertBrc(req);
+
     const item = req.body;
-    const itemID = req.params.id!;
-    const branchID = req.branch?.id!;
+    const itemID = req.params.id;
+    const branchID = req.context.brc.id;
 
     await ItemsServices.update(itemID, branchID, item);
 
@@ -79,12 +82,14 @@ export const update = async (
 }
 
 export const deletItem = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try { 
-    const id = req.params.id!;
+    assertBrc(req);
+
+    const id = req.params.id;
 
     await ItemsServices.deleteItem(id);
 

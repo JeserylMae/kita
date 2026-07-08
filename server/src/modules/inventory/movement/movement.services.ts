@@ -37,7 +37,7 @@ export const store = async (
   }
 
   const db = new BaseRepository('inventory_movements');
-  await db.store(data);
+  await db.insert(data);
 }
 
 export const update = async ( 

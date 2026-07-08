@@ -1,17 +1,19 @@
+import { IdParams } from '../base/base.types';
 import { findMembership } from '../branch/branch.services';
-import { InvalidCredentials } from '@/errors';
+import { AuthRequest, BrcRequest } from '@/config/types';
 
 import { 
-  Request, 
+  Request,
   Response, 
   NextFunction 
 } from 'express';
 import { 
   InvitationParams, 
-  InvitationResponseParams 
+  InvitationResponse 
 } from '../organization/organization.types';
 
 import * as InvitationServices from './invitation.services';
+import { assertAuth, assertBrc } from '../base/base.services';
 
 
 /**
@@ -26,6 +28,8 @@ export const invite = async (
   next: NextFunction
 ) => {
   try {
+    assertBrc(req);
+
     const invitation  = req.body;
 
     await InvitationServices.createInvitation(invitation);
@@ -47,17 +51,15 @@ export const invite = async (
  * @param next 
  */
 export const respondToInvitation = async (
-  req: Request<any, any, InvitationResponseParams>,
+  req: Request<{token: string}, any, InvitationResponse>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertAuth(req);
+
     const invitation = req.body;
     const token = req.params.token;
-
-    if (typeof token !== 'string') {
-      throw new InvalidCredentials('Invalid token');
-    }
 
     await InvitationServices.respond( 
       invitation, token
@@ -80,19 +82,15 @@ export const respondToInvitation = async (
  * @param next 
  */
 export const reinvite = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    assertAuth(req);
+
     const inviteID = req.params.id;
     const { inviteURL } = req.body;
-
-    if (typeof inviteID !== 'string') {
-      throw new InvalidCredentials(
-        'Invalid invitation ID.'
-      );
-    }
 
     await InvitationServices.reInvite(
       inviteID,
@@ -116,18 +114,14 @@ export const reinvite = async (
  * @param next 
  */
 export const getInvitations = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const orgMemID = req.params.id;
+    assertBrc(req);
 
-    if (typeof orgMemID !== 'string') {
-      throw new InvalidCredentials(
-        'Invalid organization member id.'
-      );
-    }
+    const orgMemID = req.context.org.memID;
 
     const invitations = await findMembership(
       orgMemID,
@@ -147,18 +141,14 @@ export const getInvitations = async (
 }
 
 export const deleteInvitation = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const invID = req.params.id;
+    assertAuth(req);
 
-    if (typeof invID !== 'string') {
-      throw new InvalidCredentials(
-        'Invitation ID is not valid.'
-      );
-    }
+    const invID = req.params.id;
 
     await InvitationServices.deleteInvitation(invID);
 

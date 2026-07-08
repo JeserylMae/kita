@@ -2,26 +2,34 @@ import * as AuthController from './auth.controllers';
 import * as UserController from './user.controller';
 
 import { Router } from 'express';
-import * as authMiddleware from '@/middleware/auth.middleware';
+import {
+  requireGuest,
+  requireAuth,
+  verifyBrcPermission
+} from '@/middleware/auth.middleware';
+import { validateBody, validateIdParams } from '@/middleware/validation.middleware';
+import { ResetPasswordParamsSchema, SignupParamsSchema, UserUpdateSchema } from './user.schemas';
 
 
 const userRouter = Router();
 
 userRouter.post('/signup', 
+  validateBody(SignupParamsSchema),
   AuthController.signup
 );
 
 userRouter.post('/signin', 
-  authMiddleware.requireGuest,
+  requireGuest,
   AuthController.signin
 );
 
 userRouter.post('/logout', 
-  authMiddleware.verifyToken,
+  requireAuth,
   AuthController.logout
 );
 
 userRouter.post('/reset-password', 
+  validateBody(ResetPasswordParamsSchema),
   AuthController.resetPassword
 );
 
@@ -30,9 +38,17 @@ userRouter.post('/forgot-password',
 );
 
 userRouter.get('/me',
-  authMiddleware.verifyToken,
-  authMiddleware.verifyPermission,
+  requireAuth,
+  verifyBrcPermission('select.user'),
   UserController.me
-)
+);
+
+userRouter.patch('/:id',
+  requireAuth,
+  verifyBrcPermission('update.user'),
+  validateIdParams,
+  validateBody(UserUpdateSchema),
+  UserController.update
+);
 
 export default userRouter;

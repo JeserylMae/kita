@@ -1,9 +1,11 @@
 import { UserUpdate } from "./user.types";
 import { sanitizeObject } from "@/utils/data.helpers";
-import { InvalidCredentials } from "@/errors";
 import { NextFunction, Request, Response } from "express";
 
 import * as UserServices from "./user.services";
+import { AuthRequest } from "@/config/types";
+import { IdParams } from "../base/base.types";
+import { assertAuth } from "../base/base.services";
 
 
 /**
@@ -17,7 +19,9 @@ export const me = async (
   next: NextFunction 
 ) => {
   try {
-    const userID = req.user?.id;
+    assertAuth(req);
+
+    const userID = req.context.user.id;
 
     const user = await UserServices.me(userID);
 
@@ -40,17 +44,15 @@ export const me = async (
  * @param next 
  */
 export const update = async ( 
-  req: Request<any, any, UserUpdate>, 
+  req: Request<IdParams, any, UserUpdate>, 
   res: Response,
   next: NextFunction 
 ) => {
   try {
+    assertAuth(req);
+    
     const userID = req.params.id;
     const user = req.body;
-    
-    if (!userID) throw new InvalidCredentials(
-      'User ID is a required field.'
-    );
 
     const userData = sanitizeObject(user);
     await UserServices.update(userID, userData);

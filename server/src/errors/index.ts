@@ -44,6 +44,13 @@ export class RecordNotFound extends ErrorII {
   }
 }
 
+export class BadRequest extends ErrorII {
+  constructor( message: string ) {
+    super( message, 400 )
+    this.name = 'BadRequest';
+  }
+}
+
 interface ErrorParam {
   type: Error;
   message: string;

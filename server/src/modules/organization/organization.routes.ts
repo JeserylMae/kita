@@ -1,66 +1,86 @@
 import { Router } from "express";
-import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
 
 import * as OrganizationController from "./organization.controller";
 
+import { 
+  requireAuth, 
+  requireOrg, 
+  verifyOrgPermission 
+} from "@/middleware/auth.middleware";
+
+import { 
+  validateBody, 
+  validateIdParams 
+} from "@/middleware/validation.middleware";
+
+import { 
+  MembershipUpdateSchema, 
+  OrgInsertRequestSchema, 
+  OrgUpdateRequestSchema 
+} from "./organization.schemas";
+
+
+const orgMiddlewares = [
+  requireOrg,
+  verifyOrgPermission,
+  validateIdParams
+];
 
 const organizationRouter = Router();
 
+organizationRouter.use(requireAuth);
+
 organizationRouter.get('/memberships/me',
-  verifyToken,
-  verifyPermission('select.orgmem'),
   OrganizationController.getOrganizations
 );
 
 organizationRouter.get('/:id',
-  verifyToken,
-  verifyPermission('select.orgmem'),
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.getMembers
 );
 
 organizationRouter.get('/switch/:id', 
-  verifyToken,
+  validateIdParams,
   OrganizationController.switchOrganization
 );
 
 organizationRouter.post('/',
-  verifyToken,
+  validateBody(OrgInsertRequestSchema),
   OrganizationController.create
 );
 
 organizationRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.org'),
+  requireOrg,
+  verifyOrgPermission,
+  validateBody(OrgUpdateRequestSchema),
   OrganizationController.update
 )
 
 organizationRouter.patch('/:orgID/member/:id',
-  verifyToken,
-  verifyPermission('update.orgmem'),
+  ...orgMiddlewares,
+  validateBody(MembershipUpdateSchema),
   OrganizationController.updateMember
 );
 
 organizationRouter.delete('/founder/:id',
-  verifyToken,
-  verifyPermission('delete.org'),
+  ...orgMiddlewares,
   OrganizationController.deleteFounder
 );
 
 organizationRouter.delete('/brand/:id',
-  verifyToken,
-  verifyPermission('delete.org'),
+  ...orgMiddlewares,
   OrganizationController.deleteBrand
 );
 
 organizationRouter.delete('/',
-  verifyToken,
-  verifyPermission('delete.org'),
+  requireOrg,
+  verifyOrgPermission,
   OrganizationController.deleteOrg
 );
 
 organizationRouter.delete('/member/:id',
-  verifyToken,
-  verifyPermission('delete.orgmem'),
+  ...orgMiddlewares,
   OrganizationController.deleteMember
 );
 

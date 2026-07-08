@@ -1,48 +1,19 @@
+import * as z from 'zod';
+import { 
+  ProductInsertRequestSchema,
+  ProductInsertSchema, 
+  ProductUpdateSchema, 
+  VariantInsertSchema, 
+  VariantUpdateSchema 
+} from './product.schemas';
 
 
-export interface ProductInsert {
-  name: string; 
-  brand: string;
-  category_id: string;
-  remarks?: string;
-  specific_branch_only?: boolean;
-  branch_id?: string;
-  vat_rate: string;
-}
+export type ProductInsert        = z.infer<typeof ProductInsertSchema>;
 
-export interface ProductUpdate {
-  name?: string; 
-  brand?: string;
-  category_id?: string;
-  remarks?: string;
-  specific_branch_only?: boolean;
-  branch_id?: string;
-  vat_rate?: string;
-  status?: 'active' | 'discontinued' | 'archived' | 'soft deleted'
-}
+export type ProductUpdate        = z.infer<typeof ProductUpdateSchema>;
 
-export interface VariantInsert {
-  item_code: string;
-  sku: string;
-  color?: string;
-  size: string;
-  unit: string;
-  flavor?: string;
-  weight?: string;
-  volume?: string;
-  material?: string;
-  barcode?: string;
-}
+export type VariantInsert        = z.infer<typeof VariantInsertSchema>;
 
-export interface VariantUpdate {
-  item_code?: string;
-  sku?: string;
-  color?: string;
-  size?: string;
-  unit?: string;
-  flavor?: string;
-  weight?: string;
-  volume?: string;
-  material?: string;
-  barcode?: string;
-}
+export type VariantUpdate        = z.infer<typeof VariantUpdateSchema>;
+
+export type ProductInsertRequest = z.infer<typeof ProductInsertRequestSchema>;

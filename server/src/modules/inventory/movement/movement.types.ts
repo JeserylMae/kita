@@ -1,17 +1,10 @@
+import * as z from 'zod';
+import { 
+  MovementInsertSchema, 
+  MovementUpdateSchema 
+} from './movement.schemas';
 
 
-export interface MovementInsert {
-  product_variant_id: string;
-  quantity_changed: number;
-  movement_type: string;
-  reference_type: string;
-  reference_id: string;
-}
+export type MovementInsert = z.infer<typeof MovementInsertSchema>;
 
-export interface MovementUpdate {
-  product_variant_id?: string;
-  quantity_changed?: number;
-  movement_type?: string; 
-  reference_type?: string;
-  reference_id?: string;
-}
+export type MovementUpdate = z.infer<typeof MovementUpdateSchema>;

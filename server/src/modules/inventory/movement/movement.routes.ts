@@ -1,31 +1,52 @@
 import { Router } from "express";
+import { invtMiddlewares } from "../inventory.middlewares";
+
 import * as MovementController from "./movement.controller";
-import { verifyPermission, verifyToken } from "@/middleware/auth.middleware";
+
+import { 
+  requireAuth, 
+  requireBrc, 
+  requireOrg
+} from "@/middleware/auth.middleware";
+
+import { 
+  validateBody, 
+  validateIdParams 
+} from "@/middleware/validation.middleware";
+
+import { 
+  MovementInsertSchema, 
+  MovementUpdateSchema 
+} from "./movement.schemas";
 
 
 const movementRouter = Router();
 
+movementRouter.use(requireAuth);
+movementRouter.use(requireOrg);
+movementRouter.use(requireBrc);
+
 movementRouter.get('/',
-  verifyToken,
-  verifyPermission('select.'),
+  ...invtMiddlewares('select.invtmov'),
   MovementController.get
 );
 
 movementRouter.post('/', 
-  verifyToken,
-  verifyPermission('insert.'),
+  ...invtMiddlewares('insert.invtmov'),
+  validateBody(MovementInsertSchema),
   MovementController.store
 );
 
 movementRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.'),
+  ...invtMiddlewares('update.invtmov'),
+  validateIdParams,
+  validateBody(MovementUpdateSchema),
   MovementController.update
 );
 
 movementRouter.delete('/:id',
-  verifyToken,
-  verifyPermission('delete.'),
+  ...invtMiddlewares('delete.invtmov'),
+  validateIdParams,
   MovementController.deleteMovement
 );
 

@@ -1,6 +1,18 @@
+import { IdParams } from "@/modules/base/base.types";
+import { assertOrg } from "@/modules/base/base.services";
 import * as ProductServices from "./product.services";
-import { ProductUpdate, VariantUpdate } from "./product.types";
-import { NextFunction, Request, Response } from "express";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response
+} from "express";
+
+import { 
+  ProductInsertRequest, 
+  ProductUpdate, 
+  VariantUpdate 
+} from "./product.types";
 
 
 type UpdateBody = ProductUpdate | VariantUpdate;
@@ -11,9 +23,11 @@ export const getAll = async (
   next: NextFunction
 ) => {
   try {
-    const orgID = req.org?.id;
+    assertOrg(req);
 
-    const products = await ProductServices.getAll(orgID!);
+    const orgID = req.context.org.id;
+
+    const products = await ProductServices.getAll(orgID);
 
     res.status(200).json({
       'success': true,
@@ -27,19 +41,21 @@ export const getAll = async (
 }
 
 export const store = async (
-  req: Request,
+  req: Request<any, any, ProductInsertRequest>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const orgID = req.org?.id;
-    const orgMemID = req.org?.orgmemID;
+    assertOrg(req);
+
+    const orgID = req.context.org.id
+    const orgMemID = req.context.org.memID;
     const { product, variants } = req.body;
 
     await ProductServices.store(
       product,
-      orgID!,
-      orgMemID!,
+      orgID,
+      orgMemID,
       variants
     );
 
@@ -78,14 +94,16 @@ const updateHandler = <T extends UpdateBody>(
   successMessage: string
 ) => {
   return async (
-    req: Request<any, any, T>,
+    req: Request<IdParams, any, T>,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      assertOrg(req);
+
       const data = req.body;
-      const id = req.params.id!;
-      const orgID = req.org?.id!;
+      const id = req.params.id;
+      const orgID = req.context.org.id;
 
       await ProductServices.update(id, orgID, data, table);
 
@@ -104,11 +122,13 @@ const deleteHandler = (
   successMessage: string
 ) => {
   return async (
-    req: Request,
+    req: Request<IdParams>,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      assertOrg(req);
+      
       const id = req.params.id!;
 
       await ProductServices.deleteHandler(id, table);

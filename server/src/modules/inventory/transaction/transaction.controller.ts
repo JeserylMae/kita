@@ -1,4 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import { assertBrc } from "@/modules/base/base.services";
+import { QueryParams } from "./transaction.types";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response 
+} from "express";
+
 import { 
   findAll as findAllTxn, 
   findDetails as findTxnDetails 
@@ -11,7 +19,9 @@ export const findAll = async (
   next: NextFunction
 ) => {
   try {
-    const branchID = req.branch?.id!;
+    assertBrc(req);
+
+    const branchID = req.context.brc.id;
 
     const data = await findAllTxn(branchID);
 
@@ -27,13 +37,15 @@ export const findAll = async (
 }
 
 export const findDetails = async (
-  req: Request,
+  req: Request<any, any, any, QueryParams>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id = req.query.id!;
-    const referenceType = req.query.referenceType!;
+    assertBrc(req);
+    
+    const id = req.query.id;
+    const referenceType = req.query.referenceType;
 
     const data = await findTxnDetails(id, referenceType);
 
