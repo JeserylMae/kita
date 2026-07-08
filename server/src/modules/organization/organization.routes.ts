@@ -18,6 +18,11 @@ organizationRouter.get('/:id',
   OrganizationController.getMembers
 );
 
+organizationRouter.get('/switch/:id', 
+  verifyToken,
+  OrganizationController.switchOrganization
+);
+
 organizationRouter.post('/',
   verifyToken,
   OrganizationController.create

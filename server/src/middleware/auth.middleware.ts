@@ -1,5 +1,5 @@
 import { decodeJwt } from "jose";
-import { InvalidCredentials } from "@/errors";
+import { Forbidden, InvalidCredentials } from "@/errors";
 import { verifyAccessToken } from "@/modules/token/token.services";
 
 import { 
@@ -11,114 +11,17 @@ import {
   getRoleScope, 
   getPermissionInfo 
 } from "@/modules/user/auth.services";
+import { AuthRequest, BrcRequest, OrgRequest } from "@/config/types";
 
 
-const loadAccessToken = (
-  req: Request
-) => {
-  const acsToken = req.cookies['ACCESS-TOKEN'];
 
-  if (!acsToken) {
-    throw new InvalidCredentials('Access token not found.');
-  }
-  
-  const claims = decodeJwt(acsToken);
+const ERROR_MSG = 'Cannot perform action. User has insufficient permission.';
 
-  return { acsToken, claims };
-}
-
-export const verifyToken = async (
+export const requireGuest = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { acsToken, claims } = loadAccessToken(req);
-
-  const payload = await verifyAccessToken({
-    token_hash: acsToken
-  });
-
-  const expiresAt = new Date(payload.exp! * 1000);
-
-  if (expiresAt < new Date) {
-    throw new InvalidCredentials(
-      'Access token is expired.'
-    );
-  }
-
-  if ( typeof claims.sub !== 'string' 
-    || typeof claims.sid !== 'string' 
-    || typeof claims.corg !== null
-    || typeof claims.orgrole !== null
-    || typeof claims.orgmemid !== null
-    || typeof claims.branchid !== null
-    || typeof claims.branchrole !== null
-    || typeof claims.corg !== 'string'
-    || typeof claims.orgrole !== 'string'
-    || typeof claims.orgmemid !== 'string'
-    || typeof claims.branchid !== 'string'
-    || typeof claims.branchrole !== 'string'
-  ) {
-    throw new InvalidCredentials('Subject ID not found.');
-  }
-
-  req.user = {
-    id: claims.sub,
-    sid: claims.sid,
-  };
-  req.org = {
-    id: claims.corg,
-    role: claims.orgrole,
-    orgmemID: claims.orgmemid
-  }
-  req.branch = {
-    id: claims.branchid,
-    role: claims.branchrole
-  }
-  next();
-}
-
-export const verifyPermission = ( permission: string ) =>
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-  try {
-    // If user is not yet member of any branch 
-    // and user's organization role is owner
-    // role is super_admin
-    const role = req.branch?.role 
-      ? req.branch.role
-      : req.org?.role === 'owner' ? 'super_admin' : null;
-    
-    if (!role) {
-      throw new InvalidCredentials(
-        'Cannot perform action. User has insufficient permission.'
-      );
-    }
-
-    const pInfo = await getPermissionInfo(permission);
-    const scopes = await getRoleScope(role, pInfo!);
-
-    if (!scopes || scopes.length <= 0) {
-      throw new InvalidCredentials('Unauthorized user.');
-    }
-
-    req.scopes = scopes;
-
-    next();
-  }
-  catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const requireGuest = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
   try {
     const { acsToken, claims} = loadAccessToken(req);
 
@@ -134,4 +37,156 @@ export const requireGuest = (
   catch (error: unknown) {
     next();
   }
+}
+
+export const requireAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { acsToken, claims } = loadAccessToken(req);
+
+    const payload = await verifyAccessToken({
+      token_hash: acsToken
+    });
+
+    const expiresAt = new Date(payload.exp! * 1000);
+
+    if (expiresAt < new Date) {
+      throw new InvalidCredentials(
+        'Access token is expired.'
+      );
+    }
+    
+    if ( typeof claims.sub !== 'string' 
+      || typeof claims.sid !== 'string'
+    ) { 
+      throw new Forbidden(ERROR_MSG);
+    }
+
+    (req as AuthRequest).context.user = {
+      id: claims.sub,
+      sid: claims.sid,
+      claims: claims
+    }
+
+    next();
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const requireOrg = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const claims = req.context.user.claims;
+
+    if ( typeof claims.corg !== 'string'
+      || typeof claims.orgrole !== 'string'
+      || typeof claims.orgmemid !== 'string'
+    ) {
+      throw new Forbidden(ERROR_MSG);
+    }
+
+    (req as OrgRequest).context.org = {
+      id: claims.corg,
+      role: claims.orgrole,
+      memID: claims.orgmemid
+    }
+
+    next();
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const requireBrc = (
+  req: OrgRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const claims = req.context.user.claims;
+
+    if ( typeof claims.brcid !== 'string'
+      || typeof claims.brcrole !== 'string'
+      || typeof claims.brcmemid !== 'string'
+    ) {
+      throw new Forbidden(ERROR_MSG);
+    }
+
+    (req as BrcRequest).context.brc = {
+      id: claims.brcid,
+      role: claims.brcrole,
+      memID: claims.brcmemid
+    }
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const verifyOrgPermission = async (
+  req: BrcRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try{
+    const role = req.context.org.role;
+
+    if ( role !== 'owner' && role !== 'admin') {
+      throw new Forbidden(ERROR_MSG);
+    }
+
+    next();
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const verifyBrcPermission = ( permission: string ) =>{
+  async (
+    req: BrcRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const role = req.context.brc.role;
+
+      const pInfo = await getPermissionInfo(permission);
+      const scopes = await getRoleScope(role, pInfo!);
+
+      if (!scopes || scopes.length <= 0) {
+        throw new Forbidden(ERROR_MSG);
+      }
+
+      req.context.scopes = scopes;
+
+      next();
+    }
+    catch (error: unknown) {
+      next(error);
+    }
+  }
+}
+
+const loadAccessToken = (
+  req: Request
+) => {
+  const acsToken = req.cookies['ACCESS-TOKEN'];
+
+  if (!acsToken) {
+    throw new InvalidCredentials('Access token not found.');
+  }
+  
+  const claims = decodeJwt(acsToken);
+
+  return { acsToken, claims };
 }
