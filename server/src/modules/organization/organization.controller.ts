@@ -4,6 +4,8 @@ import { NextFunction, Request, Response } from "express";
 
 import * as MembershipServices from "./membership.services";
 import * as OrganizationService from "./organization.services";
+import { createAccessToken } from "../token/token.services";
+import { accessTokenCookieOptions } from "@/config/types";
 
 
 /**
@@ -63,6 +65,42 @@ export const getMembers = async (
       "message": "Organization members are retrieved.",
       "orgMembers": data
     });
+  }
+  catch (error: unknown) {
+    next(error);
+  }
+}
+
+export const switchOrganization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const orgID = req.params.id;
+    const userID = req.user.id;
+
+    if (typeof orgID !== 'string') {
+      throw new InvalidCredentials('Invalid organization ID.');
+    }
+
+    const org = await MembershipServices.findRole(userID, orgID);
+
+    const acsToken = await createAccessToken(
+      { id: userID },
+      req.user.sid,
+      orgID,
+      org.roles[0]?.role,
+      org.id
+    );
+
+    res.cookie('ACCESS-TOKEN', acsToken, 
+      accessTokenCookieOptions
+    ).status(200)
+      .json({
+        'success': true,
+        'message': 'Swithed to selected organization'
+      });
   }
   catch (error: unknown) {
     next(error);

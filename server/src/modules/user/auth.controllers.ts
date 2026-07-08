@@ -4,6 +4,7 @@ import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
 import { InvalidCredentials } from '@/errors';
+import { accessTokenCookieOptions } from '@/config/types';
 
 
 /**
@@ -54,11 +55,14 @@ export const signin = async (
       await TokenServices.createRefreshToken(user!, '7d')
     ) as unknown as { 'id': string };
 
-    if (user?.default_org) {
+    // If user has default org, then assign the 
+    // orgID, memberID and role to access token's claims 
+    if (user?.id && user?.default_org) {
       const org = await MembershipServices.findRole(
-        user.id!,
-        user?.default_org
-      )
+        user.id, 
+        user.default_org
+      );
+
       orgrole = org?.roles[0]?.role;
       orgmemID = org?.id;
     }
@@ -71,12 +75,9 @@ export const signin = async (
       orgmemID
     );
 
-    res.cookie('ACCESS-TOKEN', acsToken, {
-      httpOnly: true,
-      secure: true, 
-      sameSite: 'strict'
-    })
-    .status(200)
+    res.cookie('ACCESS-TOKEN', acsToken, 
+      accessTokenCookieOptions
+    ).status(200)
     .json({
       'success': true,
       'message': 'Login successful',

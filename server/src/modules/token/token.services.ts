@@ -28,8 +28,10 @@ export const createAccessToken = async (
   orgID: string | null,
   orgRole: string | null,
   orgmemID: string | null,
-  branchID: string | null = null,
-  branchRole: string | null = null
+  branchID?: string,
+  branchRole?: string,
+  branchMemID?: string,
+
 ) => {
   const alg = config.signingAlg;
   const pkcs8 = config.privateKey;
@@ -42,8 +44,9 @@ export const createAccessToken = async (
     corg:       orgID,
     orgrole:    orgRole,
     orgmemid:   orgmemID,
-    branchid:   branchID,
-    branchrole: branchRole,
+    brcid:   branchID,
+    brcrole: branchRole,
+    brcmemid: branchMemID,
     verified:   user.verified_at ? true : false,
   };
 
