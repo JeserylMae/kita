@@ -1,19 +1,23 @@
-import { verifyPermission, verifyToken } from "@/middleware/auth.middleware";
 import { Router } from "express";
 import { findAll, findDetails } from "./transaction.controller";
+import { requireAuth, requireBrc, requireOrg, verifyBrcPermission } from "@/middleware/auth.middleware";
 
 
 const txnRouter = Router();
 
 txnRouter.get('/',
-  verifyToken,
-  verifyPermission('select.txn'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('select.txn'),
   findAll
 );
 
 txnRouter.get('/details',
-  verifyToken,
-  verifyPermission('select.txn'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('select.txn'),
   findDetails
 );
 
