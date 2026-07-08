@@ -6,6 +6,8 @@ import { NextFunction, Request, Response } from "express";
 import * as BranchServices from "./branch.services";
 import { BranchUpdate, MemberUpdate } from "./branch.types";
 import { accessTokenCookieOptions } from "@/config/types";
+import { assertBrc, assertOrg } from "../base/base.services";
+import { IdParams } from "../base/base.types";
 
 
 /**
@@ -21,8 +23,10 @@ export const create = async (
   next: NextFunction 
 ) => {
   try {
-    const orgID = req.org?.id!;
-    const orgMemID = req.org?.orgmemID!;
+    assertOrg(req);
+
+    const orgID = req.context.org.id;
+    const orgMemID = req.context.org.memID;
     const { branch, roleID } = req.body;
 
     await BranchServices.storeBranch(
@@ -54,9 +58,9 @@ export const findMembers = async (
   next: NextFunction
 ) => {
   try {
-    // Note: the passed id in the params are used for validation
-    // whether req.branch.id === req.params.id
-    const id = req.branch?.id!;
+    assertBrc(req);
+
+    const id = req.context.brc.id;
 
     const data = await BranchServices.findMembers(id);
 
@@ -77,24 +81,24 @@ export const selectBranch = async (
   next: NextFunction
 ) => {
   try {
+    assertOrg(req);
+
+    const cntx = req.context;
     const branchID = req.params.id;
-    const org = req.org;
-    const user = req.user;
+    const orgMemID = cntx.org.memID;
 
     if (typeof branchID !== 'string') {
-      throw new InvalidCredentials(
-        'Invalid branch ID.'
-      );
+      throw new InvalidCredentials('Invalid branch ID.');
     }
 
-    const brc = await BranchServices.findRole(org?.orgmemID!, branchID);
+    const brc = await BranchServices.findRole(orgMemID, branchID);
 
     const acsToken = await createAccessToken(
-      { id: user?.id! }, 
-      user?.sid!,
-      org?.id!,
-      org?.role!,
-      org?.orgmemID!,
+      { id: cntx.user.id }, 
+      cntx.user.sid,
+      cntx.org.id,
+      cntx.org.role,
+      cntx.org.memID,
       branchID,
       brc?.roles[0]?.role,
       brc?.id
@@ -121,7 +125,7 @@ export const selectBranch = async (
  * @returns 
  */
 export const update = (
-  req: Request<any, any, BranchUpdate>,
+  req: Request<IdParams, any, BranchUpdate>,
   res: Response,
   next: NextFunction 
 ) => {
@@ -136,7 +140,7 @@ export const update = (
  * @returns 
  */
 export const updateMember = (
-  req: Request<any, any, MemberUpdate>,
+  req: Request<IdParams, any, MemberUpdate>,
   res: Response,
   next: NextFunction
 ) => {
@@ -151,7 +155,7 @@ export const updateMember = (
  * @returns 
  */
 export const deleteBranch = (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -168,7 +172,7 @@ export const deleteBranch = (
  * @returns 
  */
 export const deleteMember = (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -185,12 +189,14 @@ export const deleteMember = (
  * @param action 
  */
 const save = async (
-  req: Request<any, any, BranchUpdate | MemberUpdate>,
+  req: Request<IdParams, any, BranchUpdate | MemberUpdate>,
   res: Response,
   next: NextFunction,
   table: TableName = TableName.branch
 ) => {
   try {
+    assertBrc(req);
+
     const id = req.params.id;
     const record = req.body;
 
@@ -214,7 +220,7 @@ const save = async (
  * @param next 
  */
 const deleteHandler = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction,
   record: 'brc' | 'brcmem'

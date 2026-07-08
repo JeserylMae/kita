@@ -1,49 +1,62 @@
 import { Router } from "express";
-import { verifyToken, verifyPermission } from "@/middleware/auth.middleware";
 
 import * as BranchController from "./branch.controller";
+import { requireAuth, requireBrc, requireOrg, verifyBrcPermission } from "@/middleware/auth.middleware";
 
 
 const branchRouter = Router();
 
 branchRouter.post('/',
-  verifyToken,
-  verifyPermission('insert.brc'),
+  requireAuth,
+  requireOrg,
+  verifyBrcPermission('insert.brc'),
   BranchController.create
 );
 
-branchRouter.get('/member/:id',
-  verifyToken,
-  verifyPermission('select.brcmem'),
+branchRouter.get('/members/',
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('select.brcmem'),
   BranchController.findMembers
 );
 
 branchRouter.get('/:id',
-  verifyToken,
+  requireAuth,
+  requireOrg,
+  verifyBrcPermission('select.brc'),
   BranchController.selectBranch
 );
 
 branchRouter.patch('/:id',
-  verifyToken,
-  verifyPermission('update.brc'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('update.brc'),
   BranchController.update
 );
 
 branchRouter.patch('/member/:id',
-  verifyToken,
-  verifyPermission('update.brcmem'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('update.brcmem'),
   BranchController.updateMember
 );
 
 branchRouter.delete('/:id',
-  verifyToken,
-  verifyPermission('delete.brc'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('delete.brc'),
   BranchController.deleteBranch
 );
 
 branchRouter.delete('/member/:id',
-  verifyToken,
-  verifyPermission('delete.brcmem'),
+  requireAuth,
+  requireOrg,
+  requireBrc,
+  verifyBrcPermission('delete.brcmem'),
   BranchController.deleteMember
 );
 
