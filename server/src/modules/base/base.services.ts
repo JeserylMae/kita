@@ -39,20 +39,42 @@ export const doesRecordExist = async (
   return (count ?? 0) > 0;
 };
 
-export function assertAuth(req: Request): asserts req is AuthRequest {
-  if (!(req as Partial<AuthRequest>).context?.user) {
-    throw new Forbidden("Authentication required");
+
+export function assertAuth<
+  Params,
+  ResBody,
+  ReqBody,
+  ReqQuery
+>(
+  req: Request<Params, ResBody, ReqBody, ReqQuery>
+): asserts req is AuthRequest<Params, ResBody, ReqBody, ReqQuery> {
+  if (!(req as Partial<AuthRequest<Params, ResBody, ReqBody, ReqQuery>>).context?.user) {
+    throw new Forbidden("Authorized required");
   }
 }
 
-export function assertOrg(req: Request): asserts req is OrgRequest {
-  if (!(req as Partial<OrgRequest>).context?.org) {
+export function assertOrg<
+  Params,
+  ResBody,
+  ReqBody,
+  ReqQuery
+>(
+  req: Request<Params, ResBody, ReqBody, ReqQuery>
+): asserts req is OrgRequest<Params, ResBody, ReqBody, ReqQuery> {
+  if (!(req as Partial<OrgRequest<Params, ResBody, ReqBody, ReqQuery>>).context?.org) {
     throw new Forbidden("Organization required");
   }
 }
 
-export function assertBrc(req: Request): asserts req is BrcRequest {
-  if (!(req as Partial<BrcRequest>).context?.brc) {
+export function assertBrc<
+  Params,
+  ResBody,
+  ReqBody,
+  ReqQuery
+>(
+  req: Request<Params, ResBody, ReqBody, ReqQuery>
+): asserts req is BrcRequest<Params, ResBody, ReqBody, ReqQuery> {
+  if (!(req as Partial<BrcRequest<Params, ResBody, ReqBody, ReqQuery>>).context?.brc) {
     throw new Forbidden("Branch required");
   }
 }
