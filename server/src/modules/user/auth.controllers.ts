@@ -4,7 +4,8 @@ import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
 import { InvalidCredentials } from '@/errors';
-import { accessTokenCookieOptions } from '@/config/types';
+import { accessTokenCookieOptions, AuthRequest } from '@/config/types';
+import { assertAuth } from '../base/base.services';
 
 
 /**
@@ -198,7 +199,9 @@ export const logout = async (
   next: NextFunction
 ) => {
   try {
-    const sessionID = req.user?.sid;
+    assertAuth(req);
+    
+    const sessionID = req.context.user.id;
 
     await AuthServices.logout(sessionID!);
 

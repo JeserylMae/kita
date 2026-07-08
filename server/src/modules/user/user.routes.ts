@@ -2,7 +2,11 @@ import * as AuthController from './auth.controllers';
 import * as UserController from './user.controller';
 
 import { Router } from 'express';
-import * as authMiddleware from '@/middleware/auth.middleware';
+import {
+  requireGuest,
+  requireAuth,
+  verifyBrcPermission
+} from '@/middleware/auth.middleware';
 
 
 const userRouter = Router();
@@ -12,12 +16,12 @@ userRouter.post('/signup',
 );
 
 userRouter.post('/signin', 
-  authMiddleware.requireGuest,
+  requireGuest,
   AuthController.signin
 );
 
 userRouter.post('/logout', 
-  authMiddleware.verifyToken,
+  requireAuth,
   AuthController.logout
 );
 
@@ -30,9 +34,15 @@ userRouter.post('/forgot-password',
 );
 
 userRouter.get('/me',
-  authMiddleware.verifyToken,
-  authMiddleware.verifyPermission,
+  requireAuth,
+  verifyBrcPermission('select.user'),
   UserController.me
-)
+);
+
+userRouter.patch('/:id',
+  requireAuth,
+  verifyBrcPermission('update.user'),
+  UserController.update
+);
 
 export default userRouter;
