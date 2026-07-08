@@ -14,7 +14,7 @@ import {
 } from "@/utils/data.helpers";
 import { 
   InvitationParams, 
-  InvitationResponseParams, 
+  InvitationResponse, 
   InvitationUpdate, 
   InviteEmailParams, 
   TableName
@@ -122,7 +122,7 @@ export const reInvite = async (
 }
 
 export const respond = async (
-  invitation: InvitationResponseParams,
+  invitation: InvitationResponse,
   token: string
 ) => {
   const invDB = new BaseRepository(TableName.orgInv);

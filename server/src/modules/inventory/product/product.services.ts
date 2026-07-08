@@ -53,7 +53,7 @@ export const store = async (
   }
 
   const db = new BaseRepository('organization_products');
-  const new_product = await db.store(pdata);
+  const new_product = await db.insert(pdata);
 
   if (!variant) return;
 
@@ -65,7 +65,7 @@ export const store = async (
   }
   
   const variantDB = new BaseRepository('product_variants');
-  await variantDB.store(vdata);
+  await variantDB.insert(vdata);
 }
 
 export const update = async <T extends Record<string, any>>(

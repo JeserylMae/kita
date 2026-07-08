@@ -39,7 +39,8 @@ export class BaseRepository {
     const { data, error } = await supabase
       .from(this.table)
       .insert(record as any)
-      .select();
+      .select()
+      .single();
 
     if (!error) return data;
 
