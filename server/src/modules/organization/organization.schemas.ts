@@ -100,3 +100,16 @@ export const MembershipUpdateSchema = z.object({
   role:            z.enum(['owner', 'admin', 'member']).optional(),
   updated_at:      z.iso.datetime().optional()
 });
+
+export const OrgInsertRequestSchema = z.object({
+  organization: OrgInsertSchema,
+  brands:       BrandInsertSchema.array(), 
+  founders:     FounderInsertSchema.array(),
+  membership:   MembershipInsertSchema
+});
+
+export const OrgUpdateRequestSchema = z.object({
+  organization: OrgUpdateSchema.optional(),
+  brands:       BrandUpdateSchema.array().optional(), 
+  founders:     FounderUpdateSchema.array().optional(),
+});

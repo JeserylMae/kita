@@ -1,13 +1,28 @@
+import { IdParams } from "../base/base.types";
+import { createAccessToken } from "../token/token.services";
 import { InvalidCredentials } from "@/errors";
-import { MembershipUpdate, TableName } from "./organization.types";
-import { NextFunction, Request, Response } from "express";
+import { accessTokenCookieOptions } from "@/config/types";
 
 import * as MembershipServices from "./membership.services";
 import * as OrganizationService from "./organization.services";
-import { createAccessToken } from "../token/token.services";
-import { accessTokenCookieOptions, AuthRequest, OrgRequest } from "@/config/types";
-import { IdParams } from "../base/base.types";
-import { assertAuth, assertOrg } from "../base/base.services";
+
+import { 
+  assertAuth, 
+  assertOrg 
+} from "../base/base.services";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response 
+} from "express";
+
+import { 
+  MembershipUpdate, 
+  OrgInsertRequest, 
+  OrgUpdateRequest, 
+  TableName 
+} from "./organization.types";
 
 
 /**
@@ -124,7 +139,7 @@ export const switchOrganization = async (
  * @returns 
  */
 export const create = async (
-  req: Request, 
+  req: Request<any, any, OrgInsertRequest>, 
   res: Response, 
   next: NextFunction
 ) => {
@@ -165,7 +180,7 @@ export const create = async (
  * @returns 
  */
 export const update = async (
-  req: Request,
+  req: Request<any, any, OrgUpdateRequest>,
   res: Response, 
   next: NextFunction
 ) => {
