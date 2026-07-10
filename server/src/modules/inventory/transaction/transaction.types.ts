@@ -1,27 +1,12 @@
+import * as z from 'zod';
+import { TransactionInsertSchema, TransactionUpdateSchema } from './transaction.schemas';
+
 
 export type ReferenceTypeKeys = keyof typeof ReferenceType;
 
-export interface TransactionInsert {
-  branch_id: string;
-  amount: number;
-  payment_method: string;
-  reference_type: string;
-  reference_id: string;
-  code: string;
-  created_by_name?: string;
-  created_by_role?: string;
-}
+export type TransactionInsert = z.infer<typeof TransactionInsertSchema>;
 
-
-export interface TransactionUpdate {
-  amount?: number;
-  payment_method?: string;
-  reference_type?: string;
-  reference_id?: string;
-  code?: string;
-  created_by_name?: string;
-  created_by_role?: string;
-}
+export type TransactionUpdate = z.infer<typeof TransactionUpdateSchema>;
 
 export const ReferenceType = {
   'sales invoice': {
