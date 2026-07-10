@@ -1,8 +1,18 @@
+import { IdParams } from "@/modules/base/base.types";
 import { assertOrg } from "@/modules/base/base.services";
 import * as ProductServices from "./product.services";
-import { ProductUpdate, VariantUpdate } from "./product.types";
-import { NextFunction, Request, Response } from "express";
-import { IdParams } from "@/modules/base/base.types";
+
+import { 
+  NextFunction, 
+  Request, 
+  Response
+} from "express";
+
+import { 
+  ProductInsertRequest, 
+  ProductUpdate, 
+  VariantUpdate 
+} from "./product.types";
 
 
 type UpdateBody = ProductUpdate | VariantUpdate;
@@ -31,7 +41,7 @@ export const getAll = async (
 }
 
 export const store = async (
-  req: Request,
+  req: Request<any, any, ProductInsertRequest>,
   res: Response,
   next: NextFunction
 ) => {

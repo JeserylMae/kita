@@ -1,6 +1,22 @@
 import { Router } from "express";
 import * as ItemsController from "./items.controller";
-import { requireAuth, requireBrc, requireOrg, verifyBrcPermission } from "@/middleware/auth.middleware";
+
+import { 
+  validateBody, 
+  validateIdParams 
+} from "@/middleware/validation.middleware";
+
+import { 
+  ItemInsertSchema, 
+  ItemUpdateSchema 
+} from "./items.schemas";
+
+import { 
+  requireAuth, 
+  requireBrc, 
+  requireOrg, 
+  verifyBrcPermission 
+} from "@/middleware/auth.middleware";
 
 
 const itemRouter = Router();
@@ -10,6 +26,7 @@ itemRouter.post('/',
   requireOrg,
   requireBrc,
   verifyBrcPermission('insert.invtitm'),
+  validateBody(ItemInsertSchema),
   ItemsController.create
 );
 
@@ -26,6 +43,8 @@ itemRouter.patch('/:id',
   requireOrg,
   requireBrc,
   verifyBrcPermission('update.invtitm'),
+  validateIdParams,
+  validateBody(ItemUpdateSchema),
   ItemsController.update
 );
 
@@ -34,6 +53,7 @@ itemRouter.delete('/:id',
   requireOrg,
   requireBrc,
   verifyBrcPermission('delete.invtitm'),
+  validateIdParams,
   ItemsController.deletItem
 );
 

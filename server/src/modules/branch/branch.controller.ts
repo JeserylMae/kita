@@ -1,13 +1,26 @@
+import { IdParams } from "../base/base.types";
 import { TableName } from "../organization/organization.types";
 import { createAccessToken} from "../token/token.services";
 import { InvalidCredentials } from "@/errors";
-import { NextFunction, Request, Response } from "express";
+import { accessTokenCookieOptions } from "@/config/types";
 
 import * as BranchServices from "./branch.services";
-import { BranchUpdate, MemberUpdate } from "./branch.types";
-import { accessTokenCookieOptions } from "@/config/types";
-import { assertBrc, assertOrg } from "../base/base.services";
-import { IdParams } from "../base/base.types";
+
+import { 
+  NextFunction, 
+  Request,
+  Response 
+} from "express";
+
+import { 
+  BranchUpdate, 
+  MemberUpdate 
+} from "./branch.types";
+
+import { 
+  assertBrc, 
+  assertOrg 
+} from "../base/base.services";
 
 
 /**
@@ -76,7 +89,7 @@ export const findMembers = async (
 }
 
 export const selectBranch = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {

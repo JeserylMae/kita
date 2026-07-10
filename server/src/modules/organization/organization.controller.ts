@@ -93,7 +93,7 @@ export const getMembers = async (
 }
 
 export const switchOrganization = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -103,10 +103,6 @@ export const switchOrganization = async (
     const orgID = req.params.id;
     const userID = req.context.user.id;
     const sessionID = req.context.user.sid;
-
-    if (typeof orgID !== 'string') {
-      throw new InvalidCredentials('Invalid organization ID.');
-    }
 
     const org = await MembershipServices.findRole(userID, orgID);
 

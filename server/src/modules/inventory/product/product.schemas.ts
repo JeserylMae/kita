@@ -47,3 +47,8 @@ export const VariantUpdateSchema = z.object({
   material:  z.string().optional(),
   barcode:   z.string().optional()
 });
+  
+  export const ProductInsertRequestSchema = z.object({
+    product:  ProductInsertSchema,
+    variants: VariantInsertSchema.array()
+  });

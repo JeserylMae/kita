@@ -1,6 +1,18 @@
 import * as z from 'zod';
 
 
+export const SignupParamsSchema = z.object({
+  email:    z.email(),
+  password: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d).{8,}$/),
+  url:      z.url()
+});
+
+export const ResetPasswordParamsSchema = z.object({
+  email:       z.email(),
+  token:       z.string(),
+  newPassword: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d).{8,}$/)
+});
+
 export const UserInsertSchema = z.object({
   auth_id: z.uuid(),
 

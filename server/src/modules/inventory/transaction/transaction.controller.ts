@@ -1,5 +1,5 @@
 import { assertBrc } from "@/modules/base/base.services";
-import { ReferenceTypeKeys } from "./transaction.types";
+import { QueryParams } from "./transaction.types";
 
 import { 
   NextFunction, 
@@ -36,14 +36,8 @@ export const findAll = async (
   }
 }
 
-
-interface queryParams {
-  id: string;
-  referenceType: ReferenceTypeKeys;
-};
-
 export const findDetails = async (
-  req: Request<any, any, any, queryParams>,
+  req: Request<any, any, any, QueryParams>,
   res: Response,
   next: NextFunction
 ) => {

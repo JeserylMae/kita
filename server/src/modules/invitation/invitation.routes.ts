@@ -1,6 +1,22 @@
 import { Router } from "express";
 import * as InvitationController from "./invitation.controller";
-import { requireAuth, requireBrc, requireOrg, verifyBrcPermission } from "@/middleware/auth.middleware";
+
+import { 
+  requireAuth, 
+  requireBrc, 
+  requireOrg, 
+  verifyBrcPermission 
+} from "@/middleware/auth.middleware";
+
+import { 
+  validateBody, 
+  validateIdParams 
+} from "@/middleware/validation.middleware";
+
+import { 
+  InvitationParamsSchema, 
+  InvitationResponseSchema 
+} from "../organization/organization.schemas";
 
 
 const invitationRouter = Router();
@@ -11,18 +27,22 @@ invitationRouter.post('/',
   requireOrg,
   requireBrc,
   verifyBrcPermission('insert.orginv'),
+  validateIdParams,
+  validateBody(InvitationParamsSchema),
   InvitationController.invite
 );
 
 // /invitation/tokenstr
 invitationRouter.post('/:token', 
   requireAuth,
+  validateBody(InvitationResponseSchema),
   InvitationController.respondToInvitation
 );
 
 // /invitation/idstr
 invitationRouter.post('/:id',
   requireAuth,
+  validateIdParams,
   InvitationController.reinvite
 );
 
@@ -32,6 +52,7 @@ invitationRouter.get('/me',
   requireOrg,
   requireBrc,
   verifyBrcPermission('select.orginv'),
+  validateIdParams,
   InvitationController.getInvitations
 );
 
@@ -41,6 +62,7 @@ invitationRouter.delete('/:id',
   requireOrg,
   requireBrc,
   verifyBrcPermission('delete.orginv'),
+  validateIdParams,
   InvitationController.deleteInvitation
 );
 

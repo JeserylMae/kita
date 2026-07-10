@@ -1,5 +1,21 @@
 import * as z from 'zod';
+import { 
+  ReferenceType, 
+  ReferenceTypeKeys 
+} from './transaction.types';
 
+
+const ReferenceTypeSchema = z.enum(
+  Object.keys(ReferenceType) as [
+    ReferenceTypeKeys,
+    ...ReferenceTypeKeys[]
+  ]
+);
+
+export const QueryParamsSchema = z.object({
+  id: z.uuid(),
+  referenceType: ReferenceTypeSchema
+});
 
 export const TransactionInsertSchema = z.object({
   branch_id:       z.uuid(),

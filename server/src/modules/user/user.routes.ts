@@ -7,11 +7,14 @@ import {
   requireAuth,
   verifyBrcPermission
 } from '@/middleware/auth.middleware';
+import { validateBody, validateIdParams } from '@/middleware/validation.middleware';
+import { ResetPasswordParamsSchema, SignupParamsSchema, UserUpdateSchema } from './user.schemas';
 
 
 const userRouter = Router();
 
 userRouter.post('/signup', 
+  validateBody(SignupParamsSchema),
   AuthController.signup
 );
 
@@ -26,6 +29,7 @@ userRouter.post('/logout',
 );
 
 userRouter.post('/reset-password', 
+  validateBody(ResetPasswordParamsSchema),
   AuthController.resetPassword
 );
 
@@ -42,6 +46,8 @@ userRouter.get('/me',
 userRouter.patch('/:id',
   requireAuth,
   verifyBrcPermission('update.user'),
+  validateIdParams,
+  validateBody(UserUpdateSchema),
   UserController.update
 );
 

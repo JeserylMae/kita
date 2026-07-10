@@ -1,8 +1,14 @@
 import * as z from 'zod';
-import { TransactionInsertSchema, TransactionUpdateSchema } from './transaction.schemas';
+import { 
+  QueryParamsSchema,
+  TransactionInsertSchema, 
+  TransactionUpdateSchema 
+} from './transaction.schemas';
 
 
 export type ReferenceTypeKeys = keyof typeof ReferenceType;
+
+export type QueryParams       = z.infer<typeof QueryParamsSchema>;
 
 export type TransactionInsert = z.infer<typeof TransactionInsertSchema>;
 

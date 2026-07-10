@@ -1,11 +1,12 @@
+import { assertAuth } from '../base/base.services';
+import { ResetPasswordParams, SignupParams } from './user.types';
+import { InvalidCredentials } from '@/errors';
+import { accessTokenCookieOptions } from '@/config/types';
 import { NextFunction, Request, Response } from 'express';
 
 import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
-import { InvalidCredentials } from '@/errors';
-import { accessTokenCookieOptions, AuthRequest } from '@/config/types';
-import { assertAuth } from '../base/base.services';
 
 
 /**
@@ -15,7 +16,7 @@ import { assertAuth } from '../base/base.services';
  * @returns 
  */
 export const signup = async ( 
-  req: Request, 
+  req: Request<any, any, SignupParams>, 
   res: Response,
   next: NextFunction 
 ) => {
@@ -167,7 +168,7 @@ export const requestForgotPassword = async (
  * @param res 
  */
 export const resetPassword = async (
-  req: Request, 
+  req: Request<any, any, ResetPasswordParams>, 
   res: Response,
   next: NextFunction
 ) => {

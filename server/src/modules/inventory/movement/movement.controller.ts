@@ -1,8 +1,9 @@
+import { IdParams } from "@/modules/base/base.types";
 import { assertBrc } from "@/modules/base/base.services";
-import * as MovementServices from "./movement.services";
 import { MovementInsert, MovementUpdate } from "./movement.types";
 import { NextFunction, Request, Response } from "express";
-import { IdParams } from "@/modules/base/base.types";
+
+import * as MovementServices from "./movement.services";
 
 
 export const get = async (
