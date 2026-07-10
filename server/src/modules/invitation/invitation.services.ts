@@ -105,8 +105,8 @@ export const reInvite = async (
     'id': inviteID,
     'token': token,
     'status': 're-invited',
-    'expires_at': expiresAt,
-    'sent_at': new Date()
+    'expires_at': expiresAt.toISOString(),
+    'sent_at': new Date().toISOString()
   });
 
   await sendInviteEmail(
@@ -146,7 +146,7 @@ export const respond = async (
   
   TokenServices.verify({
     'isavailable': true,
-    'expires_at': idata.expires_at!
+    'expires_at': new Date(idata.expires_at!)
   })
 
   if (invitation.status === 'accepted') {

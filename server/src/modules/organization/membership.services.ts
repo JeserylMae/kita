@@ -189,7 +189,7 @@ export const update = async (
   orgID: string,
   org: MembershipUpdate
 ) => {
-  org.updated_at = new Date();
+  org.updated_at = (new Date()).toISOString();
 
   const odata = sanitizeObject(org);
 
