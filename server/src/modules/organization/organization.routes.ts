@@ -20,34 +20,37 @@ import {
 } from "./organization.schemas";
 
 
+const orgMiddlewares = [
+  requireOrg,
+  verifyOrgPermission,
+  validateIdParams
+];
+
 const organizationRouter = Router();
 
+organizationRouter.use(requireAuth);
+
 organizationRouter.get('/memberships/me',
-  requireAuth,
   OrganizationController.getOrganizations
 );
 
 organizationRouter.get('/:id',
-  requireAuth,
   requireOrg,
   verifyOrgPermission,
   OrganizationController.getMembers
 );
 
 organizationRouter.get('/switch/:id', 
-  requireAuth,
   validateIdParams,
   OrganizationController.switchOrganization
 );
 
 organizationRouter.post('/',
-  requireAuth,
   validateBody(OrgInsertRequestSchema),
   OrganizationController.create
 );
 
 organizationRouter.patch('/:id',
-  requireAuth,
   requireOrg,
   verifyOrgPermission,
   validateBody(OrgUpdateRequestSchema),
@@ -55,42 +58,29 @@ organizationRouter.patch('/:id',
 )
 
 organizationRouter.patch('/:orgID/member/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
-  validateIdParams,
+  ...orgMiddlewares,
   validateBody(MembershipUpdateSchema),
   OrganizationController.updateMember
 );
 
 organizationRouter.delete('/founder/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
-  validateIdParams,
+  ...orgMiddlewares,
   OrganizationController.deleteFounder
 );
 
 organizationRouter.delete('/brand/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
-  validateIdParams,
+  ...orgMiddlewares,
   OrganizationController.deleteBrand
 );
 
 organizationRouter.delete('/',
-  requireAuth,
   requireOrg,
   verifyOrgPermission,
   OrganizationController.deleteOrg
 );
 
 organizationRouter.delete('/member/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
-  validateIdParams,
+  ...orgMiddlewares,
   OrganizationController.deleteMember
 );
 

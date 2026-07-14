@@ -1,31 +1,29 @@
 import { Router } from "express";
 import { validateBody } from "@/middleware/validation.middleware";
+import { invtMiddlewares } from "../inventory.middlewares";
 import { QueryParamsSchema } from "./transaction.schemas";
 import { findAll, findDetails } from "./transaction.controller";
 
 import { 
   requireAuth, 
   requireBrc, 
-  requireOrg, 
-  verifyBrcPermission 
+  requireOrg
 } from "@/middleware/auth.middleware";
 
 
 const txnRouter = Router();
 
+txnRouter.use(requireAuth);
+txnRouter.use(requireOrg);
+txnRouter.use(requireBrc);
+
 txnRouter.get('/',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('select.txn'),
+  ...invtMiddlewares('select.txn'),
   findAll
 );
 
 txnRouter.get('/details',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('select.txn'),
+  ...invtMiddlewares('select.txn'),
   validateBody(QueryParamsSchema),
   findDetails
 );

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { invtMiddlewares } from "../inventory.middlewares";
+
 import * as ItemsController from "./items.controller";
 
 import { 
@@ -14,45 +16,36 @@ import {
 import { 
   requireAuth, 
   requireBrc, 
-  requireOrg, 
-  verifyBrcPermission 
+  requireOrg
 } from "@/middleware/auth.middleware";
 
 
 const itemRouter = Router();
 
+itemRouter.use(requireAuth);
+itemRouter.use(requireOrg);
+itemRouter.use(requireBrc);
+
 itemRouter.post('/',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('insert.invtitm'),
+  ...invtMiddlewares('insert.invtitm'),
   validateBody(ItemInsertSchema),
   ItemsController.create
 );
 
 itemRouter.get('/',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('select.invtitm'),
+  ...invtMiddlewares('select.invtitm'),
   ItemsController.get
 );
 
 itemRouter.patch('/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('update.invtitm'),
+  ...invtMiddlewares('update.invtitm'),
   validateIdParams,
   validateBody(ItemUpdateSchema),
   ItemsController.update
 );
 
 itemRouter.delete('/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('delete.invtitm'),
+  ...invtMiddlewares('delete.invtitm'),
   validateIdParams,
   ItemsController.deletItem
 );

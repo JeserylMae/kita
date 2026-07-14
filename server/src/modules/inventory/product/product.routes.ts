@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { authorizeOrganizationAccess } from '@/middleware/authorization.middleware';
+
 import * as ProductController from './product.controller';
 
 import { 
@@ -21,51 +23,38 @@ import {
 
 const productRouter = Router();
 
+productRouter.use(requireAuth);
+productRouter.use(requireOrg);
+productRouter.use(verifyOrgPermission);
+productRouter.use(authorizeOrganizationAccess);
+
 productRouter.get('/',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
   ProductController.getAll
 );
 
 productRouter.post('/',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
   validateBody(ProductInsertRequestSchema),
   ProductController.store
 );
 
-productRouter.patch('/:id', 
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
+productRouter.patch('/:id',
   validateIdParams,
   validateBody(ProductUpdateSchema),
   ProductController.update
 );
 
 productRouter.patch('/variant/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
   validateIdParams,
   validateBody(VariantUpdateSchema),
   ProductController.updateVariant 
 );
 
 productRouter.delete('/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
   validateIdParams,
   ProductController.deleteProduct
 );
 
 productRouter.delete('/variant/:id',
-  requireAuth,
-  requireOrg,
-  verifyOrgPermission,
   validateIdParams,
   ProductController.deleteVariant
 );

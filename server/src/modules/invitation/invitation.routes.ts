@@ -19,50 +19,48 @@ import {
 } from "../organization/organization.schemas";
 
 
+const inviteMiddlewares = (scope: string) => {
+  return [
+    requireOrg,
+    requireBrc,
+    verifyBrcPermission(scope),
+    validateIdParams
+  ];
+}
+
 const invitationRouter = Router();
 
+invitationRouter.use(requireAuth);
+
+
 // /invitation/
-invitationRouter.post('/', 
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('insert.orginv'),
-  validateIdParams,
+invitationRouter.post('/',
+  ...inviteMiddlewares('insert.orginv'),
   validateBody(InvitationParamsSchema),
   InvitationController.invite
 );
 
 // /invitation/tokenstr
 invitationRouter.post('/:token', 
-  requireAuth,
   validateBody(InvitationResponseSchema),
   InvitationController.respondToInvitation
 );
 
 // /invitation/idstr
 invitationRouter.post('/:id',
-  requireAuth,
   validateIdParams,
   InvitationController.reinvite
 );
 
 // /invitation/idstr
 invitationRouter.get('/me',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('select.orginv'),
-  validateIdParams,
+  ...inviteMiddlewares('select.orginv'),
   InvitationController.getInvitations
 );
 
 // /invitation/idstr
 invitationRouter.delete('/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('delete.orginv'),
-  validateIdParams,
+  ...inviteMiddlewares('delete.orginv'),
   InvitationController.deleteInvitation
 );
 

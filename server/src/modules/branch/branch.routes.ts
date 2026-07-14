@@ -18,68 +18,62 @@ import {
   BranchUpdateSchema, 
   MemberUpdateSchema 
 } from "./branch.schemas";
+import { authorizeBranchAccess } from "@/middleware/authorization.middleware";
+
+
+const brcMiddlewares = (scope: string) => {
+  return [
+    requireBrc,
+    verifyBrcPermission(scope),
+    authorizeBranchAccess,
+    validateIdParams
+  ];
+}
 
 
 const branchRouter = Router();
 
+branchRouter.use(requireAuth);
+branchRouter.use(requireOrg);
+
 branchRouter.post('/',
-  requireAuth,
-  requireOrg,
   verifyBrcPermission('insert.brc'),
   BranchController.create
 );
 
 branchRouter.get('/members/',
-  requireAuth,
-  requireOrg,
   requireBrc,
   verifyBrcPermission('select.brcmem'),
+  authorizeBranchAccess,
   BranchController.findMembers
 );
 
 branchRouter.get('/:id',
-  requireAuth,
-  requireOrg,
   verifyBrcPermission('select.brc'),
+  authorizeBranchAccess,
   validateIdParams,
   BranchController.selectBranch
 );
 
 branchRouter.patch('/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('update.brc'),
-  validateIdParams,
+  ...brcMiddlewares('update.brc'),
   validateBody(BranchUpdateSchema),
   BranchController.update
 );
 
 branchRouter.patch('/member/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('update.brcmem'),
-  validateIdParams,
+  ...brcMiddlewares('update.brcmem'),
   validateBody(MemberUpdateSchema),
   BranchController.updateMember
 );
 
 branchRouter.delete('/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('delete.brc'),
-  validateIdParams,
+  ...brcMiddlewares('delete.brc'),
   BranchController.deleteBranch
 );
 
 branchRouter.delete('/member/:id',
-  requireAuth,
-  requireOrg,
-  requireBrc,
-  verifyBrcPermission('delete.brcmem'),
-  validateIdParams,
+  ...brcMiddlewares('delete.brcmem'),
   BranchController.deleteMember
 );
 
