@@ -57,3 +57,5 @@ export type MembershipUpdate   = z.infer<typeof schema.MembershipUpdateSchema>;
 export type OrgInsertRequest   = z.infer<typeof schema.OrgInsertRequestSchema>;
 
 export type OrgUpdateRequest   = z.infer<typeof schema.OrgUpdateRequestSchema>;
+
+export type OrgQueryParams     = z.infer<typeof schema.OrgQueryParamsSchema>;
