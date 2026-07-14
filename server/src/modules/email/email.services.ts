@@ -30,14 +30,14 @@ export const sendEmail = async (
   return data;
 }
 
-
+const src = 'src/modules/email/templates';
 const inviteSource = fs.readFileSync(
-  path.join(process.cwd(), "templates/invite.html"),
+  path.join(process.cwd(), `${src}/invite.html`),
   "utf-8"
 );
 
 const verifyEmailSource = fs.readFileSync(
-  path.join(process.cwd(), "templates/invite.html"),
+  path.join(process.cwd(), `${src}/invite.html`),
   "utf-8"
 );
 
