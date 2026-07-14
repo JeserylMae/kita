@@ -20,7 +20,7 @@ export const loader = ({ app }: Params) => {
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: true }));
   
-  app.use('/auth', userRouter);
+  app.use('/user', userRouter);
   app.use('/organization', organizationRouter);
   app.use('/invitation', invitationRouter);
   app.use('/branch', branchRouter);

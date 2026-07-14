@@ -2,14 +2,24 @@ import { hash } from '@node-rs/argon2';
 import { supabase } from '@/config/db';
 import { v4 as uuidv4 } from "uuid";
 import { PermissionInfo } from './user.types';
-import { AccountNotVerified, ConflictError, ErrorII, InvalidCredentials } from "@/errors";
+import { getDateAfterInterval } from '@/utils/data.helpers';
 
 import * as UserServices from './user.services';
 import * as TokenServices from '../token/token.services';
 import * as SessionServices from '../token/sessions.services';
 import * as PasswordServices from './password.services';
-import { renderVerifyEmail, sendEmail } from '../email/email.services';
-import { getDateAfterInterval } from '@/utils/data.helpers';
+
+import { 
+  renderVerifyEmail, 
+  sendEmail 
+} from '../email/email.services';
+
+import { 
+  AccountNotVerified, 
+  ConflictError, 
+  ErrorII, 
+  InvalidCredentials 
+} from "@/errors";
 
 
 // @TODO: add role validation via middleware

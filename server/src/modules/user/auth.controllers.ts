@@ -1,5 +1,4 @@
 import { assertAuth } from '../base/base.services';
-import { ResetPasswordParams, SignupParams } from './user.types';
 import { InvalidCredentials } from '@/errors';
 import { accessTokenCookieOptions } from '@/config/types.d';
 import { NextFunction, Request, Response } from 'express';
@@ -7,6 +6,13 @@ import { NextFunction, Request, Response } from 'express';
 import * as TokenServices from '../token/token.services';
 import * as AuthServices from './auth.services';
 import * as MembershipServices from '../organization/membership.services';
+
+import { 
+  ForgotPasswordParams, 
+  ResetPasswordParams, 
+  SigninParams, 
+  SignupParams 
+} from './user.types';
 
 
 /**
@@ -42,7 +48,7 @@ export const signup = async (
  * @param res 
  */
 export const signin = async ( 
-  req: Request, 
+  req: Request<any, any, SigninParams>, 
   res: Response,
   next: NextFunction 
 ) => {
@@ -117,14 +123,14 @@ export const verifyEmail = async (
 }
 
 export const resendEmailVerification = async (
-  req: Request, 
+  req: Request<any, any, ForgotPasswordParams>, 
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { email, acceptURL} = req.body;
+    const { email, url} = req.body;
 
-    await AuthServices.resendVerificationEmail(email, acceptURL);
+    await AuthServices.resendVerificationEmail(email, url);
 
     res.status(200).json({
       'success': true,
@@ -143,14 +149,14 @@ export const resendEmailVerification = async (
  * @param res 
  */
 export const requestForgotPassword = async ( 
-  req: Request, 
+  req: Request<any, any, ForgotPasswordParams>, 
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { email, resetClientLink } = req.body;
+    const { email, url } = req.body;
 
-    await AuthServices.requestforgotPassword( email, resetClientLink );
+    await AuthServices.requestforgotPassword( email, url );
 
     res.status(202).json({
       'success': true,

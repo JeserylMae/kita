@@ -1,5 +1,12 @@
 import * as z from 'zod';
-import { ResetPasswordParamsSchema, SignupParamsSchema, UserInsertSchema, UserUpdateSchema } from './user.schemas';
+import { 
+  ForgotPasswordParamsSchema, 
+  ResetPasswordParamsSchema, 
+  SigninParamsSchema, 
+  SignupParamsSchema, 
+  UserInsertSchema, 
+  UserUpdateSchema 
+} from './user.schemas';
 
 
 export type PermissionInfo = {
@@ -41,10 +48,14 @@ export interface UserSelect {
   token_expires_at?:   Date;
 }
 
-export type SignupParams        = z.infer<typeof SignupParamsSchema>;
+export type SignupParams         = z.infer<typeof SignupParamsSchema>;
 
-export type ResetPasswordParams = z.infer<typeof ResetPasswordParamsSchema>;
+export type SigninParams         = z.infer<typeof SigninParamsSchema>;
 
-export type UserInsert          = z.infer<typeof UserInsertSchema>;
+export type ForgotPasswordParams = z.infer<typeof ForgotPasswordParamsSchema>;
 
-export type UserUpdate          = z.infer<typeof UserUpdateSchema>;
+export type ResetPasswordParams  = z.infer<typeof ResetPasswordParamsSchema>;
+
+export type UserInsert           = z.infer<typeof UserInsertSchema>;
+
+export type UserUpdate           = z.infer<typeof UserUpdateSchema>;

@@ -8,7 +8,12 @@ import {
   verifyBrcPermission
 } from '@/middleware/auth.middleware';
 import { validateBody, validateIdParams } from '@/middleware/validation.middleware';
-import { ResetPasswordParamsSchema, SignupParamsSchema, UserUpdateSchema } from './user.schemas';
+import { 
+  ResetPasswordParamsSchema, 
+  SignupParamsSchema, 
+  UserUpdateSchema,
+  ForgotPasswordParamsSchema
+} from './user.schemas';
 
 
 const userRouter = Router();
@@ -34,7 +39,17 @@ userRouter.post('/reset-password',
 );
 
 userRouter.post('/forgot-password', 
+  validateBody(ForgotPasswordParamsSchema),
   AuthController.requestForgotPassword
+);
+
+userRouter.get('/verify-email', 
+  AuthController.verifyEmail
+);
+
+userRouter.post('/resend-verification', 
+  validateBody(ForgotPasswordParamsSchema),
+  AuthController.resendEmailVerification
 );
 
 userRouter.get('/me',
