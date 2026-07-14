@@ -42,7 +42,7 @@ export const GetMembersPath: ZodOpenApiPathItemObject = {
     ],
 
     responses: {
-      200: { description: "Organization members retrieved successfully" },
+      200: { description: "Organization members retrieved successfully" }, 
       401: { description: "Unauthorized" },
       403: { description: "Insufficient permissions" },
       404: { description: "Organization not found" },
