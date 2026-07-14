@@ -1,38 +1,50 @@
-import { Forbidden } from "@/errors";
+import { Forbidden, InvalidCredentials } from "@/errors";
 import { isUserInOrg } from "@/modules/organization/membership.services";
 import { isUserInBranch } from "@/modules/branch/branch.services";
 import { NextFunction, Request, Response } from "express"
-import { doesRecordExist } from "@/modules/base/base.services";
+import { assertAuth, assertBrc, assertOrg, doesRecordExist } from "@/modules/base/base.services";
 import { TableName } from "@/modules/organization/organization.types";
 
 
 const errMsg = 'You do not have sufficient permissions for this operation.'
 
+// for user module
 export const authorizeUserAccess = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try { 
-    const usrScope = req.scopes;
+    // Check if user is logged in and verified.
+    assertAuth(req);
+    
     const targetID = req.params.id;
 
-    if (!usrScope || typeof targetID !== 'string') { 
-      throw new Forbidden(errMsg);
+    if (typeof targetID !== 'string') {
+      throw new InvalidCredentials('Invalid user ID.');
     }
     
-    if (usrScope.includes('self') && targetID === req.user?.id) {
+    // Is user accessing their own info.
+    if (targetID === req.context.user.id) {
       return next();
     }
 
-    if (usrScope.includes('branch')) {
-      const inBrc = await isUserInBranch(req.branch?.id!, targetID);
-      if (inBrc) return next();
+    // Check if user is an organization member.
+    assertOrg(req);
+
+    if (req.context.org.role === 'admin') {
+      const inOrg = await isUserInOrg(req.context.org.id, targetID);
+      if (inOrg) return next();
     }
 
-    if (usrScope.includes('organization')) {
-      const inOrg = await isUserInOrg(req.org?.id!, targetID);
-      if (inOrg) return next();
+    // Check if user has sufficient branch role.
+    assertBrc(req);
+
+    const usrScope = req.context.scopes;
+
+    if (usrScope.includes('branch')) {
+      const inBrc = await isUserInBranch(req.context.brc.id, targetID);
+      if (inBrc) return next();
     }
 
     throw new Forbidden(errMsg);
@@ -42,22 +54,22 @@ export const authorizeUserAccess = async (
   } 
 }
 
-// for branch and branch members 
+// for branch level modules
 export const authorizeBranchAccess = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const usrScope = req.scopes ?? [];
-    const orgId = req.org?.id;
-    const branchId = req.branch?.id;
-    const userOrgMemId = req.org?.orgmemID;
-    const targetID = req.params.id;
+    assertBrc(req);
 
-    if (!usrScope || typeof targetID !== 'string'
-      || !branchId || !userOrgMemId || !orgId
-    ) { 
+    const usrScope     = req.context.scopes;
+    const orgId        = req.context.org.id;
+    const branchId     = req.context.brc.id;
+    const userOrgMemId = req.context.org.memID;
+    const targetID     = req.params.id;
+
+    if (typeof targetID !== 'string') { 
       throw new Forbidden(errMsg);
     }
 
@@ -81,33 +93,30 @@ export const authorizeBranchAccess = async (
 }
 
 
-// for organization and organization members 
+// for organization level modules
 export const authorizeOrganizationAccess = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const usrScope = req.scopes;
-    const targetID = req.params.id;
-    const orgID = req.org?.id;
-    const branchID = req.branch?.id;
-    const userOrgMemID = req.org?.orgmemID;
+    assertOrg(req);
 
-    if (!usrScope || typeof targetID !== 'string'
-      || !branchID || !userOrgMemID || !orgID
-    ) { 
+    const targetID = req.params.id;
+    const orgID    = req.context.org.id;
+    const memID    = req.context.org.memID;
+    const role     = req.context.org.role;
+
+    if (typeof targetID !== 'string') { 
       throw new Forbidden(errMsg);
     }
 
-    if (usrScope.includes('self') || usrScope.includes('branch')) {
-      if (await hasBranchAccess(userOrgMemID, branchID)) {
-        return next();
-      }
+    if (targetID === memID) {
+      return next();
     }
 
-    if (usrScope.includes('organization')) {
-      if (await hasOrganizationAccess(userOrgMemID, orgID)) {
+    if (role === 'admin' || role === 'owner') {
+      if (await hasOrganizationAccess(memID, orgID)) {
         return next();
       }
     }
