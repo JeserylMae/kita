@@ -26,7 +26,7 @@ export const loader = ({ app }: Params) => {
   app.use('/branch', branchRouter);
   
   app.use('/inventory/items', itemRouter);
-  app.use('/product', productRouter);
+  app.use('/inventory/product', productRouter);
   app.use('/inventory/movement', movementRouter);
   app.use('/transaction', txnRouter);
 
