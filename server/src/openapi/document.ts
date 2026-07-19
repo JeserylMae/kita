@@ -11,7 +11,7 @@ import * as item from "../modules/inventory/items/items.openapi";
 import * as brc from "../modules/branch/branch.openapi";
 
 
-export const openapiDocument: OpenAPIObject = createDocument({
+const openapiDocument: OpenAPIObject = createDocument({
   openapi: "3.1.0",
 
   info: {
@@ -137,3 +137,5 @@ export const openapiDocument: OpenAPIObject = createDocument({
     },
   ],
 });
+
+export default openapiDocument;

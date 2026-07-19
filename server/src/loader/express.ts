@@ -9,6 +9,7 @@ import txnRouter from '@/modules/inventory/transaction/transaction.routes';
 import movementRouter from '@/modules/inventory/movement/movement.routes';
 import productRouter from '@/modules/inventory/product/product.routes';
 import itemRouter from '@/modules/inventory/items/items.routes';
+import openapiDocument from '@/openapi/document';
 
 
 interface Params {
@@ -31,6 +32,10 @@ export const loader = ({ app }: Params) => {
   app.use('/transaction', txnRouter);
 
   app.use(ErrorMiddleware.handleError);
+
+  app.get("/openapi.json", (req, res) => {
+    res.json(openapiDocument);
+  });
 
   app.get('/status', (req, res) => {
     return res.status(200).end("OK");
