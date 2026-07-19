@@ -9,7 +9,9 @@ import {
   Token,
   ExpiresAt,
   UpdatedAt,
-  URL
+  URL,
+  Icon,
+  HexColor,
 } from '@/modules/base/base.schemas';
 
 
@@ -51,16 +53,6 @@ const InvitationURL = URL.meta({
 const OrgName = z.string().meta({
   description: "Organization name",
   example: "Acme Corporation",
-});
-
-const Icon = z.string().meta({
-  description: "URL or identifier of the organization's icon/logo",
-  example: "https://cdn.example.com/icons/acme.png",
-});
-
-const HexColor = z.string().regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/).meta({
-  description: "Brand color in hex format",
-  example: "#1A73E8",
 });
 
 const OrgStatus = z.string().meta({

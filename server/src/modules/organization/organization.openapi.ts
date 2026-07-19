@@ -6,6 +6,7 @@ import {
   OrgUpdateRequestSchema,
   OrgQueryParamsSchema
 } from "@/modules/organization/organization.schemas";
+import { IdParamsSchema } from '../base/base.schemas';
 
 
 export const GetOrganizationsPath: ZodOpenApiPathItemObject = {
@@ -30,17 +31,6 @@ export const GetMembersPath: ZodOpenApiPathItemObject = {
     description: "Retrieves all members belonging to the specified organization.",
     security:    [{ cookieAuth: [] }],
 
-    parameters: [
-      {
-        name:        "id",
-        in:          "path",
-        required:    true,
-        description: "Organization UUID",
-        schema:      { type: "string", format: "uuid" },
-        example:     "550e8400-e29b-41d4-a716-446655440000",
-      },
-    ],
-
     responses: {
       200: { description: "Organization members retrieved successfully" }, 
       401: { description: "Unauthorized" },
@@ -57,16 +47,7 @@ export const SwitchOrganizationPath: ZodOpenApiPathItemObject = {
     description: "Switches the authenticated user's active organization context and issues a new access token.",
     security:    [{ cookieAuth: [] }],
 
-    parameters: [
-      {
-        name:        "id",
-        in:          "path",
-        required:    true,
-        description: "Organization UUID to switch to",
-        schema:      { type: "string", format: "uuid" },
-        example:     "550e8400-e29b-41d4-a716-446655440000",
-      },
-    ],
+    requestParams: { query: IdParamsSchema },
 
     responses: {
       200: { description: "Switched to selected organization" },
@@ -103,15 +84,6 @@ export const UpdateOrganizationPath: ZodOpenApiPathItemObject = {
     description: "Updates an existing organization's information, brands, and founders.",
     security:    [{ cookieAuth: [] }],
 
-    parameters: [{
-      name:        "id",
-      in:          "path",
-      required:    true,
-      description: "Organization UUID",
-      schema:      { type: "string", format: "uuid" },
-      example:     "550e8400-e29b-41d4-a716-446655440000",
-    }],
-
     requestBody: {
       required: true,
       content: { "application/json": { schema: OrgUpdateRequestSchema } },
@@ -134,21 +106,7 @@ export const UpdateMemberPath: ZodOpenApiPathItemObject = {
     description: "Updates an existing member's status, role, or employment information within an organization.",
     security:    [{ cookieAuth: [] }],
     
-    parameters: [{
-      name:        "orgID",
-      in:          "path",
-      required:    true,
-      description: "Organization UUID",
-      schema:      { type: "string", format: "uuid" },
-      example:     "550e8400-e29b-41d4-a716-446655440000",
-    }, {
-      name:        "id",
-      in:          "path",
-      required:    true,
-      description: "Organization member UUID",
-      schema:      { type: "string", format: "uuid" },
-      example:     "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    }],
+    requestParams: { query: IdParamsSchema },
 
     requestBody: {
       required: true,
@@ -182,19 +140,11 @@ export const DeleteOrgPath: ZodOpenApiPathItemObject = {
 
 export const DeleteMemberPath: ZodOpenApiPathItemObject = {
   delete: {
-    tags:        ["Organizations"],
-    summary:     "Delete organization member",
-    description: "Removes a member from an organization.",
-    security:    [{ cookieAuth: [] }],
-    
-    parameters: [{
-      name:        "id",
-      in:          "path",
-      required:    true,
-      description: "Organization member UUID",
-      schema:      { type: "string", format: "uuid" },
-      example:     "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    }],
+    tags:          ["Organizations"],
+    summary:       "Delete organization member",
+    description:   "Removes a member from an organization.",
+    security:      [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema },
     
     responses: {
       200: { description: "Member deleted successfully" },
@@ -206,19 +156,11 @@ export const DeleteMemberPath: ZodOpenApiPathItemObject = {
 
 export const DeleteFounderPath: ZodOpenApiPathItemObject = {
   delete: {
-    tags:        ["Organizations"],
-    summary:     "Delete founder",
-    description: "Removes a founder record from an organization.",
-    security:    [{ cookieAuth: [] }],
-    
-    parameters: [{
-      name: "id",
-      in: "path",
-      required: true,
-      description: "Founder UUID",
-      schema: { type: "string", format: "uuid" },
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    }],
+    tags:          ["Organizations"],
+    summary:       "Delete founder",
+    description:   "Removes a founder record from an organization.",
+    security:      [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema },
 
     responses: {
       200: { description: "Record deleted successfully" },
@@ -231,18 +173,11 @@ export const DeleteFounderPath: ZodOpenApiPathItemObject = {
 
 export const DeleteBrandPath: ZodOpenApiPathItemObject = {
   delete: {
-    tags:        ["Organizations"],
-    summary:     "Delete brand",
-    description: "Removes a brand/sub-brand record from an organization.",
-    security:    [{ cookieAuth: [] }],
-    parameters: [{
-      name: "id",
-      in: "path",
-      required: true,
-      description: "Brand UUID",
-      schema: { type: "string", format: "uuid" },
-      example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-    }],
+    tags:          ["Organizations"],
+    summary:       "Delete brand",
+    description:   "Removes a brand/sub-brand record from an organization.",
+    security:      [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema },
     
     responses: {
       200: { description: "Record deleted successfully" },

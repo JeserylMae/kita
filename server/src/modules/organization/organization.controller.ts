@@ -20,6 +20,7 @@ import {
 import { 
   MembershipUpdate, 
   OrgInsertRequest, 
+  OrgQueryParams, 
   OrgUpdateRequest, 
   TableName 
 } from "./organization.types";
@@ -32,7 +33,7 @@ import {
  * @param next 
  */
 export const getOrganizations = async (
-  req: Request,
+  req: Request<any, any, any, OrgQueryParams>,
   res: Response,
   next: NextFunction
 ) => {
