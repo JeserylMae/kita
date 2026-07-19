@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validateBody } from "@/middleware/validation.middleware";
-import { invtMiddlewares } from "../inventory.middlewares";
+import { invtMiddlewares } from "../common/inventory.middlewares";
 import { QueryParamsSchema } from "./transaction.schemas";
 import { findAll, findDetails } from "./transaction.controller";
 

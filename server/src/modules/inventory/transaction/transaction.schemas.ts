@@ -1,39 +1,50 @@
 import * as z from 'zod';
+
 import { 
-  ReferenceType, 
-  ReferenceTypeKeys 
-} from './transaction.types';
+  ReferenceTypeSchema,
+  ReferenceID
+} from '../common/inventory.schemas'
 
+import { 
+  Amount, 
+  PaymentMethod 
+} from '../common/inventory.schemas';
 
-const ReferenceTypeSchema = z.enum(
-  Object.keys(ReferenceType) as [
-    ReferenceTypeKeys,
-    ...ReferenceTypeKeys[]
-  ]
-);
+import {
+  BranchID,
+  CreatedByName,
+  CreatedByRole,
+  UUID,
+} from '../../base/base.schemas'
+
 
 export const QueryParamsSchema = z.object({
-  id: z.uuid(),
+  id: UUID,
   referenceType: ReferenceTypeSchema
 });
 
+const TransactionCode = z.string().meta({
+  description: "Unique code for the transaction",
+  example: "TXN-00123",
+});
+
 export const TransactionInsertSchema = z.object({
-  branch_id:       z.uuid(),
-  amount:          z.number(),
-  payment_method:  z.string(),
-  reference_type:  z.string(),
-  reference_id:    z.uuid(),
-  code:            z.string(),
-  created_by_name: z.string().optional(),
-  created_by_role: z.string().optional()
+  branch_id:       BranchID,
+  amount:          Amount,
+  payment_method:  PaymentMethod,
+  reference_type:  ReferenceTypeSchema,
+  reference_id:    ReferenceID,
+  code:            TransactionCode,
+  created_by_name: CreatedByName.optional(),
+  created_by_role: CreatedByRole.optional()
 });
 
 export const TransactionUpdateSchema = z.object({
-  amount:          z.number().optional(),
-  payment_method:  z.string().optional(),
-  reference_type:  z.string().optional(),
-  reference_id:    z.uuid().optional(),
-  code:            z.string().optional(),
-  created_by_name: z.string().optional(),
-  created_by_role: z.string().optional()
+  amount:          Amount.optional(),
+  payment_method:  PaymentMethod.optional(),
+  reference_type:  ReferenceTypeSchema.optional(),
+  reference_id:    ReferenceID.optional(),
+  code:            TransactionCode.optional(),
+  created_by_name: CreatedByName.optional(),
+  created_by_role: CreatedByRole.optional()
 });

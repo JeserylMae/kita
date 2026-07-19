@@ -1,30 +1,75 @@
 import * as z from 'zod';
 
+import {
+  BranchID,
+  RoleID,
+  Icon,
+  HexColor,
+} from '@/modules/base/base.schemas';
+
+
+const OrgMemID = z.uuid().meta({
+  description: "Organization member UUID",
+  example: "550e8400-e29b-41d4-a716-446655440000",
+});
+
+const MemberStatus = z.enum(['invited', 'active', 'rejected', 'expired', 're-invited', 'removed']).meta({
+  description: "Status of the branch member",
+  example: "active",
+});
+
+const Starred = z.boolean().meta({
+  description: "Indicates if the branch member is starred",
+  example: true,
+});
+
+const BranchName = z.string().meta({
+  description: "Name of the branch",
+  example: "Main Branch",
+});
+
+const Address = z.string().meta({
+  description: "Address of the branch",
+  example: "123 Main St, City, Country",
+});
+
+const BranchStatus = z.enum(['active', 'inactive', 'closed', 'under review', 'suspended']).meta({
+  description: "Status of the branch",
+  example: "active",
+});
 
 export const MemberInsertSchema = z.object({
-  branch_id:  z.uuid(),
-  org_mem_id: z.uuid(),
-  role_id:    z.uuid(),
-  status:     z.string()
+  branch_id:  BranchID,
+  org_mem_id: OrgMemID,
+  role_id:    RoleID,
+  status:     MemberStatus
 });
 
 export const MemberUpdateSchema = z.object({
-  role_id: z.uuid().optional(),
-  status:  z.string().optional(),
-  starred: z.boolean().optional()
+  role_id: RoleID.optional(),
+  status:  MemberStatus.optional(),
+  starred: Starred.optional()
 });
 
 export const BranchInsertSchema = z.object({
-  branch_name: z.string(),
-  icon:        z.string().optional(),
-  color:       z.string().optional(),
-  address:     z.string().optional()
+  branch_name: BranchName,
+  icon:        Icon.optional(),
+  color:       HexColor.optional(),
+  address:     Address.optional()
 });
 
 export const BranchUpdateSchema = z.object({
-  branch_name: z.string(),
-  icon:        z.string().optional(),
-  color:       z.string().optional(),
-  address:     z.string().optional(),
-  status:      z.string().optional()
+  branch_name: BranchName.optional(),
+  icon:        Icon.optional(),
+  color:       HexColor.optional(),
+  address:     Address.optional(),
+  status:      BranchStatus.optional()
+});
+
+
+export const BranchInsertRequestParamsSchema = z.object({
+  branch: BranchInsertSchema,
+  roleID: RoleID
+}).meta({
+  description: "Branch insert parameter list."
 });
