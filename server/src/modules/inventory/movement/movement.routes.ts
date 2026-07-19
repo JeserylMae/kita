@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { invtMiddlewares } from "../inventory.middlewares";
+import { invtMiddlewares } from "../common/inventory.middlewares";
 
 import * as MovementController from "./movement.controller";
 
