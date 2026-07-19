@@ -13,6 +13,7 @@ import {
 } from "express";
 
 import { 
+  BranchInsertRequest,
   BranchUpdate, 
   MemberUpdate 
 } from "./branch.types";
@@ -31,7 +32,7 @@ import {
  * @returns 
  */
 export const create = async (
-  req: Request,
+  req: Request<any, any, BranchInsertRequest>,
   res: Response,
   next: NextFunction 
 ) => {
