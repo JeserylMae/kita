@@ -46,26 +46,25 @@ export const MemberInsertSchema = z.object({
 });
 
 export const MemberUpdateSchema = z.object({
-  role_id: RoleID.optional(),
-  status:  MemberStatus.optional(),
-  starred: Starred.optional()
+  role_id: RoleID.optional().nullable(),
+  status:  MemberStatus.optional().nullable(),
+  starred: Starred.optional().nullable()
 });
 
 export const BranchInsertSchema = z.object({
   branch_name: BranchName,
-  icon:        Icon.optional(),
-  color:       HexColor.optional(),
-  address:     Address.optional()
+  icon:        Icon.optional().nullable(),
+  color:       HexColor.optional().nullable(),
+  address:     Address.optional().nullable()
 });
 
 export const BranchUpdateSchema = z.object({
-  branch_name: BranchName.optional(),
-  icon:        Icon.optional(),
-  color:       HexColor.optional(),
-  address:     Address.optional(),
-  status:      BranchStatus.optional()
+  branch_name: BranchName.optional().nullable(),
+  icon:        Icon.optional().nullable(),
+  color:       HexColor.optional().nullable(),
+  address:     Address.optional().nullable(),
+  status:      BranchStatus.optional().nullable()
 });
-
 
 export const BranchInsertRequestParamsSchema = z.object({
   branch: BranchInsertSchema,

@@ -26,9 +26,9 @@ export const MovementInsertSchema = z.object({
 });
 
 export const MovementUpdateSchema = z.object({
-  product_variant_id: ProductVariantID.optional(),
-  quantity_changed:   QuantityChanged.optional(),
-  movement_type:      MovementType.optional(),
-  reference_type:     ReferenceTypeSchema.optional(),
-  reference_id:       ReferenceID.optional()
+  product_variant_id: ProductVariantID.optional().nullable(),
+  quantity_changed:   QuantityChanged.optional().nullable(),
+  movement_type:      MovementType.optional().nullable(),
+  reference_type:     ReferenceTypeSchema.optional().nullable(),
+  reference_id:       ReferenceID.optional().nullable()
 });

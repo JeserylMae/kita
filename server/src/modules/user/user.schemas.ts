@@ -112,20 +112,20 @@ export const ResetPasswordParamsSchema = z.object({
 
 export const UserInsertSchema = z.object({
   auth_id: AuthID,
+    
+  firstname:     FirstName.optional().nullable(),
+  middlename:    MiddleName.optional().nullable(),
+  lastname:      LastName.optional().nullable(),
+  suffix:        Suffix.optional().nullable(),
 
-  firstname:  FirstName.optional(),
-  middlename: MiddleName.optional(),
-  lastname:   LastName.optional(),
-  suffix:     Suffix.optional(),
+  house_number:  HouseNumber.optional().nullable(),
+  street:        Street.optional().nullable(),
+  barangay:      Barangay.optional().nullable(),
+  city:          City.optional().nullable(),
+  province:      Province.optional().nullable(),
+  region:        Region.optional().nullable(),
 
-  house_number: HouseNumber.optional(),
-  street:       Street.optional(),
-  barangay:     Barangay.optional(),
-  city:         City.optional(),
-  province:     Province.optional(),
-  region:       Region.optional(),
-
-  birthdate:    BirthDate.optional(),
+  birthdate:     BirthDate.optional().nullable(),
 
   email:        Email,
   password:     Password,
@@ -139,28 +139,28 @@ export const UserInsertSchema = z.object({
 });
 
 export const UserUpdateSchema = z.object({
-  firstname:  FirstName.optional(),
-  middlename: MiddleName.optional(),
-  lastname:   LastName.optional(),
-  suffix:     Suffix.optional(),
+  firstname:     FirstName.optional().nullable(),
+  middlename:    MiddleName.optional().nullable(),
+  lastname:      LastName.optional().nullable(),
+  suffix:        Suffix.optional().nullable(),
 
-  house_number: HouseNumber.optional(),
-  street:       Street.optional(),
-  barangay:     Barangay.optional(),
-  city:         City.optional(),
-  province:     Province.optional(),
-  region:       Region.optional(),
+  house_number:  HouseNumber.optional().nullable(),
+  street:        Street.optional().nullable(),
+  barangay:      Barangay.optional().nullable(),
+  city:          City.optional().nullable(),
+  province:      Province.optional().nullable(),
+  region:        Region.optional().nullable(),
 
-  birthdate: BirthDate.optional(),
+  birthdate:     BirthDate.optional().nullable(),
 
-  email:    Email.optional(),
-  password: Password.optional(),
-  
-  verification_token: Token.optional(),
-  token_expires_at:   ExpiresAt.optional(),
-  verified_at:        VerifiedAt.optional(),
+  email:         Email.optional().nullable(),
+  password:      Password.optional().nullable(),
 
-  default_org: OrgID.optional()
+  verification_token: Token.optional().nullable(),
+  token_expires_at:   ExpiresAt.optional().nullable(),
+  verified_at:        VerifiedAt.optional().nullable(),
+
+  default_org:   OrgID.optional().nullable(),
 }).meta({
   id: "UserUpdate",
   title: "User Update",
