@@ -45,7 +45,7 @@ export const getOrganizations = async (
     const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
 
     const data = await MembershipServices
-      .findMembership( userID!, { 
+      .findMembership( userID, { 
         withBranches,
         defaultOrgOnly 
       });
@@ -75,9 +75,14 @@ export const getMembers = async (
   try {
     assertOrg(req);
 
-    // Note: the passed id in the params are used for validation
-    // whether req.org.id === req.params.id
+    const paramOrgID = req.params.id;
     const orgID = req.context.org.id;
+
+    if (paramOrgID !== orgID) {
+      throw new InvalidCredentials(
+        'Invalid organization ID.'
+      );
+    }
 
     const data = await MembershipServices
       .findAllMembers(orgID);
@@ -108,11 +113,12 @@ export const switchOrganization = async (
     const org = await MembershipServices.findRole(userID, orgID);
 
     const acsToken = await createAccessToken(
-      { id: userID },
+      userID,
       sessionID,
       orgID,
-      org.roles[0]?.role,
-      org.id
+      org.role,
+      org.id,
+      true
     );
 
     res.cookie('ACCESS-TOKEN', acsToken, 
@@ -189,8 +195,7 @@ export const update = async (
       brands, 
       founders
     } = req.body;
-    // Note: the passed id in the params are used for validation
-    // whether req.org.id === req.params.id
+    
     const orgID = req.context.org.id;
   
     await OrganizationService.update(
@@ -311,14 +316,24 @@ export const deleteMember = async (
 /**
  * Returns delete handler
  */
-export const deleteFounder = () => 
-  createDeleteHandler( TableName.founder );
+export const deleteFounder = (
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  createDeleteHandler(TableName.founder, req, res, next);
+}
 
 /**
  * Returns delete handler
  */
-export const deleteBrand = () => 
-  createDeleteHandler( TableName.brand );
+export const deleteBrand = (
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  createDeleteHandler(TableName.brand, req, res, next);
+}
 
 /**
  * 
@@ -326,34 +341,32 @@ export const deleteBrand = () =>
  * @returns 
  */
 const createDeleteHandler = async (
-  table: TableName
+  table: TableName,
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
 ) => {
-  return async (
-    req: Request<IdParams>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      assertOrg(req);
+  try {
+    assertOrg(req);
 
-      const id = req.params.id;
-  
-      if (typeof id !== 'string') {
-        throw new InvalidCredentials(
-          'ID is not valid.'
-        );
-      }
-  
-      await OrganizationService
-        .deleteHandler( id, table, res, next );
+    const id = req.params.id;
 
-      res.status(200).json({
-        'success': true,
-        'message': 'Record was deleted.'
-      });
+    if (typeof id !== 'string') {
+      throw new InvalidCredentials(
+        'ID is not valid.'
+      );
     }
-    catch (error: unknown) {
-      next(error);
-    }
+
+    await OrganizationService
+      .deleteHandler( id, table );
+
+    res.status(200).json({
+      'success': true,
+      'message': 'Record was deleted.'
+    });
+  }
+  catch (error: unknown) {
+    next(error);
   }
 }
+

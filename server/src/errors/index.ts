@@ -39,7 +39,7 @@ export class InvalidCredentials extends ErrorII {
 
 export class RecordNotFound extends ErrorII {
   constructor( message: string ) {
-    super( message, 403 )
+    super( message, 404 )
     this.name = 'RecordNotFound';
   }
 }

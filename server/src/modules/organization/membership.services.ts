@@ -37,7 +37,7 @@ export const findRole = async (
 ) => {
   const { data, error } = await supabase
     .from(TableName.orgMem)
-    .select('id, roles(role)')
+    .select('id, role')
     .eq('user_id', userID)
     .eq('org_id', defaultOrg)
     .single();
@@ -65,7 +65,7 @@ export const findMembership = async (
     org_id,
     employee_code,
     status,
-    organizations( org_name, icon, hex_color )
+    organizations( org_name, icon, hex_color, status )
   `);
 
   if (options?.withBranches) {
@@ -78,7 +78,7 @@ export const findMembership = async (
         role(role),
         status,
         starred,
-        branches( branch_name, icon, color )
+        branches( branch_name, icon, color, status )
       )
     `);
   }
@@ -87,11 +87,11 @@ export const findMembership = async (
     .from('organization_members')
     .select(slctStr)
     .eq('user_id', userID)
-    .eq('organizations.status', 'active')
-    .eq('status', 'active');
+    .eq('status', 'accepted')
+    .eq('organizations.status', 'active');
 
   buidler = options?.withBranches
-    ? buidler.eq('branches.status', 'active')
+    ? buidler.eq('branch_members.branches.status', 'accepted')
     : buidler;
   
   buidler = options?.defaultOrgOnly 
@@ -101,6 +101,8 @@ export const findMembership = async (
   const { data, error } = await buidler;
   
   if (!error) return data;
+
+  console.log(`Message: ${error.message}`);
   
   throw new RecordNotFound(
     'Failed to fetch organization list.'

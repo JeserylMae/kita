@@ -33,7 +33,7 @@ const validateHandler = <T> (
       throw new BadRequest(result.error.message);
     }
 
-    return next();
+    next();
   }
   catch (error: unknown) {
     return next(error);

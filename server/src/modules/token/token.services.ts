@@ -7,6 +7,7 @@ import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
 import { ConflictError, ErrorII, InvalidCredentials, RecordNotFound } from '@/errors';
 
 import * as SessionServices from './sessions.services';
+import { JWTExpired } from 'jose/errors';
 
 
 export interface Token {
@@ -186,20 +187,31 @@ export const verify = ( token: Token ) => {
 }
 
 export const verifyAccessToken = async (token: Token) => {
-  const alg = config.signingAlg;
-  const spki = config.publicKey;
+  try {
+    const alg = config.signingAlg;
+    const spki = config.publicKey;
 
-  const pub = await importSPKI(spki, alg);
+    const pub = await importSPKI(spki, alg);
 
-  const { payload, protectedHeader } = await jwtVerify(
-    token.token_hash!,
-    pub, {
-      issuer: config.tokenIss,
-      audience: config.tokenAud
+    const { payload } = await jwtVerify(
+      token.token_hash!,
+      pub,
+      {
+        issuer: config.tokenIss,
+        audience: config.tokenAud
+      }
+    );
+
+    return payload;
+  } 
+  catch (error) {
+    if (error instanceof JWTExpired) {
+      throw new InvalidCredentials(
+        "Access token is expired."
+      );
     }
-  );
-
-  return payload;
+    throw error;
+  }
 }
 
 export const setUsed = async ( tokenID: string ) => {

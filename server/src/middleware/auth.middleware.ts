@@ -55,18 +55,21 @@ export const requireAuth = async (
   next: NextFunction
 ) => {
   try {
+    const action = req.get("Token-Action");
     const { acsToken, claims } = loadAccessToken(req);
 
-    const payload = await verifyAccessToken({
-      token_hash: acsToken
-    });
-
-    const expiresAt = new Date(payload.exp! * 1000);
-
-    if (expiresAt < new Date) {
-      throw new InvalidCredentials(
-        'Access token is expired.'
-      );
+    if (action !== 'refresh') {
+      const payload = await verifyAccessToken({ 
+        token_hash: acsToken 
+      });
+  
+      const expiresAt = new Date(payload.exp! * 1000);
+  
+      if (expiresAt < new Date) {
+        throw new InvalidCredentials(
+          'Access token is expired.'
+        );
+      }
     }
     
     if ( typeof claims.sub !== 'string' 
