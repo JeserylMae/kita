@@ -52,3 +52,7 @@ export const injectPropertyIntoObjects = (
   let newArr = arr.map(f => ({ ...f, ...pair }));
   return newArr;
 }
+
+export const stringOrNull = (value: unknown): string | null =>
+  typeof value === "string" ? value : null;
+

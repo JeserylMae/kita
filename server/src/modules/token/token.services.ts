@@ -23,14 +23,15 @@ export interface Token {
  * @returns 
  */
 export const createAccessToken = async ( 
-  user: UserSelect,
+  userID: string,
   sessionID: string,
   orgID: string | null,
   orgRole: string | null,
   orgmemID: string | null,
-  branchID?: string,
-  branchRole?: string,
-  branchMemID?: string,
+  verified: boolean,
+  branchID?: string | null,
+  branchRole?: string | null,
+  branchMemID?: string | null,
 
 ) => {
   const alg = config.signingAlg;
@@ -39,7 +40,7 @@ export const createAccessToken = async (
   const pri = await importPKCS8( pkcs8, alg );
 
   const payload = {
-    sub:        user.id!,
+    sub:        userID,
     sid:        sessionID!,
     corg:       orgID,
     orgrole:    orgRole,
@@ -47,7 +48,7 @@ export const createAccessToken = async (
     brcid:   branchID,
     brcrole: branchRole,
     brcmemid: branchMemID,
-    verified:   user.verified_at ? true : false,
+    verified:   verified
   };
 
   const jwt = await new SignJWT( payload )
@@ -75,7 +76,7 @@ export const createAccessToken = async (
  * - "1m"    1 month
  */
 export const createRefreshToken = async ( 
-  user: UserSelect, 
+  userID: string, 
   expDuration: string 
 ) => {
   const refreshToken = createToken();
@@ -87,7 +88,7 @@ export const createRefreshToken = async (
   )
 
   const session = await SessionServices.insert({
-    user_id: user!.id!,
+    user_id: userID,
     refresh_token_hash: refreshToken,
     expires_at: expiresAt,
     created_at: createdAt

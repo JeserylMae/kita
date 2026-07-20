@@ -33,6 +33,11 @@ userRouter.delete('/logout',
   AuthController.logout
 );
 
+userRouter.post('/refresh',
+  requireAuth,
+  AuthController.refresh
+);
+
 userRouter.post('/reset-password', 
   validateBody(ResetPasswordParamsSchema),
   AuthController.resetPassword

@@ -38,9 +38,10 @@ const openapiDocument: OpenAPIObject = createDocument({
   },
 
   paths: {
-    "/user/signup": user.SignupPath,
-    "/user/signin": user.SigninPath,
-    "/user/logout": user.LogoutPath,
+    "/user/signup":  user.SignupPath,
+    "/user/signin":  user.SigninPath,
+    "/user/logout":  user.LogoutPath,
+    '/user/refresh': user.RefreshPath,
     "/user/reset-password":      user.ResetPasswordPath,
     "/user/forgot-password":     user.ForgotPasswordPath,
     "/user/verify-email":        user.VerifyEmailPath,

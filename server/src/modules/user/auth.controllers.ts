@@ -13,6 +13,7 @@ import {
   SigninParams, 
   SignupParams 
 } from './user.types';
+import { stringOrNull } from '@/utils/data.helpers';
 
 
 /**
@@ -60,7 +61,7 @@ export const signin = async (
     const user = await AuthServices.signin(email, password);
 
     const session = (
-      await TokenServices.createRefreshToken(user!, '7d')
+      await TokenServices.createRefreshToken(user?.id!, '7d')
     ) as unknown as { 'id': string };
 
     // If user has default org, then assign the 
@@ -71,16 +72,17 @@ export const signin = async (
         user.default_org
       );
 
-      orgrole = org?.roles[0]?.role;
+      orgrole = org?.role;
       orgmemID = org?.id;
     }
 
     const acsToken = await TokenServices.createAccessToken(
-      user!, 
+      user?.id!, 
       session.id,
       user?.default_org ?? null,
       orgrole,
-      orgmemID
+      orgmemID,
+      user?.verified_at? true : false
     );
 
     res.cookie('ACCESS-TOKEN', acsToken, 
@@ -209,8 +211,9 @@ export const logout = async (
     assertAuth(req);
     
     const sessionID = req.context.user.sid;
+    const userID = req.context.user.id;
 
-    await AuthServices.logout(sessionID);
+    await AuthServices.logout(sessionID, userID);
 
     res.clearCookie('ACCESS-TOKEN');
     res.status(200).json({
@@ -219,6 +222,41 @@ export const logout = async (
     });
   }
   catch ( error: unknown ) {
+    next(error);
+  }
+}
+
+export const refresh = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    assertAuth(req);
+    const userID = req.context.user.id;
+    const sessionID = req.context.user.sid;
+    const claims = req.context.user.claims;
+
+    const acstoken = await AuthServices.refresh(
+      userID,
+      sessionID,
+      stringOrNull(claims.corg),
+      stringOrNull(claims.orgrole),
+      stringOrNull(claims.orgmemid),
+      stringOrNull(claims.brcid),
+      stringOrNull(claims.brcrole),
+      stringOrNull(claims.brcmemid)
+    );
+
+    res.cookie('ACCESS-TOKEN', acstoken, 
+      accessTokenCookieOptions
+    ).status(200)
+    .json({
+      'success': true,
+      'message': 'Refresh successful.',
+    });    
+  }
+  catch (error: unknown) {
     next(error);
   }
 }

@@ -154,7 +154,7 @@ export const verifyOrgPermission = async (
   next: NextFunction
 ) => {
   try{
-    assertBrc(req);
+    assertOrg(req);
 
     const role = req.context.org.role;
 
