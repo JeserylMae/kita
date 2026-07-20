@@ -1,6 +1,7 @@
 import { supabase } from "@/config/db";
 import { BaseRepository } from "../base/base.repository";
 import { storeMembership } from "../branch/branch.services";
+import { InviteEmailParams } from "../email/email.types";
 import { renderInvite, sendEmail } from "../email/email.services";
 
 import { 
@@ -16,7 +17,6 @@ import {
   InvitationParams, 
   InvitationResponse, 
   InvitationUpdate, 
-  InviteEmailParams, 
   TableName
 } from "../organization/organization.types";
 

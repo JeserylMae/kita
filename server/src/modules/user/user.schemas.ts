@@ -160,7 +160,7 @@ export const UserUpdateSchema = z.object({
   token_expires_at:   ExpiresAt.optional(),
   verified_at:        VerifiedAt.optional(),
 
-  default_org: OrgID
+  default_org: OrgID.optional()
 }).meta({
   id: "UserUpdate",
   title: "User Update",

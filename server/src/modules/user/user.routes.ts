@@ -28,7 +28,7 @@ userRouter.post('/signin',
   AuthController.signin
 );
 
-userRouter.post('/logout', 
+userRouter.delete('/logout', 
   requireAuth,
   AuthController.logout
 );
@@ -54,8 +54,14 @@ userRouter.post('/resend-verification',
 
 userRouter.get('/me',
   requireAuth,
-  verifyBrcPermission('select.user'),
   UserController.me
+);
+
+userRouter.patch('/me/:id',
+  requireAuth,
+  validateIdParams,
+  validateBody(UserUpdateSchema),
+  UserController.update
 );
 
 userRouter.patch('/:id',

@@ -14,11 +14,6 @@ export type PermissionInfo = {
   scope: string;
 };
 
-export interface verifyEmail {
-  email:     string;
-  acceptURL: string;
-}
-
 export interface UserSelect {
   id?: string;
   auth_id?: string;

@@ -45,8 +45,9 @@ const openapiDocument: OpenAPIObject = createDocument({
     "/user/forgot-password":     user.ForgotPasswordPath,
     "/user/verify-email":        user.VerifyEmailPath,
     "/user/resend-verification": user.ResendEmailVerificationPath,
-    "/user/me":    user.MePath,
-    "/users/{id}": user.UserUpdatePath,
+    "/user/me":     user.MePath,
+    "/user/me/{id": user.UserUpdatePath,
+    "/user/{id}":   user.UserUpdatePath,
 
     "/organization/memberships/me":      org.GetOrganizationsPath,
     "/organization/switch/{id}":         org.SwitchOrganizationPath,

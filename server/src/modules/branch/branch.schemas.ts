@@ -13,7 +13,7 @@ const OrgMemID = z.uuid().meta({
   example: "550e8400-e29b-41d4-a716-446655440000",
 });
 
-const MemberStatus = z.enum(['invited', 'active', 'rejected', 'expired', 're-invited', 'removed']).meta({
+const MemberStatus = z.enum(['invited', 'accepted', 'rejected', 'expired', 're-invited', 'removed']).meta({
   description: "Status of the branch member",
   example: "active",
 });

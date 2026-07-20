@@ -208,9 +208,9 @@ export const logout = async (
   try {
     assertAuth(req);
     
-    const sessionID = req.context.user.id;
+    const sessionID = req.context.user.sid;
 
-    await AuthServices.logout(sessionID!);
+    await AuthServices.logout(sessionID);
 
     res.clearCookie('ACCESS-TOKEN');
     res.status(200).json({

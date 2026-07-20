@@ -75,11 +75,13 @@ export const requireAuth = async (
       throw new Forbidden(ERROR_MSG);
     }
 
-    (req as AuthRequest).context.user = {
-      id: claims.sub,
-      sid: claims.sid,
-      claims: claims
-    }
+    (req as AuthRequest).context = {
+      user: {
+        id: claims.sub,
+        sid: claims.sid,
+        claims: claims
+      }
+    };
 
     next();
   }
