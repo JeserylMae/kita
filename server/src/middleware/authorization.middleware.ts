@@ -156,5 +156,6 @@ const hasOrganizationAccess = async (
       }
     }
   );
+  
   return hasAccess;
 }

@@ -79,15 +79,12 @@ const openapiDocument: OpenAPIObject = createDocument({
     "/inventory/transaction/details": txn.FindTransactionDetailsPath,
 
     "/inventory/product/{id}": {
+      ...prd.CreateProductPath,
       ...prd.UpdateProductPath,
-      ...prd.DeleteProductPath
-    },
-
-    "/inventory/product": {
-      ...prd.GetAllProductsPath,
+      ...prd.DeleteProductPath,
       ...prd.CreateProductPath
     },
-
+    
     "/inventory/product/variant/{id}": {
       ...prd.UpdateProductVariantPath,
       ...prd.DeleteProductVariantPath

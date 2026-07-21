@@ -9,6 +9,7 @@ export const GetAllProductsPath: ZodOpenApiPathItemObject = {
     summary:     "Get all products",
     description: "Retrieves all products in the inventory.",
     security:    [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema.meta({ description: 'Organization id'}) },
 
     responses: {
       200: { description: "Products retrieved successfully" },
@@ -24,6 +25,7 @@ export const CreateProductPath: ZodOpenApiPathItemObject = {
     summary:     "Create a new product",
     description: "Creates a new product in the inventory.",
     security:    [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema.meta({ description: 'Organization id'}) },
 
     requestBody: {
       required:    true,

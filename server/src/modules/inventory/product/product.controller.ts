@@ -18,7 +18,7 @@ import {
 type UpdateBody = ProductUpdate | VariantUpdate;
 
 export const getAll = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -41,7 +41,7 @@ export const getAll = async (
 }
 
 export const store = async (
-  req: Request<any, any, ProductInsertRequest>,
+  req: Request<IdParams, any, ProductInsertRequest>,
   res: Response,
   next: NextFunction
 ) => {
@@ -69,77 +69,100 @@ export const store = async (
   }
 }
 
-export const update = () => updateHandler<ProductUpdate>(
-    'organization_products',
-    'Product was updated.'
-  );
-
-export const updateVariant = () => updateHandler<VariantUpdate>(
-    'product_variants',
-    'Product variant was updated.'
-  );
-
-export const deleteProduct = () => deleteHandler(
-    'organization_products',
-    'Product was deleted.'
-  );
-
-export const deleteVariant = () => deleteHandler(
-    'product_variants',
-    'Product variant was deleted.'
-  );
-
-const updateHandler = <T extends UpdateBody>(
-  table: 'organization_products' | 'product_variants',
-  successMessage: string
+export const update = (
+  req: Request<IdParams, any, ProductUpdate>,
+  res: Response,
+  next: NextFunction
 ) => {
-  return async (
-    req: Request<IdParams, any, T>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      assertOrg(req);
-
-      const data = req.body;
-      const id = req.params.id;
-      const orgID = req.context.org.id;
-
-      await ProductServices.update(id, orgID, data, table);
-
-      res.status(200).json({
-        success: true,
-        message: successMessage,
-      });
-    } catch (error: unknown) {
-      next(error);
-    }
-  };
+   updateHandler<ProductUpdate>(
+    'organization_products',
+    'Product was updated.',
+    req, res, next
+  );
 }
 
-const deleteHandler = (
-  table: 'organization_products' | 'product_variants',
-  successMessage: string
-) => {
-  return async (
-    req: Request<IdParams>,
+export const updateVariant = (
+    req: Request<IdParams, any, VariantUpdate>,
     res: Response,
     next: NextFunction
-  ) => {
-    try {
-      assertOrg(req);
-      
-      const id = req.params.id!;
+) => {
+   updateHandler<VariantUpdate>(
+    'product_variants',
+    'Product variant was updated.',
+    req, res, next
+  );
+}
 
-      await ProductServices.deleteHandler(id, table);
+export const deleteProduct = (
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  deleteHandler(
+    'organization_products',
+    'Product was deleted.',
+    req, res, next
+  );
+}
 
-      res.status(200).json({
-        'success': true,
-        'message': successMessage
-      });
-    }
-    catch (error: unknown) {
-      next(error);
-    }
+export const deleteVariant = (
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  deleteHandler(
+    'product_variants',
+    'Product variant was deleted.',
+    req, res, next
+  );
+}
+
+const updateHandler = async <T extends UpdateBody>(
+  table: 'organization_products' | 'product_variants',
+  successMessage: string,
+  req: Request<IdParams, any, T>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    assertOrg(req);
+
+    const data = req.body;
+    const id = req.params.id;
+    const orgID = req.context.org.id;
+
+    await ProductServices.update(id, orgID, data, table);
+
+    res.status(200).json({
+      success: true,
+      message: successMessage,
+    });
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+const deleteHandler = async (
+  table: 'organization_products' | 'product_variants',
+  successMessage: string,
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    assertOrg(req);
+    
+    const id = req.params.id!;
+
+    await ProductServices.deleteHandler(id, table);
+
+    res.status(200).json({
+      'success': true,
+      'message': successMessage
+    });
+  }
+  catch (error: unknown) {
+    next(error);
   }
 }
+
