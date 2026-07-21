@@ -101,8 +101,6 @@ export const findMembership = async (
   const { data, error } = await buidler;
   
   if (!error) return data;
-
-  console.log(`Message: ${error.message}`);
   
   throw new RecordNotFound(
     'Failed to fetch organization list.'

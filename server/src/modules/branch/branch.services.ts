@@ -153,7 +153,7 @@ export const findMembers = async (
     .select(`
       id,
       org_mem_id,
-      role,
+      roles(id, role),
       status,
       branches(
         branch_name,

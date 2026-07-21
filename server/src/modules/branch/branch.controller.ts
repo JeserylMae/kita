@@ -67,7 +67,7 @@ export const create = async (
  * @param next 
  */
 export const findMembers = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -107,6 +107,12 @@ export const selectBranch = async (
 
     const brc = await BranchServices.findRole(orgMemID, branchID);
 
+    if (!("role" in brc.roles) 
+      || typeof brc.roles.role !== 'string'
+    ) {
+      throw new InvalidCredentials('No assigned role was found.');
+    }
+
     const acsToken = await createAccessToken(
       cntx.user.id, 
       cntx.user.sid,
@@ -115,7 +121,7 @@ export const selectBranch = async (
       cntx.org.memID,
       true,
       branchID,
-      brc?.roles[0]?.role,
+      brc?.roles.role,
       brc?.id
     );
 

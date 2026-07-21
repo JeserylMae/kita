@@ -130,7 +130,7 @@ export const requireBrc = (
 ) => {
   try {
     assertOrg(req);
-
+    
     const claims = req.context.user.claims;
 
     if ( typeof claims.brcid !== 'string'
@@ -145,6 +145,8 @@ export const requireBrc = (
       role: claims.brcrole,
       memID: claims.brcmemid
     }
+
+    next();
   }
   catch (error: unknown) {
     next(error);
