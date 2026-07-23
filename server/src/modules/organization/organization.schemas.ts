@@ -30,7 +30,7 @@ const ReceiverEmail = Email.meta({
   example: "invitee@example.com",
 });
 
-const InvitationStatus = z.enum(['accepted', 'rejected', 're-invited']).meta({
+const InvitationStatus = z.enum(['accepted', 'rejected', 're-invited', 'invited']).meta({
   description: "Current status of the invitation",
   example: "accepted",
 });
@@ -151,7 +151,8 @@ export const InvitationUpdateSchema = z.object({
   role_id:     RoleID.optional().nullable(),
   expires_at:  ExpiresAt.optional().nullable(),
   sent_at:     SentAt.optional().nullable(),
-  status:      InvitationStatus.optional().nullable()
+  status:      InvitationStatus.optional().nullable(),
+  accepted_at: AcceptedAt.optional().nullable()
 }).meta({
   id: "InvitationUpdate",
   title: "Invitation Update",
