@@ -1,11 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import config from "@/config";
-import { Resend } from "resend";
+import nodemailer from 'nodemailer';
 import Handlebars from "handlebars";
 import { ForgotPassword, InviteEmailParams } from "./email.types";
 import { verifyEmail } from './email.types';
-import { ErrorII } from '@/errors';
 
 
 /**
@@ -16,23 +15,31 @@ import { ErrorII } from '@/errors';
  * @returns 
  */
 export const sendEmail = async (
-  email: string, 
+  email: string,
   subject: string,
   contents: string
 ) => {
-  const resend = new Resend(config.mailAPI);
+  try {
+    const transport = nodemailer.createTransport({
+      host: config.mailHost,
+      port: Number(config.mailPort),
+      auth: {
+        user: config.mailUsername,
+        pass: config.mailPassword
+      }
+    });
 
-  const { data, error } = await resend.emails.send({
-    from:    config.mailAddress,
-    to:      email,
-    subject: subject,
-    html:    contents
-  })
+    const info = await transport.sendMail({
+      from: config.mailAddress,
+      to: email,
+      subject: subject,
+      html: contents,
+    });
 
-  if (!error) return data; 
-    
-  throw new ErrorII(error.message);
-}
+    console.log("Message sent:", info.messageId);
+  } 
+  catch (error) { throw error; }
+};
 
 const src = 'src/modules/email/templates';
 const inviteSource = fs.readFileSync(
