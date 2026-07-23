@@ -56,3 +56,26 @@ export const injectPropertyIntoObjects = (
 export const stringOrNull = (value: unknown): string | null =>
   typeof value === "string" ? value : null;
 
+
+type PrimitiveType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "bigint"
+  | "symbol"
+  | "function"
+  | "object"
+  | "undefined";
+
+export const hasProperty = <K extends PropertyKey>(
+  value: unknown,
+  key: K,
+  keyType: PrimitiveType = "string"
+): value is Record<K, PrimitiveType> => {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    key in value &&
+    typeof (value as Record<K, unknown>)[key] === keyType
+  );
+};
