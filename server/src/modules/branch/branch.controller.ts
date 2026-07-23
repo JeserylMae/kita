@@ -1,7 +1,7 @@
 import { IdParams } from "../base/base.types";
 import { TableName } from "../organization/organization.types";
 import { createAccessToken} from "../token/token.services";
-import { InvalidCredentials } from "@/errors";
+import { ConflictError, InvalidCredentials } from "@/errors";
 import { accessTokenCookieOptions } from "@/config/types.d";
 
 import * as BranchServices from "./branch.services";
@@ -22,6 +22,7 @@ import {
   assertBrc, 
   assertOrg 
 } from "../base/base.services";
+import { hasProperty } from "@/utils/data.helpers";
 
 
 /**
@@ -107,12 +108,11 @@ export const selectBranch = async (
 
     const brc = await BranchServices.findRole(orgMemID, branchID);
 
-    if (!("role" in brc.roles) 
-      || typeof brc.roles.role !== 'string'
-    ) {
-      throw new InvalidCredentials('No assigned role was found.');
+    if (!hasProperty(brc.roles, 'role', 'string')) {
+      throw new ConflictError('No assigned role was found.');
     }
 
+    console.log('create');
     const acsToken = await createAccessToken(
       cntx.user.id, 
       cntx.user.sid,
