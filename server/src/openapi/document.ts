@@ -100,12 +100,12 @@ const openapiDocument: OpenAPIObject = createDocument({
       ...mov.DeleteMovementPath
     },
 
-    "inventory/items": {
+    "/inventory/items": {
       ...item.ItemInsertPath,
       ...item.GetItemsPath
     },
 
-    "inventory/items/{id}": {
+    "/inventory/items/{id}": {
       ...item.ItemUpdatePath,
       ...item.DeleteItemPath
     },

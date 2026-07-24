@@ -15,12 +15,12 @@ export const create = async (
     assertBrc(req);
 
     const item = req.body;
-    const userID = req.context.user.id;
     const branchID = req.context.brc.id;
+    const brcmemID = req.context.brc.memID;
     const userRole = req.context.brc.role;
 
     await ItemsServices
-      .store(item, branchID, userID, userRole);
+      .store(item, branchID, brcmemID, userRole);
 
     res.status(201).json({
       'success': true,

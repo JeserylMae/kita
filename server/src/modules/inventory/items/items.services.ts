@@ -47,14 +47,14 @@ export const store = async (
   createdByRole: string
 ) => {
   const idata = { 
-    ...item, 
+    ...item,
     current_quantity: item.init_quantity, 
     status: 'in stock',
     branch_id: branchID,
     created_by: createdByID,
     created_by_role: createdByRole
   }
-  
+
   const { data, error } = await supabase
     .from('inventory_items')
     .insert(idata);
