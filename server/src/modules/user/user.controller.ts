@@ -54,8 +54,7 @@ export const update = async (
     const userID = req.params.id;
     const user = req.body;
 
-    const userData = sanitizeObject(user);
-    await UserServices.update(userID, userData);
+    await UserServices.update(userID, user);
 
     res.status(201).json({
       'success': true,

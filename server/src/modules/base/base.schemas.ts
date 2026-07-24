@@ -1,6 +1,24 @@
 import * as z from 'zod';
 
 
+const PageSize =  z.number().min(1).max(100).default(10).meta({
+  id: "Page Size",
+  description: "Default: 10. Limits the number of returned data, used with pagination.",
+  example: 10,
+});
+
+const Cursor = z.uuid().meta({
+  id: 'Cursor',
+  description: "The last ID of the last record in the paginated record.",
+  example: "550e8400-e29b-41d4-a716-446655440000",
+});
+
+export const PaginationSchema =  z.object({
+    pageSize: PageSize,
+    cursor: Cursor.optional(),
+    order: z.enum(['asc', 'desc']).default('asc')
+  }).meta({ description: 'Modifies how GET request data filters its records.'});
+
 export const UUID = z.uuid().meta({
   id: "UUID",
   description: "Universal UUID.",
@@ -82,3 +100,4 @@ export const HexColor = z.string().regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/).m
   description: "Brand color in hex format",
   example: "#1A73E8",
 });
+

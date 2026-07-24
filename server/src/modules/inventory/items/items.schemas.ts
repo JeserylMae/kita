@@ -12,6 +12,7 @@ import {
 import {
   ExpiresAt,
   CreatedByName,
+  PaginationSchema,
 } from '@/modules/base/base.schemas'
 
 const BatchCode = z.string().meta({
@@ -59,4 +60,19 @@ export const ItemUpdateSchema = z.object({
   expiry_date:        ExpiresAt.optional(),
   remarks:            Remarks.optional(),
   status:             Status.optional()
+});
+
+const itemOrderField = [
+  'id', // product variant id
+  'sku',
+  'inventory_items.item_code',
+  'inventory_items.current_quantity',
+  'inventory_items.expiry_date',
+  'inventory_items.batch_code',
+  'inventory_items.created_at',
+  'inventory_items.updated_at'
+];
+
+export const ItemPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(itemOrderField).optional()
 });
