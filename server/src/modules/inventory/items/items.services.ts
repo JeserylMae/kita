@@ -3,6 +3,7 @@ import { supabase } from "@/config/db";
 import { BaseRepository } from "@/modules/base/base.repository";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { ItemInsert, ItemPagination, ItemUpdate } from "./items.types";
+import { handleCursor, handleNextPage } from "@/modules/base/base.services";
 
 
 export const getAllItems = async (
@@ -42,22 +43,24 @@ export const getAllItems = async (
     .order(orderBy, { ascending: options.order === 'asc' })
     .limit(options.pageSize + 1); 
 
-  if (options.cursor || options.cursor !== undefined) {
-    builder = (options.order === 'asc')
-      ? builder.gt(orderBy, options.cursor) // orderBy > cursor
-      : builder.lt(orderBy, options.cursor) // orderBy < cursor 
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor, 
+      builder, 
+      orderBy, 
+      options.order
+    );
   }
 
   const { data, error } = await builder;
   
   if (error) throw new ErrorII(error.message);
   
-  const hasNextPage = data.length > options.pageSize;
-  if (hasNextPage) data.pop();
-
-  const nextCursor = hasNextPage
-    ? data[data.length - 1]?.id
-    : null;
+  const { hasNextPage, nextCursor } = handleNextPage(
+    data,
+    options.pageSize,
+    orderBy
+  );
   
   return { data, hasNextPage, nextCursor };
 }
