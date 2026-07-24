@@ -37,7 +37,7 @@ productRouter.get('/:id',
   ProductController.getAll
 );
 
-productRouter.post('/:id',
+productRouter.post('/',
   authorizeOrganizationAccess,
   validateIdParams,
   validateBody(ProductInsertRequestSchema),
