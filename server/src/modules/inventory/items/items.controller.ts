@@ -1,9 +1,10 @@
 import { IdParams } from "@/modules/base/base.types";
 import { assertBrc } from "@/modules/base/base.services";
-import { ItemInsert, ItemUpdate } from "./items.types";
+import { ItemInsert, ItemPagination, ItemUpdate } from "./items.types";
 import { NextFunction, Request, Response } from "express";
 
 import * as ItemsServices from "./items.services";
+import { ItemPaginationSchema } from "./items.schemas";
 
 
 export const create = async (
@@ -40,16 +41,27 @@ export const get = async (
   try {
     assertBrc(req);
 
+    const options = ItemPaginationSchema.parse(req.query);
+
+    for (const [key, val] of Object.entries(options)){
+      console.log(`${key}: ${val} - ${typeof val}`);
+    }
+
     const orgID = req.context.org.id;
     const branchID = req.context.brc.id;
 
-    const items = await ItemsServices
-      .getAllItems(branchID, orgID);
+    const {data:items, hasNextPage, nextCursor} = await ItemsServices
+      .getAllItems(branchID, orgID, options);
 
     res.status(200).json({
       'success': true,
       'message': 'Inventory items was retrieved.',
-      'items': items
+      'items': items,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {
