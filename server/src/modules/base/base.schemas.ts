@@ -7,7 +7,7 @@ const PageSize =  z.number().min(1).max(100).default(10).meta({
   example: 10,
 });
 
-const Cursor = z.uuid().meta({
+const Cursor = z.string().meta({
   id: 'Cursor',
   description: "The last ID of the last record in the paginated record.",
   example: "550e8400-e29b-41d4-a716-446655440000",
@@ -22,7 +22,7 @@ export const PaginationSchema =  z.object({
 export const UUID = z.uuid().meta({
   id: "UUID",
   description: "Universal UUID.",
-  example: "550e8400-e29b-41d4-a716-446655440000",
+  example: "eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCJ9",
 });
 
 export const AuthID = z.uuid().meta({

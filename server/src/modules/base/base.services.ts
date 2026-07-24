@@ -5,6 +5,8 @@ import { supabase } from "@/config/db";
 import { Forbidden } from "@/errors";
 import { TableName } from "../organization/organization.types";
 import { AuthRequest, BrcRequest, OrgRequest } from "@/config/types";
+import { PostgrestFilterBuilder } from "@supabase/supabase-js";
+import { decodeCursor, encodeCursor } from "@/utils/data.helpers";
 
 
 export const getEnum = async ( name: EnumName ) => {
@@ -38,6 +40,40 @@ export const doesRecordExist = async (
 
   return (count ?? 0) > 0;
 };
+
+export const handleCursor = <
+  T extends PostgrestFilterBuilder<any, any, any, any>
+> ( 
+  b64cursor: string,
+  builder: T,
+  orderBy: string,
+  order: 'asc' | 'desc',
+) => {
+  const cursor = decodeCursor(b64cursor);
+
+  return (order === 'asc')
+    ? builder.gt(orderBy, cursor) // orderBy > cursor
+    : builder.lt(orderBy, cursor) // orderBy < cursor 
+}
+
+export const handleNextPage = (
+  data: Record<string, any>[],
+  pageSize: number,
+  orderBy: string
+) => {
+  const hasNextPage = data.length > pageSize;
+  if (hasNextPage) data.pop();
+
+  let nextCursor = hasNextPage
+    ? data[data.length - 1]?.[orderBy]
+    : null;
+  
+  nextCursor = (typeof nextCursor === 'string')
+    ? encodeCursor(nextCursor)
+    : null;
+
+  return { hasNextPage,  nextCursor };
+}
 
 
 export function assertAuth<
