@@ -52,3 +52,15 @@ export const injectPropertyIntoObjects = (
   let newArr = arr.map(f => ({ ...f, ...pair }));
   return newArr;
 }
+
+export const encodeCursor = (data: unknown) => {
+  return Buffer
+    .from(JSON.stringify(data))
+    .toString("base64url");
+}
+
+export const decodeCursor = <T> (cursor: string) => {
+  return JSON.parse(
+    Buffer.from(cursor, "base64url").toString()
+  );
+}
