@@ -1,7 +1,7 @@
 import { IdParams } from "../base/base.types";
 import { TableName } from "../organization/organization.types";
 import { createAccessToken} from "../token/token.services";
-import { InvalidCredentials } from "@/errors";
+import { ConflictError, InvalidCredentials } from "@/errors";
 import { accessTokenCookieOptions } from "@/config/types.d";
 
 import * as BranchServices from "./branch.services";
@@ -22,6 +22,7 @@ import {
   assertBrc, 
   assertOrg 
 } from "../base/base.services";
+import { hasProperty } from "@/utils/data.helpers";
 
 
 /**
@@ -67,7 +68,7 @@ export const create = async (
  * @param next 
  */
 export const findMembers = async (
-  req: Request,
+  req: Request<IdParams>,
   res: Response,
   next: NextFunction
 ) => {
@@ -107,14 +108,20 @@ export const selectBranch = async (
 
     const brc = await BranchServices.findRole(orgMemID, branchID);
 
+    if (!hasProperty(brc.roles, 'role', 'string')) {
+      throw new ConflictError('No assigned role was found.');
+    }
+
+    console.log('create');
     const acsToken = await createAccessToken(
-      { id: cntx.user.id }, 
+      cntx.user.id, 
       cntx.user.sid,
       cntx.org.id,
       cntx.org.role,
       cntx.org.memID,
+      true,
       branchID,
-      brc?.roles[0]?.role,
+      brc?.roles.role,
       brc?.id
     );
 
@@ -143,7 +150,7 @@ export const update = (
   res: Response,
   next: NextFunction 
 ) => {
-  return save(req, res, next);
+  save(req, res, next);
 }
 
 /**
@@ -158,7 +165,7 @@ export const updateMember = (
   res: Response,
   next: NextFunction
 ) => {
-  return save(req, res, next, TableName.branchMem);
+  save(req, res, next, TableName.branchMem);
 }
 
 /**
@@ -173,7 +180,7 @@ export const deleteBranch = (
   res: Response,
   next: NextFunction
 ) => {
-  return deleteHandler(
+  deleteHandler(
     req, res, next, 'brc'
   );
 }
@@ -190,7 +197,7 @@ export const deleteMember = (
   res: Response,
   next: NextFunction
 ) => {
-  return deleteHandler(
+  deleteHandler(
     req, res, next, 'brcmem'
   );
 }

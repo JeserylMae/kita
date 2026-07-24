@@ -41,6 +41,7 @@ export const insert = async (
  */
 export const find = async ( 
   sessionID: string, 
+  userID: string,
   ...fields: string[] 
 ) => {
   const selectStr = fields.join(', ');
@@ -49,13 +50,16 @@ export const find = async (
     .from('sessions')
     .select(selectStr)
     .eq('id', sessionID)
+    .eq('user_id', userID)
     .single();
-  
-  if (error) {
+
+  if (error && error.code === 'PGRST116') {
     throw new RecordNotFound(
-      `No session info for user was found.`
+      'No existing session was found for the signed user.'
     );
   }
+
+  if (error) throw new ErrorII(error.message);
 
   return data as unknown as Session;
 }

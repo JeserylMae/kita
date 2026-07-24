@@ -29,48 +29,48 @@ export const ProductInsertSchema = z.object({
   category_id:          invt.CategoryID,
   remarks:              invt.Remarks,
   specific_branch_only: SpecificBranchOnly,
-  branch_id:            BranchID.optional(),
+  branch_id:            BranchID.optional().nullable(),
   vat_rate:             invt.VatRate,
 });
 
 export const ProductUpdateSchema = z.object({
-  name:                 ProductName.optional(),
-  brand:                ProductBrand.optional(),
-  category_id:          invt.CategoryID.optional(),
-  remarks:              invt.Remarks.optional(),
-  specific_branch_only: SpecificBranchOnly.optional(),
-  branch_id:            BranchID.optional(),
-  vat_rate:             invt.VatRate.optional(),
-  status:               ProductStatus.optional()
+  name:                 ProductName.optional().nullable(),
+  brand:                ProductBrand.optional().nullable(),
+  category_id:          invt.CategoryID.optional().nullable(),
+  remarks:              invt.Remarks.optional().nullable(),
+  specific_branch_only: SpecificBranchOnly.optional().nullable(),
+  branch_id:            BranchID.optional().nullable(),
+  vat_rate:             invt.VatRate.optional().nullable(),
+  status:               ProductStatus.optional().nullable()
 });
 
 export const VariantInsertSchema = z.object({
   item_code: invt.ItemCode,
   sku:       invt.SKU,
-  color:     invt.Color.optional(),
+  color:     invt.Color.optional().nullable(),
   size:      invt.Size,
   unit:      invt.Unit,
-  flavor:    invt.Flavor.optional(),
-  weight:    invt.Weight.optional(),
-  volume:    invt.Volume.optional(),
-  material:  invt.Material.optional(),
-  barcode:   invt.Barcode.optional()
+  flavor:    invt.Flavor.optional().nullable(),
+  weight:    invt.Weight.optional().nullable(),
+  volume:    invt.Volume.optional().nullable(),
+  material:  invt.Material.optional().nullable(),
+  barcode:   invt.Barcode.optional().nullable()
 });
 
 export const VariantUpdateSchema = z.object({
-  item_code: invt.ItemCode.optional(),
-  sku:       invt.SKU.optional(),
-  color:     invt.Color.optional(),
-  size:      invt.Size.optional(),
-  unit:      invt.Unit.optional(),
-  flavor:    invt.Flavor.optional(),
-  weight:    invt.Weight.optional(),
-  volume:    invt.Volume.optional(),
-  material:  invt.Material.optional(),
-  barcode:   invt.Barcode.optional()
+  item_code: invt.ItemCode.optional().nullable(),
+  sku:       invt.SKU.optional().nullable(),
+  color:     invt.Color.optional().nullable(),
+  size:      invt.Size.optional().nullable(),
+  unit:      invt.Unit.optional().nullable(),
+  flavor:    invt.Flavor.optional().nullable(),
+  weight:    invt.Weight.optional().nullable(),
+  volume:    invt.Volume.optional().nullable(),
+  material:  invt.Material.optional().nullable(),
+  barcode:   invt.Barcode.optional().nullable()
 });
-  
-  export const ProductInsertRequestSchema = z.object({
-    product:  ProductInsertSchema,
-    variants: VariantInsertSchema.array()
-  });
+
+export const ProductInsertRequestSchema = z.object({
+  product:  ProductInsertSchema,
+  variants: VariantInsertSchema.array()
+});

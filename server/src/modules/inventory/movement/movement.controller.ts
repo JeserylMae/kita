@@ -39,10 +39,10 @@ export const store = async (
 
     const movement = req.body;
     const branchID = req.context.brc.id;
-    const orgMemID = req.context.org.memID;
+    const brcMemID = req.context.brc.memID;
 
     await MovementServices
-      .store(movement, orgMemID, branchID);
+      .store(movement, brcMemID, branchID);
 
     res.status(201).json({
       'success': true,

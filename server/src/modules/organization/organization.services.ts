@@ -78,18 +78,17 @@ export const update = async (
       .from(TableName.org)
       .update(odata)
       .eq('id', orgID)
-      .select('id')
-      .single();
+      .select('id');
 
     if (error) throw new ErrorII(error.message);
   }
   
-  if (brands) {
-    await updateRelations(orgID, brands);
+  if (brands && brands.length >= 1 ) {
+    await updateRelations(TableName.brand, orgID, brands);
   }
 
-  if (founders) {
-    await updateRelations(orgID, founders);
+  if (founders && founders.length >= 1) {
+    await updateRelations(TableName.founder, orgID, founders);
   }
 }
 
@@ -116,23 +115,10 @@ export const deleteOrg = async ( orgID: string ) => {
  */
 export const deleteHandler = async (
   id: string,
-  table: TableName,
-  res: Response,
-  next: NextFunction
+  table: TableName
 ) => {
-  try {
-    const db = new BaseRepository(table);
-
-    await db.delete(id);
-
-    res.status(200).json({
-      'success': true,
-      'message': 'Deletion successful.',
-    });
-  }
-  catch (error: unknown) {
-    next(error);
-  }
+  const db = new BaseRepository(table);
+  await db.delete(id);
 }
 
 /**
@@ -174,29 +160,22 @@ const storeRelations = async (
   }
 }
 
-const updateRelations = async <T extends Record<string, any>> (
+const updateRelations = async <T extends  { id: string }>(
+  table: TableName,
   orgID: string,
   records: T[]
 ) => {
-  if (records.length <= 0) return;
+  if (records.length === 0) return;
 
-  const results = await Promise.allSettled(
-    records.map(record => {
-      supabase
-        .from(TableName.brand)
-        .update({
-          ...record,
-          org_id: orgID
-        })
-        .eq('id', record.id)
-    })
-  );
+  for (const record of records) {
+    const { id, ...updateData } = record;
 
-  const failed = results.filter(
-    (r): r is PromiseRejectedResult => r.status === "rejected"
-  );
+    const { data, error } = await supabase
+      .from(table)
+      .update(updateData as Record<string, any>)
+      .eq('id', id)
+      .eq('org_id', orgID);
 
-  if (failed.length > 0) {
-    throw new ErrorII(`Some updates failed: ${failed}`);
+    if (error) throw new ErrorII(error.message);
   }
-}
+};

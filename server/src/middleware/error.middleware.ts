@@ -35,7 +35,8 @@ export class ErrorMiddleware {
         console.error(`${ConsoleColor.ERROR}${log}${ConsoleColor.RESET}`);
     }
     console.error(`${ConsoleColor.ERROR}
-      Error: Internal server error.
+      Error: Internal server error.\n
+      ${error}\n\n
       ${ConsoleColor.RESET}
     `); 
   }

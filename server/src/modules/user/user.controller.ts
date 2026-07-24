@@ -28,8 +28,7 @@ export const me = async (
     res.status(200).json({
       'success': true,
       'message': 'User information were retrieved.',
-      'user': user,
-      'organization': 'org',
+      'user': user
     });
   }
   catch ( error: unknown ) {

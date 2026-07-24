@@ -1,5 +1,4 @@
 import { IdParams } from '../base/base.types';
-import { findMembership } from '../branch/branch.services';
 
 import { 
   Request,
@@ -66,7 +65,7 @@ export const respondToInvitation = async (
 
     res.status(201).json({
       'success': true,
-      'message': 'Re-invitation sent.'
+      'message': 'Invitation was accepted/rejected.'
     });
   }
   catch ( error: unknown ) {
@@ -120,13 +119,10 @@ export const getInvitations = async (
   try {
     assertBrc(req);
 
-    const orgMemID = req.context.org.memID;
+    const receiverID = req.params.id;
 
-    const invitations = await findMembership(
-      orgMemID,
-      'org_mem_id',
-      false
-    );
+    const invitations = await InvitationServices
+      .findInvitations(receiverID, 'receiver_id', false);
 
     res.status(200).json({
       'success': true,

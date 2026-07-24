@@ -37,9 +37,10 @@ export const findRole = async (
 ) => {
   const { data, error } = await supabase
     .from(TableName.orgMem)
-    .select('id, roles(role)')
+    .select('id, role')
     .eq('user_id', userID)
     .eq('org_id', defaultOrg)
+    .limit(1)
     .single();
 
   if(!error) return data;
@@ -65,7 +66,7 @@ export const findMembership = async (
     org_id,
     employee_code,
     status,
-    organizations( org_name, icon, hex_color )
+    organizations( org_name, icon, hex_color, status )
   `);
 
   if (options?.withBranches) {
@@ -78,7 +79,7 @@ export const findMembership = async (
         role(role),
         status,
         starred,
-        branches( branch_name, icon, color )
+        branches( branch_name, icon, color, status )
       )
     `);
   }
@@ -87,11 +88,11 @@ export const findMembership = async (
     .from('organization_members')
     .select(slctStr)
     .eq('user_id', userID)
-    .eq('organizations.status', 'active')
-    .eq('status', 'active');
+    .eq('status', 'accepted')
+    .eq('organizations.status', 'active');
 
   buidler = options?.withBranches
-    ? buidler.eq('branches.status', 'active')
+    ? buidler.eq('branch_members.branches.status', 'accepted')
     : buidler;
   
   buidler = options?.defaultOrgOnly 
@@ -153,26 +154,32 @@ export const findAllMembers = async (
 export const store = async <K extends keyof MembershipSelect>(
   orgID: string,
   userID: string,
+  status: string,
   ...selectFields: K[]
 ) => {   
   const slctStr = selectFields.join(", ");
 
-  const rOrgs = await findMembership(userID);
+  await findMembership(userID);
 
   const { data, error } = await supabase
     .from('organization_members')
     .upsert({
       'org_id': orgID,
       'user_id': userID,
-      'status': 'accepted'
+      'role': 'member',
+      'status': status
     }, {
-      onConflict: 'user_id,org_id',
-      ignoreDuplicates: true
+      onConflict: 'user_id,org_id'
     })
-    .select(slctStr)
-    .single();
+    .select(slctStr);
 
-  if (!error) return data as unknown as Pick<MembershipSelect, K>;
+  if (!error) return data;
+
+  if (error.code === '23505') {
+    throw new InvalidCredentials(
+      'User is already a member of the organization.'
+    );
+  }
 
   throw new InvalidCredentials(
     'Failed to store organization membership.'

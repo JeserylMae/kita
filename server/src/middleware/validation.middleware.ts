@@ -2,7 +2,7 @@ import { BadRequest } from "@/errors";
 import { TypedRequest } from "@/config/types";
 import { ZodType } from "zod";
 import { NextFunction, Response } from "express";
-import { IdParamsSchema } from "@/modules/base/base.types";
+import { IdParamsSchema } from "@/modules/base/base.schemas";
 
 
 export const validateBody = (schema: ZodType) => (
@@ -33,7 +33,7 @@ const validateHandler = <T> (
       throw new BadRequest(result.error.message);
     }
 
-    return next();
+    next();
   }
   catch (error: unknown) {
     return next(error);

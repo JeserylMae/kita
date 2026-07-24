@@ -43,20 +43,20 @@ export const ItemInsertSchema = z.object({
   unit_cost:          UnitCost,
   unit_price:         UnitPrice,
   expiry_date:        ExpiresAt,
-  remarks:            Remarks.optional(),
+  remarks:            Remarks.optional().nullable(),
   created_by_name:    CreatedByName,
 });
 
 export const ItemUpdateSchema = z.object({
-  product_variant_id: ProductVariantID.optional(),
-  item_code:          ItemCode.optional(),
-  batch_code:         BatchCode.optional(),
-  init_quantity:      Quantity.optional(),
-  current_quantity:   Quantity.optional(),
-  reorder_level:      ReorderLevel.optional(),
-  unit_cost:          UnitCost.optional(),
-  unit_price:         UnitPrice.optional(),
-  expiry_date:        ExpiresAt.optional(),
-  remarks:            Remarks.optional(),
-  status:             Status.optional()
+  product_variant_id: ProductVariantID.optional().nullable(),
+  item_code:          ItemCode.optional().nullable(),
+  batch_code:         BatchCode.optional().nullable(),
+  init_quantity:      Quantity.optional().nullable(),
+  current_quantity:   Quantity.optional().nullable(),
+  reorder_level:      ReorderLevel.optional().nullable(),
+  unit_cost:          UnitCost.optional().nullable(),
+  unit_price:         UnitPrice.optional().nullable(),
+  expiry_date:        ExpiresAt.optional().nullable(),
+  remarks:            Remarks.optional().nullable(),
+  status:             Status.optional().nullable()
 });

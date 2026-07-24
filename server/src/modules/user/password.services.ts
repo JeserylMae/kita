@@ -1,6 +1,6 @@
 import { verify }   from "@node-rs/argon2";
 import { sendEmail } from "../email/email.services";
-import { resetPwdTemplate } from "@/utils/template.helper";
+import { renderResetPassword } from "../email/email.services";
 import { ErrorII, InvalidCredentials } from "@/errors";
 
 import * as UserServices from "./user.services";
@@ -36,10 +36,10 @@ export const sendResetEmail = async (
   const mailData = await sendEmail(
     userEmail,
     'Kita - Forget Account Password',
-    resetPwdTemplate(resetURL)
+    renderResetPassword({resetURL})
   );
   
-  if (mailData) {
+  if (!mailData) {
     throw new ErrorII('Failed to send email.');
   }
 }

@@ -68,8 +68,8 @@ export const authorizeBranchAccess = async (
     const branchId     = req.context.brc.id;
     const userOrgMemId = req.context.org.memID;
     const targetID     = req.params.id;
-
-    if (typeof targetID !== 'string') { 
+    
+    if (targetID && typeof targetID !== 'string') { 
       throw new Forbidden(errMsg);
     }
 
@@ -156,5 +156,6 @@ const hasOrganizationAccess = async (
       }
     }
   );
+  
   return hasAccess;
 }

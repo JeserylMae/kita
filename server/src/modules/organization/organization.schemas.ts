@@ -30,7 +30,7 @@ const ReceiverEmail = Email.meta({
   example: "invitee@example.com",
 });
 
-const InvitationStatus = z.enum(['accepted', 'rejected', 're-invited']).meta({
+const InvitationStatus = z.enum(['accepted', 'rejected', 're-invited', 'invited']).meta({
   description: "Current status of the invitation",
   example: "accepted",
 });
@@ -127,9 +127,9 @@ const MembershipRole = z.enum(['owner', 'admin', 'member']).meta({
 
 
 export const InvitationParamsSchema = z.object({
-  id:             UUID.optional(),
+  id:             UUID.optional().nullable(),
   sender_id:      SenderID,
-  receiver_id:    ReceiverID.optional(),
+  receiver_id:    ReceiverID.optional().nullable(),
   receiver_email: ReceiverEmail,
   role_id:        RoleID,
   org_id:         OrgID,
@@ -145,13 +145,14 @@ export const InvitationParamsSchema = z.object({
 export const InvitationUpdateSchema = z.object({
   id:          UUID,
   token:       Token,
-  receiver_id: ReceiverID.optional(),
-  org_id:      OrgID.optional(),
-  branch_id:   BranchID.optional(),
-  role_id:     RoleID.optional(),
-  expires_at:  ExpiresAt.optional(),
-  sent_at:     SentAt.optional(),
-  status:      InvitationStatus.optional()
+  receiver_id: ReceiverID.optional().nullable(),
+  org_id:      OrgID.optional().optional().nullable(),
+  branch_id:   BranchID.optional().nullable(),
+  role_id:     RoleID.optional().nullable(),
+  expires_at:  ExpiresAt.optional().nullable(),
+  sent_at:     SentAt.optional().nullable(),
+  status:      InvitationStatus.optional().nullable(),
+  accepted_at: AcceptedAt.optional().nullable()
 }).meta({
   id: "InvitationUpdate",
   title: "Invitation Update",
@@ -164,8 +165,8 @@ export const InvitationResponseSchema = z.object({
   branch_id:   BranchID,
   role_id:     RoleID,
   receiver_id: ReceiverID,
-  accepted_at: AcceptedAt.optional(),
-  status:      InvitationStatus.optional()
+  accepted_at: AcceptedAt.optional().nullable(),
+  status:      InvitationStatus.optional().nullable()
 }).meta({
   id: "InvitationResponse",
   title: "Invitation Response",
@@ -184,7 +185,6 @@ export const BrandInsertSchema = z.object({
 
 export const BrandUpdateSchema = z.object({
   id:     UUID,
-  org_id: OrgID,
   name:   BrandName
 }).meta({
   id: "BrandUpdate",
@@ -195,9 +195,9 @@ export const BrandUpdateSchema = z.object({
 
 export const FounderInsertSchema = z.object({
   firstname:  FounderFirstName,
-  middlename: FounderMiddleName.optional(),
+  middlename: FounderMiddleName.optional().nullable(),
   lastname:   FounderLastName,
-  suffix:     FounderSuffix.optional()
+  suffix:     FounderSuffix.optional().nullable(),
 }).meta({
   id: "FounderInsert",
   title: "Founder Insert",
@@ -206,10 +206,10 @@ export const FounderInsertSchema = z.object({
 
 export const FounderUpdateSchema = z.object({
   id:         UUID,
-  firstname:  FounderFirstName.optional(),
-  middlename: FounderMiddleName.optional(),
-  lastname:   FounderLastName.optional(),
-  suffix:     FounderSuffix.optional()
+  firstname:  FounderFirstName.optional().nullable(),
+  middlename: FounderMiddleName.optional().nullable(),
+  lastname:   FounderLastName.optional().nullable(),
+  suffix:     FounderSuffix.optional().nullable()
 }).meta({
   id: "FounderUpdate",
   title: "Founder Update",
@@ -219,14 +219,14 @@ export const FounderUpdateSchema = z.object({
 
 export const OrgInsertSchema = z.object({
   org_name:     OrgName,
-  icon:         Icon.optional(),
-  hex_color:    HexColor.optional(),
-  status:       OrgStatus.optional(),
-  founded:      FoundedDate.optional(),
-  headquarters: Headquarters.optional(),
-  address:      Address.optional(),
-  website:      URL.optional(),
-  industry:     Industry.optional()
+  icon:         Icon.optional().nullable(),
+  hex_color:    HexColor.optional().nullable(),
+  status:       OrgStatus.optional().nullable(),
+  founded:      FoundedDate.optional().nullable(),
+  headquarters: Headquarters.optional().nullable(),
+  address:      Address.optional().nullable(),
+  website:      URL.optional().nullable(),
+  industry:     Industry.optional().nullable()
 }).meta({
   id: "OrgInsert",
   title: "Organization Insert",
@@ -234,15 +234,15 @@ export const OrgInsertSchema = z.object({
 });
 
 export const OrgUpdateSchema = z.object({
-  org_name:     OrgName.optional(),
-  icon:         Icon.optional(),
-  hex_color:    HexColor.optional(),
-  status:       OrgStatus.optional(),
-  founded:      FoundedDate.optional(),
-  headquarters: Headquarters.optional(),
-  address:      Address.optional(),
-  website:      URL.optional(),
-  industry:     Industry.optional()
+  org_name:     OrgName.optional().nullable(),
+  icon:         Icon.optional().nullable(),
+  hex_color:    HexColor.optional().nullable(),
+  status:       OrgStatus.optional().nullable(),
+  founded:      FoundedDate.optional().nullable(),
+  headquarters: Headquarters.optional().nullable(),
+  address:      Address.optional().nullable(),
+  website:      URL.optional().nullable(),
+  industry:     Industry.optional().nullable()
 }).meta({
   id: "OrgUpdate",
   title: "Organization Update",
@@ -251,10 +251,11 @@ export const OrgUpdateSchema = z.object({
 
 
 export const MembershipInsertSchema = z.object({
+  user_id:         UUID,
   status:          MembershipStatus,
-  employee_code:   EmployeeCode.optional(),
-  employment_date: EmploymentDate.optional(),
-  role:            MembershipRole.optional()
+  employee_code:   EmployeeCode.optional().nullable(),
+  employment_date: EmploymentDate.optional().nullable(),
+  role:            MembershipRole.optional().nullable()
 }).meta({
   id: "MembershipInsert",
   title: "Membership Insert",
@@ -262,11 +263,11 @@ export const MembershipInsertSchema = z.object({
 });
 
 export const MembershipUpdateSchema = z.object({
-  status:          MembershipStatus.optional(),
-  employee_code:   EmployeeCode.optional(),
-  employment_date: EmploymentDate.optional(),
-  role:            MembershipRole.optional(),
-  updated_at:      UpdatedAt.optional()
+  status:          MembershipStatus.optional().nullable(),
+  employee_code:   EmployeeCode.optional().nullable(),
+  employment_date: EmploymentDate.optional().nullable(),
+  role:            MembershipRole.optional().nullable(),
+  updated_at:      UpdatedAt.optional().nullable()
 }).meta({
   id: "MembershipUpdate",
   title: "Membership Update",
@@ -297,11 +298,11 @@ export const OrgUpdateRequestSchema = z.object({
 
 
 export const OrgQueryParamsSchema = z.object({
-  withBranches: z.enum(['true', 'false']).optional().meta({
+  withBranches: z.enum(['true', 'false']).optional().nullable().meta({
     description: "Whether to include branch data in the response",
     example: "true",
   }),
-  defaultOrgOnly: z.enum(['true', 'false']).optional().meta({
+  defaultOrgOnly: z.enum(['true', 'false']).optional().nullable().meta({
     description: "Whether to only return the user's default organization",
     example: "false",
   }),

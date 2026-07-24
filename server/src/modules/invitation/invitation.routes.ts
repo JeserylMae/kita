@@ -17,14 +17,14 @@ import {
   InvitationParamsSchema, 
   InvitationResponseSchema 
 } from "../organization/organization.schemas";
+import { authorizeBranchAccess } from "@/middleware/authorization.middleware";
 
 
 const inviteMiddlewares = (scope: string) => {
   return [
     requireOrg,
     requireBrc,
-    verifyBrcPermission(scope),
-    validateIdParams
+    verifyBrcPermission(scope)
   ];
 }
 
@@ -53,14 +53,17 @@ invitationRouter.post('/:id',
 );
 
 // /invitation/idstr
-invitationRouter.get('/me',
+invitationRouter.get('/me/:id',
   ...inviteMiddlewares('select.orginv'),
+  validateIdParams,
   InvitationController.getInvitations
 );
 
 // /invitation/idstr
 invitationRouter.delete('/:id',
   ...inviteMiddlewares('delete.orginv'),
+  authorizeBranchAccess,
+  validateIdParams,
   InvitationController.deleteInvitation
 );
 
