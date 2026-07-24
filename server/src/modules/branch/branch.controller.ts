@@ -22,6 +22,7 @@ import {
   assertBrc, 
   assertOrg 
 } from "../base/base.services";
+import { BranchPaginationSchema } from "./branch.schemas";
 
 
 /**
@@ -75,13 +76,20 @@ export const findMembers = async (
     assertBrc(req);
 
     const id = req.context.brc.id;
+    const options = BranchPaginationSchema.parse(req.query);
 
-    const data = await BranchServices.findMembers(id);
+    const { data, hasNextPage, nextCursor } = await BranchServices
+      .findMembers(id, options);
 
     res.status(200).json({
       'success': true,
       'message': 'Branch members was retrieved.',
-      'brcMembers': data 
+      'brcMembers': data,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {
