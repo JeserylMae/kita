@@ -1,6 +1,7 @@
 import * as z from 'zod';
 
 import {
+  InventoryItemID,
   ProductVariantID,
   ReferenceID,
   ReferenceTypeSchema,
@@ -18,6 +19,7 @@ const MovementType = z.string().meta({
 });
 
 export const MovementInsertSchema = z.object({
+  inventory_items_id: InventoryItemID,
   product_variant_id: ProductVariantID,
   quantity_changed:   QuantityChanged,
   movement_type:      MovementType,
