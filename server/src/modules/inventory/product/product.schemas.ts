@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { BranchID } from '@/modules/base/base.schemas';
+import { BranchID, PaginationSchema } from '@/modules/base/base.schemas';
 
 import * as invt from '../common/inventory.schemas';
 
@@ -69,8 +69,20 @@ export const VariantUpdateSchema = z.object({
   material:  invt.Material.optional(),
   barcode:   invt.Barcode.optional()
 });
-  
-  export const ProductInsertRequestSchema = z.object({
-    product:  ProductInsertSchema,
-    variants: VariantInsertSchema.array()
-  });
+
+export const ProductInsertRequestSchema = z.object({
+  product:  ProductInsertSchema,
+  variants: VariantInsertSchema.array()
+});
+
+const productOrderField = [ 
+  'id', 
+  'name', 
+  'product_variants.item_code', 
+  'product_variants.sku' 
+];
+
+export const ProductPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(productOrderField).optional()
+});
+

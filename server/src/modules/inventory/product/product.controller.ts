@@ -13,6 +13,7 @@ import {
   ProductUpdate, 
   VariantUpdate 
 } from "./product.types";
+import { ProductPaginationSchema } from "./product.schemas";
 
 
 type UpdateBody = ProductUpdate | VariantUpdate;
@@ -26,13 +27,20 @@ export const getAll = async (
     assertOrg(req);
 
     const orgID = req.context.org.id;
+    const options = ProductPaginationSchema.parse(req.query);
 
-    const products = await ProductServices.getAll(orgID);
+    const { data:products, hasNextPage, nextCursor } = await ProductServices
+      .getAll(orgID, options);
 
     res.status(200).json({
       'success': true,
       'message': 'Products was retrieved.',
-      'products': products
+      'products': products,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {
