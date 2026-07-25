@@ -1,5 +1,5 @@
 import { supabase } from "@/config/db";
-import { TableName } from "../organization/organization.types";
+import { InvitationPagination, TableName } from "../organization/organization.types";
 import { decodeCursor, sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "../base/base.repository";
 
@@ -114,8 +114,13 @@ export const storeBranch = async (
 export const findMembership = async (
   id: string,
   column: 'id'|'branch_id'|'org_mem_id'|'invitation_id' = 'id',
-  single = true
+  single = true,
+  options?: InvitationPagination
 ) => {
+  let orderBy = options?.orderBy
+    ? options.orderBy
+    : 'id';
+
   let builder = supabase
     .from(TableName.branchMem)
     .select(`
@@ -132,19 +137,44 @@ export const findMembership = async (
         ),
         receiver:users!organization_invitations_receiver_id_fkey(
           firstname,
+          lastname,
           email
         )
       )
     `)
     .eq(column, id);
 
+  if (!single && options) {
+    builder = builder.limit(options.pageSize + 1)
+      .order(orderBy, { ascending: options.order === 'asc'});
+
+    if (options.cursor) {
+      builder = handleCursor(
+        options.cursor,
+        builder,
+        orderBy,
+        options.order
+      );
+    }
+  }
+
   const { data, error } = single
     ? await builder.single()
     : await builder;
 
-  if (!error) return data;
+  if (error) throw new ErrorII(error.message);
 
-  throw new ErrorII(error.message);
+  if (!single && options) {
+    const { hasNextPage, nextCursor } = handleNextPage(
+      data,
+      options?.pageSize,
+      orderBy
+    );
+
+    return { data, hasNextPage, nextCursor };
+  }
+    
+  return data;
 }
 
 export const findMembers = async ( 
