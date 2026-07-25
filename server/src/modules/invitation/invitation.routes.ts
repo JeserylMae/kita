@@ -47,7 +47,7 @@ invitationRouter.post('/:token',
 );
 
 // /invitation/idstr
-invitationRouter.post('/:id',
+invitationRouter.post('/reinvite/:id',
   validateIdParams,
   InvitationController.reinvite
 );
