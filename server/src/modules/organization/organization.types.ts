@@ -59,3 +59,5 @@ export type OrgInsertRequest   = z.infer<typeof schema.OrgInsertRequestSchema>;
 export type OrgUpdateRequest   = z.infer<typeof schema.OrgUpdateRequestSchema>;
 
 export type OrgQueryParams     = z.infer<typeof schema.OrgQueryParamsSchema>;
+
+export type InvitationPagination = z.infer<typeof schema.InvitationPagination>;

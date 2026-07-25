@@ -13,6 +13,7 @@ import {
 
 import * as InvitationServices from './invitation.services';
 import { assertAuth, assertBrc } from '../base/base.services';
+import { InvitationPagination } from '../organization/organization.schemas';
 
 
 /**
@@ -121,17 +122,24 @@ export const getInvitations = async (
     assertBrc(req);
 
     const orgMemID = req.context.org.memID;
+    const options = InvitationPagination.parse(req.query);
 
-    const invitations = await findMembership(
+    const { data:invitations, hasNextPage, nextCursor } = await findMembership(
       orgMemID,
       'org_mem_id',
-      false
+      false,
+      options
     );
 
     res.status(200).json({
       'success': true,
       'message': 'Invitations retrieved successfully.',
-      'invitations': invitations
+      'invitations': invitations,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {

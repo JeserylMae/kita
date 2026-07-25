@@ -12,6 +12,7 @@ import {
   URL,
   Icon,
   HexColor,
+  PaginationSchema,
 } from '@/modules/base/base.schemas';
 
 
@@ -311,3 +312,12 @@ export const OrgQueryParamsSchema = z.object({
   description: "Query parameters for filtering the organizations returned for the authenticated user.",
 });
 
+const invitationOrderField = [
+  'id',
+  'sent_at',
+  'receiver.email',
+];
+
+export const InvitationPagination = PaginationSchema.extend({
+  orderBy: z.enum(invitationOrderField).optional()
+});
