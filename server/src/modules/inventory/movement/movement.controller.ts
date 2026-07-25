@@ -4,6 +4,7 @@ import { MovementInsert, MovementUpdate } from "./movement.types";
 import { NextFunction, Request, Response } from "express";
 
 import * as MovementServices from "./movement.services";
+import { MovementPaginationSchema } from "./movement.schemas";
 
 
 export const get = async (
@@ -15,13 +16,20 @@ export const get = async (
     assertBrc(req);
 
     const branchID = req.context.brc.id;
+    const options = MovementPaginationSchema.parse(req.query);
 
-    const data = await MovementServices.getAll(branchID);
+    const { data, hasNextPage, nextCursor } = await MovementServices
+      .getAll(branchID, options);
 
     res.status(200).json({
       'success': true,
       'message': 'Inventory movements was retrieved.',
-      'movements': data
+      'movements': data,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {

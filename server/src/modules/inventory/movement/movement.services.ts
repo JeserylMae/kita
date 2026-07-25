@@ -2,11 +2,19 @@ import { ErrorII } from "@/errors";
 import { supabase } from "@/config/db";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "@/modules/base/base.repository";
-import { MovementInsert, MovementUpdate } from "./movement.types";
+import { MovementInsert, MovementPagination, MovementUpdate } from "./movement.types";
+import { handleCursor, handleNextPage } from "@/modules/base/base.services";
 
 
-export const getAll = async ( branchID: string ) => {
-  const { data, error } = await supabase
+export const getAll = async ( 
+  branchID: string,
+  options: MovementPagination 
+) => {
+  const orderBy = options.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
     .from('inventory_movements')
     .select(`
       id, 
@@ -18,11 +26,30 @@ export const getAll = async ( branchID: string ) => {
       created_by,
       updated_at
     `)
-    .eq('branch_id', branchID);
+    .eq('branch_id', branchID)
+    .limit(options.pageSize + 1)
+    .order(orderBy, { ascending: options.order === 'asc'});
 
-  if (!error) return data;
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor,
+      builder,
+      orderBy,
+      options.order
+    );
+  }
 
-  throw new ErrorII(error.message);
+  const { data, error } = await builder;
+
+  if (error) throw new ErrorII(error.message);
+
+  const { hasNextPage, nextCursor } = handleNextPage(
+    data,
+    options.pageSize,
+    orderBy
+  );
+
+  return { data, hasNextPage, nextCursor };
 }
 
 export const store = async (
