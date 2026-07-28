@@ -57,13 +57,11 @@ export const getAll = async (
   
   if (error) throw new ErrorII(error.message);
 
-  const { hasNextPage, nextCursor } = handleNextPage(
+  return handleNextPage(
     data,
     options.pageSize,
     orderBy
   );
-
-  return { data, hasNextPage, nextCursor };
 }
 
 export const store = async ( 

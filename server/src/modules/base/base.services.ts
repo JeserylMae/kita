@@ -72,7 +72,7 @@ export const handleNextPage = (
     ? encodeCursor(nextCursor)
     : null;
 
-  return { hasNextPage,  nextCursor };
+  return { data, hasNextPage,  nextCursor };
 }
 
 

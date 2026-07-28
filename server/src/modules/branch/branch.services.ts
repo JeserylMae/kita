@@ -165,13 +165,11 @@ export const findMembership = async (
   if (error) throw new ErrorII(error.message);
 
   if (!single && options) {
-    const { hasNextPage, nextCursor } = handleNextPage(
+    return handleNextPage(
       data,
       options?.pageSize,
       orderBy
     );
-
-    return { data, hasNextPage, nextCursor };
   }
     
   return data;
@@ -217,13 +215,11 @@ export const findMembers = async (
 
   if (error) throw new ErrorII(error.message);
 
-  const { hasNextPage, nextCursor } = handleNextPage(
+  return handleNextPage(
     data,
     options.pageSize,
     orderBy
   );
-
-  return { data, hasNextPage, nextCursor }
 }
 
 /**
