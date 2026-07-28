@@ -114,6 +114,7 @@ export const reInvite = async (
   inviteID: string, 
   inviteURL: string 
 ) => {
+
   const token = TokenServices.createToken();
   const expiresAt = getDateAfterInterval( new Date(), '3d' );
 
@@ -125,12 +126,20 @@ export const reInvite = async (
     'sent_at': new Date().toISOString()
   });
 
+  if (!hasProperty(invitation.org, 'org_name')
+    || !hasProperty(invitation.brc, 'branch_name')
+    || !hasProperty(invitation.role, 'role')
+    || !hasProperty(invitation.sender, 'email')
+  ) {
+    throw new ErrorII('Failed to fetch necessary info.');
+  }
+
   await sendInviteEmail(
     invitation.receiver_email, {
-      'orgName': invitation.org[0]!.org_name,
-      'senderEmail': invitation.sender[0]!.email,
-      'branchName': invitation.brc[0]!.branch_name,
-      'roleName': invitation.role[0]!.role,
+      'orgName': invitation.org.org_name,
+      'senderEmail': invitation.sender.email,
+      'branchName': invitation.brc.branch_name,
+      'roleName': invitation.role.role,
       'expirationDate': expiresAt,
       'acceptURL': `${inviteURL}/invite?token=${token}`,
     }
@@ -146,6 +155,12 @@ export const respond = async (
     'id', 'token', 'expires_at', 'accepted_at'
   );
   
+  if (idata.token !== token) {
+    throw new InvalidCredentials(
+      'Incorrect token.'
+    );
+  }
+
   if (idata.id.trim() === "") {
     throw new InvalidCredentials(
       'Invitation does not exist.'
@@ -158,10 +173,11 @@ export const respond = async (
     );
   }
 
-  if (idata.token !== token) {
-    throw new InvalidCredentials(
-      'Incorrect token.'
-    );
+  if (typeof idata.expires_at === 'string'
+    && idata.expires_at 
+    && new Date(idata.expires_at) < new Date()
+  ) {
+    throw new ConflictError('Token already expired.'); 
   }
   
   TokenServices.verify({

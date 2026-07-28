@@ -69,11 +69,9 @@ const openapiDocument: OpenAPIObject = createDocument({
     "/invitation/":        invite.InvitePath,
     "/invitation/{token}": invite.RespondToInvitationPath,
     "/invitation/me{id}":      invite.GetInvitationsPath,
+    "/invitation/reinvite/{id}": invite.ReinvitePath,
 
-    "/invitation/{id}": {
-      ...invite.ReinvitePath,
-      ...invite.DeleteInvitationPath
-    },
+    "/invitation/{id}": invite.DeleteInvitationPath,
 
     "/inventory/transaction":        txn.FindAllTransactionsPath,
     "/inventory/transaction/details": txn.FindTransactionDetailsPath,

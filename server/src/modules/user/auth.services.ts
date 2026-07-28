@@ -118,7 +118,7 @@ export const verifyEmail = async (
   }
 
   if (!user.token_expires_at 
-    || user.token_expires_at < new Date()) {
+    || new Date(user.token_expires_at) < new Date()) {
     throw new InvalidCredentials('Token has expired.');
   }
 

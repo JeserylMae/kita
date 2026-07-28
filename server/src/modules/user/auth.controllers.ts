@@ -116,7 +116,7 @@ export const verifyEmail = async (
     res.status(200).json({
       'success': true,
       'message': 'If an unverified account exists for ' +
-        'this email a verification email has been sent.'
+        'this email then the email has been verified.'
     });
   }
   catch (error: unknown) {
