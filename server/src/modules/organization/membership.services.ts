@@ -2,8 +2,10 @@ import { supabase } from "@/config/db";
 import { BaseRepository } from "../base/base.repository";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { 
+  MembershipPagination,
   MembershipSelect, 
   MembershipUpdate, 
+  OrgPagination, 
   TableName 
 } from "./organization.types";
 import { 
@@ -11,6 +13,8 @@ import {
   InvalidCredentials, 
   RecordNotFound 
 } from "@/errors";
+import { builtinModules } from "node:module";
+import { handleCursor, handleNextPage } from "../base/base.services";
 
 
 export const isUserInOrg = async (
@@ -55,11 +59,17 @@ export const findRole = async (
  */
 export const findMembership = async (
   userID: string,
-  options?: {
-    withBranches?: boolean,
-    defaultOrgOnly?: boolean
-  }
+  paginate: boolean = false,
+  options?: MembershipPagination
 ) => {
+  const orderBy = options?.orderBy
+    ? options.orderBy
+    : 'org_id';
+
+  const pageSize = options?.pageSize
+    ? options.pageSize + 1
+    : 10;
+
   // organization_members.org_id = organizations.id
   let slctStr = (`
     org_id,
@@ -88,7 +98,9 @@ export const findMembership = async (
     .select(slctStr)
     .eq('user_id', userID)
     .eq('organizations.status', 'active')
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .limit(pageSize)
+    .order(orderBy, { ascending: options?.order === 'asc'});
 
   buidler = options?.withBranches
     ? buidler.eq('branches.status', 'active')
@@ -98,19 +110,43 @@ export const findMembership = async (
     ? buidler.eq('is_default_org', true)
     : buidler;
 
+  if (options?.cursor) {
+    buidler = handleCursor(
+      options.cursor,
+      buidler,
+      orderBy,
+      options.order
+    );
+  }
+
   const { data, error } = await buidler;
   
-  if (!error) return data;
-  
-  throw new RecordNotFound(
-    'Failed to fetch organization list.'
-  );
+  if (error) {
+    throw new RecordNotFound(
+      'Failed to fetch organization list.'
+    );
+  }
+
+  if (paginate) {
+    return handleNextPage(
+      data, 
+      pageSize,
+      orderBy
+    );
+  }
+
+  return data;
 }
 
 export const findAllMembers = async ( 
-  orgID: string 
+  orgID: string,
+  options: OrgPagination
 ) => {
-  const { data, error } = await supabase
+  const orderBy = options.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
     .from(TableName.orgMem)
     .select(`
       id,
@@ -134,11 +170,28 @@ export const findAllMembers = async (
       employment_date,
       updated_at
     `)
-    .eq('org_id', orgID);
+    .eq('org_id', orgID)
+    .limit(options.pageSize + 1)
+    .order(orderBy, { ascending: options.order === 'asc' });
   
-  if (!error) return data;
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor,
+      builder,
+      orderBy,
+      options.order
+    );
+  }
 
-  throw new ErrorII(error.message);
+  const { data, error } = await builder;
+
+  if (error) throw new ErrorII(error.message);
+
+  return handleNextPage(
+    data, 
+    options.pageSize,
+    orderBy
+  );
 }
 
 /**
