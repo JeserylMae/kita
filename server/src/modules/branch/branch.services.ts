@@ -43,6 +43,7 @@ export const findRole = async (
     .select('id, roles(role)')
     .eq('org_mem_id', orgMemID)
     .eq('branch_id', branchID)
+    .limit(1)
     .single();
     
   if(!error) return data;
@@ -71,6 +72,12 @@ export const storeMembership = async (
     .select(slctStr);
 
   if (!error) return data[0];
+
+  if (error.code = '23505') {
+    throw new InvalidCredentials(
+      'User is already a member of the branch.'
+    );
+  }
 
   throw new InvalidCredentials(
     'Failed to store branch membership.'
@@ -188,7 +195,7 @@ export const findMembers = async (
     .select(`
       id,
       org_mem_id,
-      role,
+      roles(id, role),
       status,
       branches(
         branch_name,

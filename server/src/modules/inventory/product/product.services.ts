@@ -1,6 +1,6 @@
 import { ErrorII } from "@/errors";
 import { supabase } from "@/config/db";
-import { sanitizeObject } from "@/utils/data.helpers";
+import { injectPropertyIntoObjects, sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "@/modules/base/base.repository";
 import { ProductInsert, ProductPagination, VariantInsert } from "./product.types";
 import { handleCursor, handleNextPage } from "@/modules/base/base.services";
@@ -82,12 +82,14 @@ export const store = async (
 
   if (!variant) return;
 
-  const vdata = {
-    ...sanitizeObject(variant),
-    org_product_id: new_product.id,
-    created_by: orgMemID,
-    org_id: orgID
-  }
+  const vdata = injectPropertyIntoObjects(
+    variant,
+    {
+      org_product_id: new_product[0].id,
+      created_by: orgMemID,
+      org_id: orgID
+    }
+  )
   
   const variantDB = new BaseRepository('product_variants');
   await variantDB.insert(vdata);

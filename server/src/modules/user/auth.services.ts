@@ -18,8 +18,11 @@ import {
   AccountNotVerified, 
   ConflictError, 
   ErrorII, 
-  InvalidCredentials 
+  Forbidden, 
+  InvalidCredentials, 
+  RecordNotFound
 } from "@/errors";
+import { BaseRepository } from '../base/base.repository';
 
 
 // @TODO: add role validation via middleware
@@ -213,10 +216,11 @@ export const resetPassword = async (
  * @param userID 
  */
 export const logout = async ( 
-  sessionID: string 
+  sessionID: string,
+  userID: string
 ) => {
   const session = await SessionServices
-    .find(sessionID);
+    .find(sessionID, userID);
 
   await SessionServices.deleteSession(session.id!);
 }
@@ -240,6 +244,47 @@ export const getPermissionInfo =  async (
   permissionsCache[permission] = data;
 
   return data;
+}
+
+export const refresh = async (
+  userID: string,
+  sessionID: string,
+  orgID: string | null,
+  orgRole: string | null, 
+  orgmemID: string | null, 
+  branchID?: string | null | undefined, 
+  branchRole?: string | null | undefined, 
+  branchMemID?: string | null | undefined
+) => {
+  const session = await SessionServices.find(
+    sessionID,
+    userID,
+    'refresh_token_hash',
+    'expires_at'
+  );
+  
+  if (session.expires_at! < new Date) {
+    await SessionServices.deleteSession(sessionID);
+
+    throw new Forbidden(
+      'Refresh token expired. Please login again.'
+    );
+  }
+
+  const acstoken = await TokenServices
+    .createAccessToken(
+      userID,
+      sessionID,
+      orgID,
+      orgRole,
+      orgmemID,
+      true,
+      branchID,
+      branchRole,
+      branchMemID
+    );
+
+  return acstoken;
 }
 
 export const getRoleScope = async ( 

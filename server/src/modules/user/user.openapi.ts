@@ -59,6 +59,34 @@ export const LogoutPath: ZodOpenApiPathItemObject = {
   },
 };
 
+export const RefreshPath: ZodOpenApiPathItemObject = {
+  post: {
+    tags:        ["Auth"],
+    summary:     "Refresh access token",
+    description: "Create new access token.",
+    security:    [{ cookieAuth: [] }],
+
+    parameters: [
+      {
+        in: "header",
+        name: "Token-Action",
+        required: true,
+        schema: {
+          type: "string",
+          enum: ["refresh"],
+        },
+        description: "Indicates that this request is for refreshing the access token.",
+        example: "refresh",
+      },
+    ],
+
+    responses: {
+      200: { description: "Refresh successful." },
+      400: { description: "Invalid reset token or request data" },
+    },
+  },
+};
+
 export const ResetPasswordPath: ZodOpenApiPathItemObject  = {
   post: {
     tags:        ["Auth"],

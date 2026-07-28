@@ -31,6 +31,7 @@ export const FindMembersPath: ZodOpenApiPathItemObject = {
     summary:     "Select all members",
     description: "Select all members of the branch.",
     security:    [{ cookieAuth: [] }],
+    requestParams: { query: IdParamsSchema },
 
     responses: {
       "200": { description: "Branch members was successfully retrieved." },

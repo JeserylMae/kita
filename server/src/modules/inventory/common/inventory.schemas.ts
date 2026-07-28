@@ -87,6 +87,11 @@ export const ProductVariantID = z.uuid().meta({
   example: "550e8400-e29b-41d4-a716-446655440000",
 });
 
+export const InventoryItemID = z.uuid().meta({
+  description: "UUID of the inventory item",
+  example: "550e8400-e29b-41d4-a716-446655440000",
+});
+
 export const ReferenceTypeSchema = z.enum(
   Object.keys(ReferenceType) as [
     ReferenceTypeKeys,

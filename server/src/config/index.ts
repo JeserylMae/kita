@@ -23,7 +23,10 @@ export default {
   databaseURL: requiredEnv('DATABASE_URL'),
   dbSecret: requiredEnv('DB_SECRET_KEY'),
 
-  mailAPI: requiredEnv('MAIL_API'),
+  mailHost: requiredEnv('MAIL_HOST'),
+  mailPort: requiredEnv('MAIL_PORT'),
+  mailUsername: requiredEnv('MAIL_USERNAME'),
+  mailPassword: requiredEnv('MAIL_PASSWORD'),
   mailAddress: requiredEnv('MAIL_ADDRESS'),
 
   tokenIss: requiredEnv('TOKEN_ISS'),

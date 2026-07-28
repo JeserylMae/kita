@@ -38,15 +38,17 @@ const openapiDocument: OpenAPIObject = createDocument({
   },
 
   paths: {
-    "/user/signup": user.SignupPath,
-    "/user/signin": user.SigninPath,
-    "/user/logout": user.LogoutPath,
+    "/user/signup":  user.SignupPath,
+    "/user/signin":  user.SigninPath,
+    "/user/logout":  user.LogoutPath,
+    '/user/refresh': user.RefreshPath,
     "/user/reset-password":      user.ResetPasswordPath,
     "/user/forgot-password":     user.ForgotPasswordPath,
     "/user/verify-email":        user.VerifyEmailPath,
     "/user/resend-verification": user.ResendEmailVerificationPath,
-    "/user/me":    user.MePath,
-    "/users/{id}": user.UserUpdatePath,
+    "/user/me":     user.MePath,
+    "/user/me/{id": user.UserUpdatePath,
+    "/user/{id}":   user.UserUpdatePath,
 
     "/organization/memberships/me":      org.GetOrganizationsPath,
     "/organization/switch/{id}":         org.SwitchOrganizationPath,
@@ -66,7 +68,7 @@ const openapiDocument: OpenAPIObject = createDocument({
 
     "/invitation/":        invite.InvitePath,
     "/invitation/{token}": invite.RespondToInvitationPath,
-    "/invitation/me":      invite.GetInvitationsPath,
+    "/invitation/me{id}":      invite.GetInvitationsPath,
 
     "/invitation/{id}": {
       ...invite.ReinvitePath,
@@ -77,15 +79,12 @@ const openapiDocument: OpenAPIObject = createDocument({
     "/inventory/transaction/details": txn.FindTransactionDetailsPath,
 
     "/inventory/product/{id}": {
+      ...prd.CreateProductPath,
       ...prd.UpdateProductPath,
-      ...prd.DeleteProductPath
-    },
-
-    "/inventory/product": {
-      ...prd.GetAllProductsPath,
+      ...prd.DeleteProductPath,
       ...prd.CreateProductPath
     },
-
+    
     "/inventory/product/variant/{id}": {
       ...prd.UpdateProductVariantPath,
       ...prd.DeleteProductVariantPath
@@ -101,12 +100,12 @@ const openapiDocument: OpenAPIObject = createDocument({
       ...mov.DeleteMovementPath
     },
 
-    "inventory/items": {
+    "/inventory/items": {
       ...item.ItemInsertPath,
       ...item.GetItemsPath
     },
 
-    "inventory/items/{id}": {
+    "/inventory/items/{id}": {
       ...item.ItemUpdatePath,
       ...item.DeleteItemPath
     },

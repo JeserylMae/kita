@@ -6,7 +6,8 @@ import {
   requireAuth, 
   requireBrc, 
   requireOrg, 
-  verifyBrcPermission 
+  verifyBrcPermission, 
+  verifyOrgPermission
 } from "@/middleware/auth.middleware";
 
 import { 
@@ -37,20 +38,19 @@ branchRouter.use(requireAuth);
 branchRouter.use(requireOrg);
 
 branchRouter.post('/',
-  verifyBrcPermission('insert.brc'),
+  verifyOrgPermission,
   BranchController.create
 );
 
-branchRouter.get('/members/',
+branchRouter.get('/members/:id',
   requireBrc,
   verifyBrcPermission('select.brcmem'),
   authorizeBranchAccess,
+  validateIdParams,
   BranchController.findMembers
 );
 
 branchRouter.get('/:id',
-  verifyBrcPermission('select.brc'),
-  authorizeBranchAccess,
   validateIdParams,
   BranchController.selectBranch
 );

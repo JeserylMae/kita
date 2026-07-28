@@ -21,41 +21,48 @@ import {
 } from './product.schemas';
 
 
+const prdMiddlewares = [
+  authorizeOrganizationAccess,
+  validateIdParams,
+]
+
 const productRouter = Router();
 
 productRouter.use(requireAuth);
 productRouter.use(requireOrg);
 productRouter.use(verifyOrgPermission);
-productRouter.use(authorizeOrganizationAccess);
 
-productRouter.get('/',
+productRouter.get('/:id',
+  ...prdMiddlewares,
   ProductController.getAll
 );
 
 productRouter.post('/',
+  authorizeOrganizationAccess,
+  validateIdParams,
   validateBody(ProductInsertRequestSchema),
   ProductController.store
 );
 
 productRouter.patch('/:id',
-  validateIdParams,
+  ...prdMiddlewares,
   validateBody(ProductUpdateSchema),
   ProductController.update
 );
 
 productRouter.patch('/variant/:id',
-  validateIdParams,
+  ...prdMiddlewares,
   validateBody(VariantUpdateSchema),
   ProductController.updateVariant 
 );
 
 productRouter.delete('/:id',
-  validateIdParams,
+  ...prdMiddlewares,
   ProductController.deleteProduct
 );
 
 productRouter.delete('/variant/:id',
-  validateIdParams,
+  ...prdMiddlewares,
   ProductController.deleteVariant
 );
 

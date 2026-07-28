@@ -55,18 +55,21 @@ export const requireAuth = async (
   next: NextFunction
 ) => {
   try {
+    const action = req.get("Token-Action");
     const { acsToken, claims } = loadAccessToken(req);
 
-    const payload = await verifyAccessToken({
-      token_hash: acsToken
-    });
-
-    const expiresAt = new Date(payload.exp! * 1000);
-
-    if (expiresAt < new Date) {
-      throw new InvalidCredentials(
-        'Access token is expired.'
-      );
+    if (action !== 'refresh') {
+      const payload = await verifyAccessToken({ 
+        token_hash: acsToken 
+      });
+  
+      const expiresAt = new Date(payload.exp! * 1000);
+  
+      if (expiresAt < new Date) {
+        throw new InvalidCredentials(
+          'Access token is expired.'
+        );
+      }
     }
     
     if ( typeof claims.sub !== 'string' 
@@ -75,11 +78,13 @@ export const requireAuth = async (
       throw new Forbidden(ERROR_MSG);
     }
 
-    (req as AuthRequest).context.user = {
-      id: claims.sub,
-      sid: claims.sid,
-      claims: claims
-    }
+    (req as AuthRequest).context = {
+      user: {
+        id: claims.sub,
+        sid: claims.sid,
+        claims: claims
+      }
+    };
 
     next();
   }
@@ -125,7 +130,7 @@ export const requireBrc = (
 ) => {
   try {
     assertOrg(req);
-
+    
     const claims = req.context.user.claims;
 
     if ( typeof claims.brcid !== 'string'
@@ -140,6 +145,8 @@ export const requireBrc = (
       role: claims.brcrole,
       memID: claims.brcmemid
     }
+
+    next();
   }
   catch (error: unknown) {
     next(error);
@@ -152,7 +159,7 @@ export const verifyOrgPermission = async (
   next: NextFunction
 ) => {
   try{
-    assertBrc(req);
+    assertOrg(req);
 
     const role = req.context.org.role;
 

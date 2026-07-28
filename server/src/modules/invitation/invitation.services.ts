@@ -1,22 +1,24 @@
 import { supabase } from "@/config/db";
 import { BaseRepository } from "../base/base.repository";
 import { storeMembership } from "../branch/branch.services";
+import { InviteEmailParams } from "../email/email.types";
 import { renderInvite, sendEmail } from "../email/email.services";
 
 import { 
+  ConflictError,
   ErrorII,
   InvalidCredentials, 
   RecordNotFound 
 } from "@/errors";
 import { 
   getDateAfterInterval, 
+  hasProperty, 
   sanitizeObject 
 } from "@/utils/data.helpers";
 import { 
   InvitationParams, 
   InvitationResponse, 
   InvitationUpdate, 
-  InviteEmailParams, 
   TableName
 } from "../organization/organization.types";
 
@@ -38,13 +40,23 @@ export const createInvitation = async (
   const expiresAt = getDateAfterInterval(new Date(), '3d');
 
   const inviteData = await store(invite, token, expiresAt);
-  
+
+  if (!hasProperty(inviteData.org, "org_name")
+    || !hasProperty(inviteData.sender, "email") 
+    || !hasProperty(inviteData.brc, "branch_name")
+    || !hasProperty(inviteData.role, "role")
+  ) {
+    throw new ConflictError(
+      'Failed to fetch necessary data.'
+    );
+  }
+
   await sendInviteEmail(
     invite.receiver_email, {
-    'orgName': inviteData.org[0]!.org_name,
-    'senderEmail': inviteData.sender[0]!.email,
-    'branchName': inviteData.brc[0]!.branch_name,
-    'roleName': inviteData.role[0]!.role,
+    'orgName': inviteData.org.org_name,
+    'senderEmail': inviteData.sender.email,
+    'branchName': inviteData.brc.branch_name,
+    'roleName': inviteData.role.role,
     'expirationDate': expiresAt,
     'acceptURL': `${invite.url}/invite?token=${token}`
   })
@@ -83,8 +95,12 @@ export const store = async (
       role:roles!role_id(role)
     `)
     .single();
-  
+    
   if (!error) return data;
+  
+  if (error?.code === '23505') {
+    throw new InvalidCredentials('Invitation already exists.');
+  }
 
   throw new InvalidCredentials('Failed to create invitation.');
 }
@@ -125,16 +141,20 @@ export const respond = async (
   invitation: InvitationResponse,
   token: string
 ) => {
-  const invDB = new BaseRepository(TableName.orgInv);
-
   const idata = await find(
     invitation.id,
-    'id', 'token', 'expires_at'
+    'id', 'token', 'expires_at', 'accepted_at'
   );
   
   if (idata.id.trim() === "") {
     throw new InvalidCredentials(
-      'Invitation does not exists.'
+      'Invitation does not exist.'
+    );
+  }
+
+  if (idata.accepted_at) {
+    throw new ConflictError(
+      'Invitation already accepted.'
     );
   }
 
@@ -149,27 +169,39 @@ export const respond = async (
     'expires_at': new Date(idata.expires_at!)
   })
 
-  if (invitation.status === 'accepted') {
+  if ( invitation.status === 'accepted') {
     const org = await MembershipServices.store(
       invitation.org_id!,
       invitation.receiver_id!,
+      invitation.status,
       'id'
     );
 
+    if (!hasProperty(org[0], 'id')) {
+      throw new ErrorII('Failed to accept or reject branch memership');
+    }
+
     await storeMembership({
       branch_id: invitation.branch_id!,
-      org_mem_id: org.id!,
+      org_mem_id: org[0]?.id,
       role_id: invitation.role_id!,
       status: invitation.status
     });
   }
 
-  await invDB.upsert({
-    'id': invitation.id,
-    'status': invitation.status,
-    'accepted_at': invitation.status === 'accepted'
-      ? new Date() : null
-  })
+  const { data, error } =  await supabase
+    .from(TableName.orgInv)
+    .update({
+      'status': invitation.status,
+      'receiver_id': invitation.receiver_id,
+      'accepted_at': invitation.status === 'accepted'
+        ? new Date() : null
+    })
+    .eq('id', invitation.id)
+    .eq('org_id', invitation.org_id)
+    .eq('branch_id', invitation.branch_id);
+
+  if (error) throw new ErrorII(error.message);
 }
 
 /**
@@ -200,6 +232,34 @@ export const find = async <K extends keyof InvitationUpdate>(
     .single();
 
   if (!error) return data as unknown as Pick<InvitationUpdate, K>;
+
+  throw new ErrorII(error.message);
+}
+
+export const findInvitations = async (
+  id: string,
+  column: 'id'|'branch_id'|'org_mem_id'|'invitation_id'|'receiver_id' = 'id',
+  single = true
+) => {
+  let builder = supabase 
+  .from(TableName.orgInv)
+  .select(`
+    id, 
+    sender:users!sender_id(email, firstname, lastname),
+    org:organizations!org_id(id, org_name),
+    brc:branches!branch_id(id, branch_name),
+    role:roles!role_id(id, role),
+    status,
+    sent_at,
+    expires_at  
+  `)
+  .eq(column, id);
+  
+  const { data, error } = single
+    ? await builder.single()
+    : await builder;
+
+  if (!error) return data;
 
   throw new ErrorII(error.message);
 }

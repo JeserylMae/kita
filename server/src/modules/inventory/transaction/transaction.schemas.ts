@@ -36,8 +36,8 @@ export const TransactionInsertSchema = z.object({
   reference_type:  ReferenceTypeSchema,
   reference_id:    ReferenceID,
   code:            TransactionCode,
-  created_by_name: CreatedByName.optional(),
-  created_by_role: CreatedByRole.optional()
+  created_by_name: CreatedByName.optional().nullable(),
+  created_by_role: CreatedByRole.optional().nullable()
 });
 
 export const TransactionUpdateSchema = z.object({

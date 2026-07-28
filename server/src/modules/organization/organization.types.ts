@@ -12,15 +12,6 @@ export enum TableName {
   orgInv =    'organization_invitations'
 };
 
-export interface InviteEmailParams {
-  orgName:        string;
-  senderEmail:    string;
-  branchName:     string;
-  roleName:       string;
-  expirationDate: Date;
-  acceptURL:      string;
-}
-
 export interface MembershipSelect {
   id?:              string;
   org_id?:          string;

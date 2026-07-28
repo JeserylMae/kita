@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import config from "@/config";
-import { Resend } from "resend";
+import nodemailer from 'nodemailer';
 import Handlebars from "handlebars";
-import { InviteEmailParams } from "@/modules/organization/organization.types";
-import { verifyEmail } from '../user/user.types';
+import { ForgotPassword, InviteEmailParams } from "./email.types";
+import { verifyEmail } from './email.types';
 
 
 /**
@@ -15,20 +15,31 @@ import { verifyEmail } from '../user/user.types';
  * @returns 
  */
 export const sendEmail = async (
-  email: string, 
+  email: string,
   subject: string,
   contents: string
 ) => {
-  const resend = new Resend(config.mailAPI);
+  try {
+    const transport = nodemailer.createTransport({
+      host: config.mailHost,
+      port: Number(config.mailPort),
+      auth: {
+        user: config.mailUsername,
+        pass: config.mailPassword
+      }
+    });
 
-  const { data } = await resend.emails.send({
-    from:    config.mailAddress,
-    to:      email,
-    subject: subject,
-    html:    contents
-  })
-  return data;
-}
+    const info = await transport.sendMail({
+      from: config.mailAddress,
+      to: email,
+      subject: subject,
+      html: contents,
+    });
+
+    console.log("Message sent:", info.messageId);
+  } 
+  catch (error) { throw error; }
+};
 
 const src = 'src/modules/email/templates';
 const inviteSource = fs.readFileSync(
@@ -37,13 +48,19 @@ const inviteSource = fs.readFileSync(
 );
 
 const verifyEmailSource = fs.readFileSync(
-  path.join(process.cwd(), `${src}/invite.html`),
+  path.join(process.cwd(), `${src}/verify-email.html`),
+  "utf-8"
+);
+
+const resetPasswordSource = fs.readFileSync(
+  path.join(process.cwd(), `${src}/reset-password.html`),
   "utf-8"
 );
 
 const iTemplate = Handlebars.compile<InviteEmailParams>(inviteSource);
 const veTemplate = Handlebars.compile<verifyEmail>(verifyEmailSource);
-
+const rpTemplate = Handlebars.compile<ForgotPassword>(resetPasswordSource);
 
 export const renderInvite = ( data: InviteEmailParams ) => iTemplate(data);
 export const renderVerifyEmail = ( data: verifyEmail ) => veTemplate(data);
+export const renderResetPassword = ( data: ForgotPassword ) => rpTemplate(data);

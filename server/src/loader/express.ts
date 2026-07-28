@@ -29,7 +29,7 @@ export const loader = ({ app }: Params) => {
   app.use('/inventory/items', itemRouter);
   app.use('/inventory/product', productRouter);
   app.use('/inventory/movement', movementRouter);
-  app.use('/transaction', txnRouter);
+  app.use('/inventory/transaction', txnRouter);
 
   app.use(ErrorMiddleware.handleError);
 
