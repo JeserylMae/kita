@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { 
   QueryParamsSchema,
   TransactionInsertSchema, 
+  TransactionPaginationSchema, 
   TransactionUpdateSchema 
 } from './transaction.schemas';
 
@@ -13,6 +14,8 @@ export type QueryParams       = z.infer<typeof QueryParamsSchema>;
 export type TransactionInsert = z.infer<typeof TransactionInsertSchema>;
 
 export type TransactionUpdate = z.infer<typeof TransactionUpdateSchema>;
+
+export type TransactionPagination = z.infer<typeof TransactionPaginationSchema>;
 
 export const ReferenceType = {
   'sales invoice': {

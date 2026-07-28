@@ -5,23 +5,47 @@ import {
   ReferenceTypeKeys, 
   ReferenceType, 
   TransactionInsert,
-  TransactionUpdate
+  TransactionUpdate,
+  TransactionPagination
 } from "./transaction.types";
 import { sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "@/modules/base/base.repository";
+import { handleCursor, handleNextPage } from "@/modules/base/base.services";
 
 
 export const findAll = async ( 
-  branhID: string 
+  branhID: string,
+  options: TransactionPagination
 ) => {
-  const { data, error } = await supabase
+  const orderBy = options.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
     .from('transactions')
     .select('*')
-    .eq('branch_id', branhID);
+    .eq('branch_id', branhID)
+    .limit(options.pageSize + 1)
+    .order(orderBy, { ascending: options.order === 'asc' });
 
-  if (!error) return data;
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor,
+      builder,
+      orderBy,
+      options.order
+    );
+  }
 
-  throw new ErrorII(error.message);
+  const { data, error } = await builder;
+
+  if (error) throw new ErrorII(error.message);
+
+   return handleNextPage(
+    data,
+    options.pageSize,
+    orderBy
+  );
 }
 
 export const findDetails = async <K extends ReferenceTypeKeys>(

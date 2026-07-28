@@ -14,6 +14,7 @@ import {
   BranchID,
   CreatedByName,
   CreatedByRole,
+  PaginationSchema,
   UUID,
 } from '../../base/base.schemas'
 
@@ -47,4 +48,14 @@ export const TransactionUpdateSchema = z.object({
   code:            TransactionCode.optional(),
   created_by_name: CreatedByName.optional(),
   created_by_role: CreatedByRole.optional()
+});
+
+const transactionOrderField = [
+  'id',
+  'created_at', 
+  'updated_at'
+];
+
+export const TransactionPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(transactionOrderField).optional()
 });
