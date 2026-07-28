@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 
-const PageSize =  z.number().min(1).max(100).default(10).meta({
+const PageSize =  z.coerce.number().min(1).max(100).default(10).meta({
   id: "Page Size",
   description: "Default: 10. Limits the number of returned data, used with pagination.",
   example: 10,

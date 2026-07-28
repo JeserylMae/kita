@@ -43,10 +43,6 @@ export const get = async (
 
     const options = ItemPaginationSchema.parse(req.query);
 
-    for (const [key, val] of Object.entries(options)){
-      console.log(`${key}: ${val} - ${typeof val}`);
-    }
-
     const orgID = req.context.org.id;
     const branchID = req.context.brc.id;
 

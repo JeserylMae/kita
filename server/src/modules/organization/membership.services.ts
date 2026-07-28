@@ -76,7 +76,8 @@ export const findMembership = async (
     org_id,
     employee_code,
     status,
-    organizations( org_name, icon, hex_color, status )
+    organizations( org_name, icon, hex_color, status ),
+    users(default_org)
   `);
 
   if (options?.withBranches) {
@@ -86,7 +87,7 @@ export const findMembership = async (
       ,
       branch_members (
         branch_id,
-        role(role),
+        roles(role),
         status,
         starred,
         branches( branch_name, icon, color, status )
@@ -99,17 +100,26 @@ export const findMembership = async (
     .select(slctStr)
     .eq('user_id', userID)
     .eq('organizations.status', 'active')
-    .eq('status', 'active')
+    .eq('status', 'accepted')
     .limit(pageSize)
     .order(orderBy, { ascending: options?.order === 'asc'});
 
-  buidler = options?.withBranches
-    ? buidler.eq('branch_members.branches.status', 'accepted')
+  buidler = options?.withBranches === 'true'
+    ? buidler.eq('branch_members.branches.status', 'active')
     : buidler;
   
-  buidler = options?.defaultOrgOnly 
-    ? buidler.eq('is_default_org', true)
-    : buidler;
+  if (options?.defaultOrgOnly === 'true') {
+    const userData = await supabase
+      .from('users')
+      .select('default_org')
+      .eq('id', userID)
+      .limit(1)
+      .single();
+
+    if (userData.data?.default_org) {
+      buidler = buidler.eq('users.default_org', userData?.data?.default_org);
+    } 
+  } 
 
   if (options?.cursor) {
     buidler = handleCursor(

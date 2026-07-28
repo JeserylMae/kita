@@ -1,10 +1,11 @@
 import type { ZodOpenApiPathItemObject } from 'zod-openapi';
 
 import {
+  MembershipPaginationSchema,
   MembershipUpdateSchema,
   OrgInsertRequestSchema,
-  OrgUpdateRequestSchema,
-  OrgQueryParamsSchema
+  OrgPaginationSchema,
+  OrgUpdateRequestSchema
 } from "@/modules/organization/organization.schemas";
 import { IdParamsSchema } from '../base/base.schemas';
 
@@ -15,7 +16,7 @@ export const GetOrganizationsPath: ZodOpenApiPathItemObject = {
     summary:       "Get user's organizations",
     description:   "Retrieves the organizations (and optionally branches) the authenticated user is a member of.",
     security:      [{ cookieAuth: [] }],
-    requestParams: { query: OrgQueryParamsSchema },
+    requestParams: { query: MembershipPaginationSchema },
 
     responses: {
       201: { description: "Organizations and branches retrieved successfully" },
@@ -30,6 +31,7 @@ export const GetMembersPath: ZodOpenApiPathItemObject = {
     summary:     "Get organization members",
     description: "Retrieves all members belonging to the specified organization.",
     security:    [{ cookieAuth: [] }],
+    requestParams: { query: OrgPaginationSchema },
 
     responses: {
       200: { description: "Organization members retrieved successfully" }, 
