@@ -5,6 +5,7 @@ import {
   RoleID,
   Icon,
   HexColor,
+  PaginationSchema,
 } from '@/modules/base/base.schemas';
 
 
@@ -71,4 +72,14 @@ export const BranchInsertRequestParamsSchema = z.object({
   roleID: RoleID
 }).meta({
   description: "Branch insert parameter list."
+});
+
+const branchOrderField = [
+  'id', // branch member id
+  'org_mem_id',
+  'branches.branch_name'
+];
+
+export const BranchPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(branchOrderField).optional()
 });

@@ -14,6 +14,7 @@ import {
   BranchID,
   CreatedByName,
   CreatedByRole,
+  PaginationSchema,
   UUID,
 } from '../../base/base.schemas'
 
@@ -40,11 +41,21 @@ export const TransactionInsertSchema = z.object({
 });
 
 export const TransactionUpdateSchema = z.object({
-  amount:          Amount.optional().nullable(),
-  payment_method:  PaymentMethod.optional().nullable(),
-  reference_type:  ReferenceTypeSchema.optional().nullable(),
-  reference_id:    ReferenceID.optional().nullable(),
-  code:            TransactionCode.optional().nullable(),
-  created_by_name: CreatedByName.optional().nullable(),
-  created_by_role: CreatedByRole.optional().nullable()
+  amount:          Amount.optional(),
+  payment_method:  PaymentMethod.optional(),
+  reference_type:  ReferenceTypeSchema.optional(),
+  reference_id:    ReferenceID.optional(),
+  code:            TransactionCode.optional(),
+  created_by_name: CreatedByName.optional(),
+  created_by_role: CreatedByRole.optional()
+});
+
+const transactionOrderField = [
+  'id',
+  'created_at', 
+  'updated_at'
+];
+
+export const TransactionPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(transactionOrderField).optional()
 });

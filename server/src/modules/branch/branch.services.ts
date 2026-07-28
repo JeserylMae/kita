@@ -1,16 +1,18 @@
 import { supabase } from "@/config/db";
-import { TableName } from "../organization/organization.types";
-import { sanitizeObject } from "@/utils/data.helpers";
+import { InvitationPagination, TableName } from "../organization/organization.types";
+import { decodeCursor, sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "../base/base.repository";
 
 import { 
   BranchInsert, 
+  BranchPagination, 
   MemberInsert
 } from "./branch.types";
 import { 
   ErrorII, 
   InvalidCredentials 
 } from "@/errors";
+import { handleCursor, handleNextPage } from "../base/base.services";
 
 
 
@@ -109,10 +111,86 @@ export const storeBranch = async (
   })
 }
 
-export const findMembers = async ( 
-  branchID: string 
+/**
+ * 
+ * @param id 
+ * @param column 
+ * @param single 
+ * @returns 
+ */
+export const findMembership = async (
+  id: string,
+  column: 'id'|'branch_id'|'org_mem_id'|'invitation_id' = 'id',
+  single = true,
+  options?: InvitationPagination
 ) => {
-  const { data, error } = await supabase
+  let orderBy = options?.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
+    .from(TableName.branchMem)
+    .select(`
+      *,
+      roles(role),
+      branches(
+        branch_name,
+        organizations(org_name)
+      ),
+      organization_invitations(
+        *,
+        sender:users!organization_invitations_sender_id_fkey(
+          email
+        ),
+        receiver:users!organization_invitations_receiver_id_fkey(
+          firstname,
+          lastname,
+          email
+        )
+      )
+    `)
+    .eq(column, id);
+
+  if (!single && options) {
+    builder = builder.limit(options.pageSize + 1)
+      .order(orderBy, { ascending: options.order === 'asc'});
+
+    if (options.cursor) {
+      builder = handleCursor(
+        options.cursor,
+        builder,
+        orderBy,
+        options.order
+      );
+    }
+  }
+
+  const { data, error } = single
+    ? await builder.single()
+    : await builder;
+
+  if (error) throw new ErrorII(error.message);
+
+  if (!single && options) {
+    return handleNextPage(
+      data,
+      options?.pageSize,
+      orderBy
+    );
+  }
+    
+  return data;
+}
+
+export const findMembers = async ( 
+  branchID: string, 
+  options: BranchPagination
+) => {
+  const orderBy = options.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
     .from(TableName.branchMem)
     .select(`
       id,
@@ -127,11 +205,28 @@ export const findMembers = async (
         org_id
       )
     `)
-    .eq('branch_id', branchID);
-  
-  if (!error) return data;
+    .order(orderBy, { ascending: options.order === 'asc' })
+    .eq('branch_id', branchID)
+    .limit(options.pageSize + 1);
 
-  throw new ErrorII(error.message);
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor,
+      builder,
+      orderBy,
+      options.order
+    );
+  }
+  
+  const { data, error } = await builder;
+
+  if (error) throw new ErrorII(error.message);
+
+  return handleNextPage(
+    data,
+    options.pageSize,
+    orderBy
+  );
 }
 
 /**

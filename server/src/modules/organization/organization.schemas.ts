@@ -12,6 +12,7 @@ import {
   URL,
   Icon,
   HexColor,
+  PaginationSchema,
 } from '@/modules/base/base.schemas';
 
 
@@ -296,9 +297,39 @@ export const OrgUpdateRequestSchema = z.object({
   description: "Request body for updating an organization along with its brands and founders.",
 });
 
+const invitationOrderField = [
+  'id',
+  'sent_at',
+  'receiver.email',
+];
 
-export const OrgQueryParamsSchema = z.object({
-  withBranches: z.enum(['true', 'false']).optional().nullable().meta({
+const orgOrderField = [
+  'id',
+  'users.firstname',
+  'users.lastname',
+  'employee_code',
+  'employment_date',
+  'updated_at'
+];
+
+const memberOrderField = [
+  'org_id',
+  'employee_code',
+  'organizations.org_name'
+];
+
+export const InvitationPagination = PaginationSchema.extend({
+  orderBy: z.enum(invitationOrderField).optional()
+});
+
+
+export const OrgPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(orgOrderField).optional()
+});
+
+export const MembershipPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(memberOrderField).optional(),
+  withBranches: z.enum(['true', 'false']).optional().meta({
     description: "Whether to include branch data in the response",
     example: "true",
   }),
@@ -306,9 +337,4 @@ export const OrgQueryParamsSchema = z.object({
     description: "Whether to only return the user's default organization",
     example: "false",
   }),
-}).meta({
-  id: "OrgQueryParams",
-  title: "Organization Query Parameters",
-  description: "Query parameters for filtering the organizations returned for the authenticated user.",
 });
-

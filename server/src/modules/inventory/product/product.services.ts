@@ -2,11 +2,19 @@ import { ErrorII } from "@/errors";
 import { supabase } from "@/config/db";
 import { injectPropertyIntoObjects, sanitizeObject } from "@/utils/data.helpers";
 import { BaseRepository } from "@/modules/base/base.repository";
-import { ProductInsert, VariantInsert } from "./product.types";
+import { ProductInsert, ProductPagination, VariantInsert } from "./product.types";
+import { handleCursor, handleNextPage } from "@/modules/base/base.services";
 
 
-export const getAll = async ( orgID: string ) => {
-  const { data, error } = await supabase
+export const getAll = async ( 
+  orgID: string,
+  options: ProductPagination 
+) => {
+  const orderBy = options.orderBy
+    ? options.orderBy
+    : 'id';
+
+  let builder = supabase
     .from('organization_products')
     .select(`
       id, 
@@ -32,11 +40,28 @@ export const getAll = async ( orgID: string ) => {
         material
       )
     `)
-    .eq('organization_id', orgID);
-  
-  if(!error) return data;
+    .eq('organization_id', orgID)
+    .limit(options.pageSize + 1)
+    .order(orderBy, { ascending: options.order === 'asc'});
 
-  throw new ErrorII(error.message);
+  if (options.cursor) {
+    builder = handleCursor(
+      options.cursor,
+      builder,
+      orderBy,
+      options.order
+    );
+  }
+
+  const { data, error } = await builder;
+  
+  if (error) throw new ErrorII(error.message);
+
+  return handleNextPage(
+    data,
+    options.pageSize,
+    orderBy
+  );
 }
 
 export const store = async ( 

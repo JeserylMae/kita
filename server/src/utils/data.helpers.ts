@@ -53,6 +53,17 @@ export const injectPropertyIntoObjects = (
   return newArr;
 }
 
+export const encodeCursor = (data: unknown) => {
+  return Buffer
+    .from(JSON.stringify(data))
+    .toString("base64url");
+}
+
+export const decodeCursor = <T> (cursor: string) => {
+  return JSON.parse(
+    Buffer.from(cursor, "base64url").toString()
+  );
+}
 export const stringOrNull = (value: unknown): string | null =>
   typeof value === "string" ? value : null;
 

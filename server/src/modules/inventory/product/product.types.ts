@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { 
   ProductInsertRequestSchema,
   ProductInsertSchema, 
+  ProductPaginationSchema, 
   ProductUpdateSchema, 
   VariantInsertSchema, 
   VariantUpdateSchema 
@@ -17,3 +18,5 @@ export type VariantInsert        = z.infer<typeof VariantInsertSchema>;
 export type VariantUpdate        = z.infer<typeof VariantUpdateSchema>;
 
 export type ProductInsertRequest = z.infer<typeof ProductInsertRequestSchema>;
+
+export type ProductPagination    = z.infer<typeof ProductPaginationSchema>;

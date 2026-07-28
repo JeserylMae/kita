@@ -1,6 +1,6 @@
 import { IdParams } from "../base/base.types";
 import { createAccessToken } from "../token/token.services";
-import { InvalidCredentials } from "@/errors";
+import { ErrorII, InvalidCredentials } from "@/errors";
 import { accessTokenCookieOptions } from "@/config/types.d";
 
 import * as MembershipServices from "./membership.services";
@@ -20,10 +20,11 @@ import {
 import { 
   MembershipUpdate, 
   OrgInsertRequest, 
-  OrgQueryParams, 
   OrgUpdateRequest, 
   TableName 
 } from "./organization.types";
+import { MembershipPaginationSchema, OrgPaginationSchema } from "./organization.schemas";
+import { equal } from "node:assert";
 
 
 /**
@@ -33,7 +34,7 @@ import {
  * @param next 
  */
 export const getOrganizations = async (
-  req: Request<any, any, any, OrgQueryParams>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -41,19 +42,24 @@ export const getOrganizations = async (
     assertAuth(req);
 
     const userID = req.context.user.id;
-    const withBranches = req.query.withBranches === 'true';
-    const defaultOrgOnly = req.query.defaultOrgOnly === 'true';
+    const options = MembershipPaginationSchema.parse(req.query);
 
-    const data = await MembershipServices
-      .findMembership( userID, { 
-        withBranches,
-        defaultOrgOnly 
-      });
+    const d = await MembershipServices
+      .findMembership( userID!, true, options);
+
+    if (Array.isArray(d)) {
+      throw new ErrorII('Failed to fetch organizations.');
+    }
 
     res.status(201).json({
       "success": true,
       "message": "Successfully fetched organizations and branches.",
-      "data": data
+      "data": d.data,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': d.nextCursor,
+        'hasNextPage': d.hasNextPage,
+      }
     })
   }
   catch ( error: unknown ) {
@@ -77,20 +83,20 @@ export const getMembers = async (
 
     const paramOrgID = req.params.id;
     const orgID = req.context.org.id;
+    const options = OrgPaginationSchema.parse(req.query);
 
-    if (paramOrgID !== orgID) {
-      throw new InvalidCredentials(
-        'Invalid organization ID.'
-      );
-    }
-
-    const data = await MembershipServices
-      .findAllMembers(orgID);
+    const { data, hasNextPage, nextCursor } = await MembershipServices
+      .findAllMembers(orgID, options);
     
     res.status(200).json({
       "success": true,
       "message": "Organization members are retrieved.",
-      "orgMembers": data
+      "orgMembers": data, 
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {

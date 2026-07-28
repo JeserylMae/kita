@@ -6,6 +6,7 @@ import {
   ReferenceID,
   ReferenceTypeSchema,
 } from '../common/inventory.schemas';
+import { PaginationSchema } from '@/modules/base/base.schemas';
 
 
 const QuantityChanged = z.number().int().meta({
@@ -33,4 +34,13 @@ export const MovementUpdateSchema = z.object({
   movement_type:      MovementType.optional().nullable(),
   reference_type:     ReferenceTypeSchema.optional().nullable(),
   reference_id:       ReferenceID.optional().nullable()
+});
+
+const movementOrderField = [
+  'id',
+  'product_variants.sku'
+];
+
+export const MovementPaginationSchema = PaginationSchema.extend({
+  orderBy: z.enum(movementOrderField).optional()
 });

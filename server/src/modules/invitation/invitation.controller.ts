@@ -12,6 +12,7 @@ import {
 
 import * as InvitationServices from './invitation.services';
 import { assertAuth, assertBrc } from '../base/base.services';
+import { InvitationPagination } from '../organization/organization.schemas';
 
 
 /**
@@ -127,7 +128,12 @@ export const getInvitations = async (
     res.status(200).json({
       'success': true,
       'message': 'Invitations retrieved successfully.',
-      'invitations': invitations
+      'invitations': invitations,
+      'pagination': {
+        'pageSize': options.pageSize,
+        'nextCursor': nextCursor,
+        'hasNextPage': hasNextPage,
+      }
     });
   }
   catch (error: unknown) {
