@@ -34,9 +34,11 @@
     "@types/node": "^25.9.3",
     "@types/nodemailer": "^6.4.24",
     "esbuild": "0.28.1",
+    "openapi3-ts": "^4.6.1",
     "prettier": "^3.8.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "zod-openapi": "^5.4.6"
   }
 }
