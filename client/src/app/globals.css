@@ -58,13 +58,14 @@
   --popover:                    var(--color-ebony-clay-100);
   --popover-foreground:         var(--color-ebony-clay-950);
   --primary:                    var(--color-emerald-500);
-  --primary-foreground:         var(--color-ebony-clay-950);
+  --primary-foreground:         var(--color-ebony-clay-50);
   --secondary:                  var(--color-ebony-clay-300);
   --secondary-foreground:       var(--color-ebony-clay-950);
   --muted:                      var(--color-ebony-clay-100);
   --muted-foreground:           var(--color-ebony-clay-900);
   --accent:                     var(--color-emerald-100);
   --accent-foreground:          var(--color-ebony-clay-950);
+  --tertiary:                   var(--color-old-gold-500);
   --destructive:                var(--color-mojo-600);
   --border:                     var(--color-ebony-clay-200);
   --input:                      var(--color-ebony-clay-300);
@@ -108,15 +109,21 @@
     --muted-foreground:           var(--color-ebony-clay-100);
     --accent:                     var(--color-emerald-100);
     --accent-foreground:          var(--color-ebony-clay-950);
+    --tertiary:                   var(--color-old-gold-400);
     --destructive:                var(--color-mojo-600);
     --border:                     var(--color-ebony-clay-800);
     --input:                      var(--color-ebony-clay-700);
     --ring:                       var(--color-emerald-100);
-    --chart-1:                    oklch(0.837 0.128 66.29);
-    --chart-2:                    oklch(0.705 0.213 47.604);
+    --chart-1:                    var(--color-emerald-100);
+    --chart-2:                    var(--color-old-gold-100);
     --chart-3:                    oklch(0.646 0.222 41.116);
     --chart-4:                    oklch(0.553 0.195 38.402);
     --chart-5:                    oklch(0.47 0.157 37.304);
+    --chart-border-1:             var(--color-emerald-500);
+    --chart-border-2:             var(--color-old-gold-500);
+    --chart-border-3:             oklch(0.646 0.222 41.116);
+    --chart-border-4:             oklch(0.553 0.195 38.402);
+    --chart-border-5:             oklch(0.47 0.157 37.304);
     --sidebar:                    var(--color-ebony-clay-950);
     --sidebar-foreground:         var(--color-ebony-clay-600);
     --sidebar-primary:            var(--color-ebony-clay-900);
@@ -143,6 +150,7 @@
   --color-muted-foreground:           var(--muted-foreground);
   --color-accent:                     var(--accent);
   --color-accent-foreground:          var(--accent-foreground);
+  --color-tertiary:                   var(--tertiary);
   --color-destructive:                var(--destructive);
   --color-border:                     var(--border);
   --color-input:                      var(--input);
@@ -152,6 +160,11 @@
   --color-chart-3:                    var(--chart-3);
   --color-chart-4:                    var(--chart-4);
   --color-chart-5:                    var(--chart-5);
+  --chart-border-1:                   var(--chart-border-1);
+  --chart-border-2:                   var(--chart-border-2);
+  --chart-border-3:                   var(--chart-border-3);
+  --chart-border-4:                   var(--chart-border-4);
+  --chart-border-5:                   var(--chart-border-5);
   --color-sidebar:                    var(--sidebar);
   --color-sidebar-foreground:         var(--sidebar-foreground);
   --color-sidebar-primary:            var(--sidebar-primary);
@@ -163,12 +176,37 @@
 
   --background-image-primary-gradient: var(--primary-gradient);
   
-  --font-sans: var(--font-quicksand);
-  --font-heading: var(--font-afacad);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-geist: var(--font-geist-sans);
+  --font-inter: var(--font-inter-sans);
+
+  --animate-carousel-slide: slide 50s linear infinite;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+
+@layer components {
+  .carousel {
+    @apply overflow-x-scroll w-max flex flex-row animate-carousel-slide;
+  }
+
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @keyframes slide {
+    from {
+      transform: translateX(0%);
+    }
+  
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
