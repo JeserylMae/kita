@@ -84,11 +84,17 @@
   --sidebar-border:             var(--color-ebony-clay-200);
   --sidebar-ring:               var(--color-emerald-100);
   
-  --primary-gradient: linear-gradient(
+  --primary-gradient-hr: linear-gradient(
       90deg, 
-      var(--color-emerald-500) 0%, 
-      var(--color-old-gold-500) 100%
+      var(--color-primary) 0%, 
+      var(--color-tertiary) 100%
     );
+  --primary-gradient-vr: linear-gradient(
+    180deg,
+    var(--color-primary) 0%,
+    var(--color-tertiary) 100%
+  );
+
 
   --radius: 0.625rem;
 }
@@ -174,7 +180,8 @@
   --color-sidebar-border:             var(--sidebar-border);
   --color-sidebar-ring:               var(--sidebar-ring);
 
-  --background-image-primary-gradient: var(--primary-gradient);
+  --background-image-primary-gradient-hr: var(--primary-gradient-hr);
+  --background-image-primary-gradient-vr: var(--primary-gradient-vr);
   
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
@@ -188,10 +195,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-size: 1.1rem;
 }
 
 
 @layer components {
+  h2 {
+    @apply font-heading text-7xl font-medium;
+  }
+
+  .gradient-text-vr {
+    @apply bg-primary-gradient-vr bg-clip-text text-transparent;
+  }
+
   .carousel {
     @apply overflow-x-scroll w-max flex flex-row animate-carousel-slide;
   }
