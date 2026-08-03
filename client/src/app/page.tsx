@@ -2,6 +2,7 @@ import "./globals.css";
 import Image from "next/image";
 import NavBar from "@/components/landing/NavBar";
 import Hero from "@/components/landing/Hero";
+import Solutions from "@/components/landing/Solutions";
 import WhyChooseUs from "@/components/landing/WhyChooseUs";
 
 
@@ -23,6 +24,7 @@ export default function Home() {
       </section>
 
       <WhyChooseUs/>
+      <Solutions/>
     </div>
   );
 }

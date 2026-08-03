@@ -43,7 +43,7 @@ export default function NavBar() {
           <li className={listItem}><a href="#solutions"> Solutions </a></li>
           <li className={listItem}><a href="#features"> Features </a></li>
 
-          <li><a href="/" className="hidden md:flex"> 
+          <li><a href="#hero" className="hidden md:flex"> 
             <Image
               src="/Kita.svg"
               alt="Kita Logo"
