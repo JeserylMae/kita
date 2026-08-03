@@ -7,7 +7,7 @@ import WhyChooseUs from "@/components/landing/WhyChooseUs";
 
 export default function Home() {
   return (
-    <div className="relative flex flex-col justify-start items-center gap-20 md:gap-32">
+    <div className="flex flex-col justify-start items-center gap-20 md:gap-32">
       <NavBar/>
       <Hero/>
 

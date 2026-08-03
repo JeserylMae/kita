@@ -21,7 +21,7 @@ export default function NavBar() {
   }, [display]);
 
   return (
-    <section className="absolute w-full">
+    <section className="fixed w-full top-0 z-10 bg-background border-b border-border">
       <div className="absolute top-3 left-0 block md:hidden">
         <Button size={"icon-lg"} width={"lg"} variant={"ghost"}
           onClick={() => setDisplay(prev => !prev)}
