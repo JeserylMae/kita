@@ -11,7 +11,16 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
-const items = [
+
+const carouselItemStyle = (`
+  flex shrink-0 flex-row gap-1.5 
+  rounded-4xl p-2 pr-3
+  text-2xl font-medium font-heading
+  text-primary-foreground
+  items-center justify-center
+`);
+
+const carouselItems = [
   { icon: Gauge, text: "Real-Time Insights" },
   { icon: ChartLine, text: "Data-Driven Decisions" },
   { icon: ShelvingUnit, text: "Clear Inventory Visibility" },
@@ -24,20 +33,12 @@ const items = [
   { icon: BadgeCheck, text: "Decision Confidence" },
 ];
 
-const carouselItem = `
-  flex shrink-0 flex-row gap-1.5 
-  rounded-4xl p-2 pr-3
-  text-2xl font-medium font-heading
-  text-primary-foreground
-  items-center justify-center
-`;
-
-function CarouselItems() {
+export default function FeatureCarousel() {
   return (
     <>
-      {items.map(({ icon: Icon, text }, index) => (
+      {carouselItems.map(({ icon: Icon, text }, index) => (
         <div key={text}
-          className={`${carouselItem} ${
+          className={`${carouselItemStyle} ${
             index % 2 === 0 ? "bg-primary" : "bg-tertiary"
           }`}
         >
@@ -45,21 +46,5 @@ function CarouselItems() {
         </div>
       ))}
     </>
-  );
-}
-
-export default function WhyChooseUs() {
-  return (
-    <section id="why-choose-us" className="w-full overflow-hidden">
-      <div className="flex w-max animate-carousel-slide">
-        <div className="flex gap-10 pr-10">
-          <CarouselItems />
-        </div>
-
-        <div aria-hidden="true" className="flex gap-10 pr-10">
-          <CarouselItems />
-        </div>
-      </div>
-    </section>
   );
 }
