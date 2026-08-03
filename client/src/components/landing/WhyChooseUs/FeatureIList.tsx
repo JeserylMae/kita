@@ -6,15 +6,16 @@ const featureCard = (`
   relative w-full h-max p-4 xl:py-6 xl:px-8
   flex flex-col justify-center items-start
   border-b first:border-y border-border
-  hover:bg-primary-gradient-hr
-  transition-colors duration-300
+  hover:bg-primary-gradient-hr 
+  hover:text-primary-foreground
+  transition-colors duration-400 ease-in
 `);
 
 const featureItemStyle = (`
   absolute top-1/2 -translate-y-1/2 right-0 
   -translate-x-10 lg:-translate-x-5 xl:-translate-x-10
   opacity-0  sm:group-hover:opacity-100
-  transition-opacity duration-300
+  transition-opacity duration-400 ease-in
 `);
 
 const featureImageStyle = (`

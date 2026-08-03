@@ -57,7 +57,7 @@
   --card-foreground:            var(--color-ebony-clay-950);
   --popover:                    var(--color-ebony-clay-100);
   --popover-foreground:         var(--color-ebony-clay-950);
-  --primary:                    var(--color-emerald-500);
+  --primary:                    var(--color-emerald-600);
   --primary-foreground:         var(--color-ebony-clay-50);
   --secondary:                  var(--color-ebony-clay-300);
   --secondary-foreground:       var(--color-ebony-clay-950);
@@ -66,6 +66,7 @@
   --accent:                     var(--color-emerald-100);
   --accent-foreground:          var(--color-ebony-clay-950);
   --tertiary:                   var(--color-old-gold-500);
+  --tertiary-1:                 var(--color-old-gold-300);
   --destructive:                var(--color-mojo-600);
   --border:                     var(--color-ebony-clay-200);
   --input:                      var(--color-ebony-clay-300);
@@ -79,7 +80,7 @@
   --sidebar-foreground:         var(--color-ebony-clay-400);
   --sidebar-primary:            var(--color-ebony-clay-100);
   --sidebar-primary-foreground: var(--color-ebony-clay-950);
-  --sidebar-accent:             var(--color-emerald-500);
+  --sidebar-accent:             var(--color-emerald-600);
   --sidebar-accent-foreground:  var(--color-ebony-clay-50);
   --sidebar-border:             var(--color-ebony-clay-200);
   --sidebar-ring:               var(--color-emerald-100);
@@ -115,7 +116,8 @@
     --muted-foreground:           var(--color-ebony-clay-100);
     --accent:                     var(--color-emerald-100);
     --accent-foreground:          var(--color-ebony-clay-950);
-    --tertiary:                   var(--color-old-gold-400);
+    --tertiary:                   var(--color-old-gold-300);
+    --tertiary-1:                 var(--color-old-gold-600);
     --destructive:                var(--color-mojo-600);
     --border:                     var(--color-ebony-clay-900);
     --input:                      var(--color-ebony-clay-700);
@@ -157,6 +159,7 @@
   --color-accent:                     var(--accent);
   --color-accent-foreground:          var(--accent-foreground);
   --color-tertiary:                   var(--tertiary);
+  --color-tertiary-1:                   var(--tertiary-1);
   --color-destructive:                var(--destructive);
   --color-border:                     var(--border);
   --color-input:                      var(--input);
