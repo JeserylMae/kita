@@ -1,11 +1,11 @@
 import "./globals.css";
-import Hero from "@/components/landing/Hero";
+import Hero from "@/features/landing/components/Hero";
 import Image from "next/image";
-import NavBar from "@/components/landing/NavBar";
+import NavBar from "@/features/landing/components/NavBar";
 import Section from "@/components/layout/Section";
-import Solutions from "@/components/landing/Solutions";
-import Community from "@/components/landing/Community";
-import WhyChooseUs from "@/components/landing/WhyChooseUs";
+import Solutions from "@/features/landing/components/Solutions";
+import Community from "@/features/landing/components/Community";
+import WhyChooseUs from "@/features/landing/components/WhyChooseUs";
 
 
 export default function Home() {

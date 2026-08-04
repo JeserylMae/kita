@@ -1,11 +1,16 @@
 import Link from "next/link";
-import Section from "../layout/Section";
+import Section from "../../../components/layout/Section";
+
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 
 export default function Hero() {
   return (
-    <Section id="hero" className="flex flex-col gap-10 justify-center items-center m-4 pt-26 md:pt-36">
+    <Section id="hero" className={cn(
+      "flex flex-col gap-10 justify-center items-center",
+      "m-4 px-6 pt-26 md:pt-36"
+    )}>
       <h1 className="
         font-heading font-medium text-center max-w-6xl
         text-7xl md:text-8xl lg:text-9xl 
