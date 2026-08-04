@@ -133,7 +133,7 @@ export default function Testimony() {
                   </div>
 
                   <div>
-                    <p><strong> {item.name} </strong></p>
+                    <p className="text-primary"><strong> {item.name} </strong></p>
                     <p> {item.role}, {item.city} </p>
                   </div>
                 </div>

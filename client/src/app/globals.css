@@ -206,7 +206,7 @@ body {
 
 @layer components {
   h2 {
-    @apply font-heading text-7xl font-medium;
+    @apply font-heading text-5xl sm:text-6xl font-medium;
   }
 
   .gradient-text-vr {
