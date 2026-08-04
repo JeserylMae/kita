@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
 
 :root {
   --color-emerald-50: #f0fdf6;
@@ -209,6 +211,10 @@ body {
 
   .gradient-text-vr {
     @apply bg-primary-gradient-vr bg-clip-text text-transparent;
+  }
+
+  .gradient-text-hr {
+    @apply bg-primary-gradient-hr bg-clip-text text-transparent;
   }
 
   .carousel {
