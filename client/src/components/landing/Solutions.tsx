@@ -6,8 +6,9 @@ import {
   Handshake
 } from 'lucide-react';
 
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Section from '../layout/Section';
 
 
 
@@ -57,8 +58,11 @@ function SolutionList() {
 
 export default function Solutions() {
   return (
-    <section id="solutions" className="w-full border-box">
-      <div className="w-full px-10 2xl:px-32">
+    <Section id="solutions" className="w-full border-box">
+      <div className={cn(
+        "w-full sm:w-9/10 mx-auto px-10 2xl:px-32 pt-32 pb-48",
+        "sm:border sm:border-b-0 border-border rounded-2xl"
+      )}>
         <h2 className="mb-32 sm:mb-8 text-center sm:text-start">
           <span className="text-primary">Fix</span> {" "}
           What {" "}
@@ -104,7 +108,7 @@ export default function Solutions() {
       </div>
 
       <div className={cn(
-        "mt-32 py-24 px-10 xl:px-32 gap-4 text-center",
+        "py-24 px-10 xl:px-32 gap-4 text-center",
         "flex flex-col justify-center items-center",
         "bg-primary text-primary-foreground font-medium"
       )}>
@@ -122,6 +126,6 @@ export default function Solutions() {
 
         <SolutionList/>
       </div>
-    </section>
+    </Section>
   )
 }

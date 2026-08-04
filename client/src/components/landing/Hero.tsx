@@ -1,12 +1,11 @@
 import Link from "next/link";
+import Section from "../layout/Section";
 import { Button } from "@/components/ui/button";
 
 
 export default function Hero() {
   return (
-    <section id="hero" className="
-      flex flex-col gap-10 justify-center items-center m-4 pt-26 md:pt-36
-    ">
+    <Section id="hero" className="flex flex-col gap-10 justify-center items-center m-4 pt-26 md:pt-36">
       <h1 className="
         font-heading font-medium text-center max-w-6xl
         text-7xl md:text-8xl lg:text-9xl 
@@ -24,6 +23,6 @@ export default function Hero() {
       <Button variant={"gradient"} size={"xl"} width={"xl"} asChild>
         <Link href={"/signup"}> Get Started </Link>
       </Button>
-    </section>
+    </Section>
   )
 }
