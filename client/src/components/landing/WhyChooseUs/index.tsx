@@ -1,10 +1,11 @@
+import Section from "@/components/layout/Section";
 import FeatureGrid from "./FeatureGrid";
 import FeatureList from "./FeatureIList";
 import FeatureCarousel from "./FeatureCarousel";
 
 export default function WhyChooseUs() {
   return (
-    <section id="why-choose-us" 
+    <Section id="why-choose-us" 
       className="w-full overflow-hidden flex flex-col gap-32"
     >
       <section className="flex w-max animate-carousel-slide">
@@ -53,6 +54,6 @@ export default function WhyChooseUs() {
 
         <FeatureGrid />
       </section>
-    </section>
+    </Section>
   );
 }
