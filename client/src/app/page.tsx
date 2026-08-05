@@ -2,10 +2,12 @@ import "./globals.css";
 import Hero from "@/features/landing/components/Hero";
 import Image from "next/image";
 import NavBar from "@/features/landing/components/NavBar";
+import Footer from "@/features/landing/components/Footer";
 import Section from "@/components/layout/Section";
 import Solutions from "@/features/landing/components/Solutions";
 import Community from "@/features/landing/components/Community";
 import WhyChooseUs from "@/features/landing/components/WhyChooseUs";
+import RequestDemo from "@/features/landing/components/RequestDemo";
 
 
 export default function Home() {
@@ -30,6 +32,8 @@ export default function Home() {
       <WhyChooseUs/>
       <Solutions/>
       <Community/>
+      <RequestDemo/>
+      <Footer/>
     </div>
   );
 }
