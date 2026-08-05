@@ -22,8 +22,7 @@ const buttonVariants = cva(
         gradient: "bg-primary-gradient-hr rounded-4xl text-md text-primary-foreground hover:opacity-85",
       },
       size: {
-        default:
-          "h-8 gap-1.5",
+        default: "h-8 gap-1.5",
         xs: "h-6 gap-1 text-xs [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1",
         md: "h-8 gap-1",

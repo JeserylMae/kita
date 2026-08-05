@@ -122,7 +122,7 @@ export default function Testimony() {
             .slice(startIndex, startIndex + visibleCard)
             .map((item) => (
               <div key={`${startIndex}-${item.name}-wr`} 
-                className={cn(gradientWrapper, animationDirection)}
+                className={cn(gradientWrapper, animationDirection, "group")}
               >
                 <div key={`${startIndex}-${item.name}`} 
                   className={cn(testimonyStyle, animationDirection)}
@@ -133,7 +133,9 @@ export default function Testimony() {
                   </div>
 
                   <div>
-                    <p className="text-primary"><strong> {item.name} </strong></p>
+                    <p className="text-tertiary-1 group-hover:text-primary-foreground">
+                      <strong> {item.name} </strong>
+                    </p>
                     <p> {item.role}, {item.city} </p>
                   </div>
                 </div>

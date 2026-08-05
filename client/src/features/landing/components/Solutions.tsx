@@ -45,8 +45,8 @@ function SolutionList() {
       {listItems.map(({icon: Icon, text}, index) => (
         <div key={index} className={cn(
           "flex flex-row w-full justify-between items-center py-5 px-6",
-          "border-b-2 border-tertiary-1 text-center text-sm sm:text-[1.1rem]",
-          "hover:bg-tertiary-1 hover:text-foreground",
+          "border-b-2 border-tertiary text-center text-sm sm:text-[1.1rem]",
+          "hover:bg-tertiary hover:text-accent-foreground",
           "transition-colors duration-400 ease-in"
         )}>
           <Icon/> <p>{text}</p> <Icon/>
